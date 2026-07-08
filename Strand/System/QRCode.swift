@@ -6,8 +6,7 @@ import AppKit
 import UIKit
 #endif
 
-/// Generates a crisp QR code image for a string (e.g. a crypto address) so people can scan straight
-/// from their wallet — the lowest-friction way to donate.
+/// Generates a crisp QR code image for a string.
 enum QRCode {
     private static let context = CIContext()
 

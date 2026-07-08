@@ -57,8 +57,8 @@ import java.util.Locale
  * (× or "Not a workout") → records the window in the durable, SEPARATE [AutoWorkoutPrefs] dismissed set
  * so it never re-prompts. It NEVER creates a workout without the user tapping Save.
  *
- * Design-Reset compliant: a flat accent-tinted [NoopCard], NoopMetrics tokens, no gold — matching the
- * other Today cards (mirrors [DonationNudgeCard] and the iOS source exactly).
+ * Design-Reset compliant: a flat accent-tinted [NoopCard], NoopMetrics tokens, no gold, matching the
+ * other Today cards and the iOS source exactly.
  */
 
 /** The strap source the scan + saves use, matching the rest of Today ("my-whoop"). */

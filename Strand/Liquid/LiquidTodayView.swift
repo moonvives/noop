@@ -248,7 +248,7 @@ struct LiquidTodayView: View {
                     .liquidSheetDoneChrome { showSettings = false }
             }
         }
-        // The heart → the (optional) Support sheet: NOOP is free forever, donations just help it keep moving.
+        // The heart opens the Support sheet.
         .sheet(isPresented: $showSupport) {
             NavigationStack {
                 SupportView()
@@ -343,7 +343,7 @@ struct LiquidTodayView: View {
                 }
                 Spacer(minLength: 8)
                 HStack(spacing: 8) {
-                    // Support / donate — a tap opens the (optional) support sheet. NOOP is free forever.
+                    // Support: a tap opens project info, attribution, and contact.
                     Button { showSupport = true } label: {
                         Image(systemName: "heart.fill")
                             .font(.system(size: 19, weight: .semibold))
@@ -352,7 +352,7 @@ struct LiquidTodayView: View {
                             .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
                     }
                     .buttonStyle(LiquidPressStyle())
-                    .accessibilityLabel("Support NOOP. It's free; donations are optional and help development.")
+                    .accessibilityLabel("Support NOOP: help and contact.")
                     // Profile pic (the one set in Settings) → opens Settings, matching the classic Today.
                     Button { showSettings = true } label: {
                         ProfileAvatarView(imageData: profile.avatarImageData, size: 34)

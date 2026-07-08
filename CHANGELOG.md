@@ -648,8 +648,7 @@ unit-tested with Swift↔Kotlin parity locked across macOS, iOS and Android.
   taken offline, NOOP moved to its own independent home — code, releases, the wiki and issues.
   **Settings → About** now links straight there, and **Check for updates** reads from the new home (if
   GitHub ever comes back it will be kept as a mirror). Nothing on your device changed and everything
-  keeps working — this just points the app at where the project lives now. Keeping it online costs
-  real money, so if NOOP is useful to you, please consider a donation. #KeepNOOPAlive
+  keeps working — this just points the app at where the project lives now.
 
 ## 4.6.0 — Editable naps, richer Trends report, better debug export (all platforms)
 
@@ -1505,17 +1504,6 @@ A large batch of fixes from reported issues and community contributions.
   strap log on [#174](https://github.com/NoopApp/noop/issues/174) is exactly what we need to finish 5.0/MG
   support. **iPhone/Android only** — a Mac can't write to a 5/MG. Built on the public protocol work of
   **judes.club**, **Asherlc/dofek** and **b-nnett/goose**.
-
----
-
-## 2.4.0 — A small, honest ask
-
-- **New (Mac, iOS and Android):** a small card on the Today screen — at most **once every 12 hours** —
-  asking whether NOOP is proving useful, with the honest numbers: a WHOOP membership runs **$300–480 a
-  year**, NOOP is free and built by one person, and **5,000+ downloads in, 7 people have donated**.
-  **"Later"** snoozes it 12 hours; **"Don't ask again"** turns it off permanently. It's a card in the
-  flow, never a pop-over — and the stats are **baked in at release time** (`Tools/update-donation-stats.sh`),
-  so the app still never touches the network.
 
 ---
 

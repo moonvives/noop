@@ -362,7 +362,7 @@ struct TodayView: View {
     @State private var derived: TodayDerived?
     @State private var derivedKey: TodayInputKey?
 
-    // Support sheet (donate + contact), opened from the home toolbar on macOS, and from an
+    // Support sheet, opened from the home toolbar on macOS, and from an
     // in-content control on iOS (a primary tab has no NavigationStack, so a `.toolbar` item never
     // renders on iPhone, the affordance was dead there before this in-flow button + sheet, #185-class).
     @State private var showingSupport = false
@@ -1293,10 +1293,8 @@ struct TodayView: View {
                 // Opt-in "looks like a workout?" suggestion (default OFF). Renders only when the
                 // Settings toggle is on AND the detector finds a recent unsaved, un-dismissed window.
                 AutoWorkoutCard()
-                // Honest, dismissible 12-hourly donation ask, a card in the flow, never a modal.
-                DonationNudgeCard()
                 #if os(iOS)
-                // iOS entry point to Support (donate + contact). macOS opens the same sheet from the
+                // iOS entry point to Support. macOS opens the same sheet from the
                 // toolbar heart, but a primary tab on iPhone has no nav bar to host a `.toolbar` item,
                 // so the affordance lives in-content here and presents SupportView as an auto-sized sheet.
                 supportRow
@@ -1368,8 +1366,8 @@ struct TodayView: View {
                         .foregroundStyle(StrandPalette.metricRose)
                         .attentionWiggle(period: 4)
                 }
-                .help("Support NOOP: donate or get in touch")
-                .accessibilityLabel("Support NOOP: donate or get in touch")
+                .help("Support NOOP: help and contact")
+                .accessibilityLabel("Support NOOP: help and contact")
             }
             // The Updates "ringer" on the TRAILING (top-right) edge, separated from the heart (iOS hosts
             // it in the compact top bar instead).
@@ -1466,7 +1464,7 @@ struct TodayView: View {
 
     /// "New here?", a single, dismissible card that points first-time users at the guide. Tapping the
     /// card opens the guide; the ✕ closes it. Either action sets `scoringGuideCardSeen`, so it shows
-    /// once and never again. Mirrors the DonationNudgeCard's in-flow, never-modal pattern.
+    /// once and never again.
     private var scoringGuideFirstRunCard: some View {
         NoopCard {
             HStack(alignment: .top, spacing: 14) {
@@ -1530,7 +1528,7 @@ struct TodayView: View {
     #if os(iOS)
     // MARK: Support entry point (iOS), the in-content stand-in for the macOS toolbar heart.
 
-    /// An in-flow card that opens the Support sheet (donate + contact). The whole card is the tap
+    /// An in-flow card that opens the Support sheet. The whole card is the tap
     /// target; reuses the heart.fill + metricRose styling and the accessibility copy of the macOS
     /// toolbar button so both platforms read identically. iOS-only, macOS keeps the toolbar item.
     private var supportRow: some View {
@@ -1548,7 +1546,7 @@ struct TodayView: View {
                         Text("Support NOOP")
                             .font(StrandFont.headline)
                             .foregroundStyle(StrandPalette.textPrimary)
-                        Text("Donate or get in touch. Totally optional.")
+                        Text("Help, contact, and attribution.")
                             .font(StrandFont.subhead)
                             .foregroundStyle(StrandPalette.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1563,7 +1561,7 @@ struct TodayView: View {
         }
         // Press-down feedback for the full-card button surface.
         .buttonStyle(StrandPressableButtonStyle())
-        .accessibilityLabel("Support NOOP: donate or get in touch")
+        .accessibilityLabel("Support NOOP: help and contact")
     }
     #endif
 

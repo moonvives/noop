@@ -1113,58 +1113,6 @@
         }
       }
     },
-    "%@ is free and always will be. If it's useful to you, you can chip in to help with development and testing costs. Totally optional.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ ist kostenlos und bleibt es. Wenn es dir nützt, kannst du etwas zu den Entwicklungs- und Testkosten beitragen. Völlig freiwillig."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ is free and always will be. If it's useful to you, you can chip in to help with development and testing costs. Totally optional."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ es gratis y siempre lo será. Si te resulta útil, puedes contribuir a los costos de desarrollo y pruebas. Totalmente opcional."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ est gratuit et le sera toujours. S'il vous est utile, vous pouvez contribuer aux coûts de développement et de test. Totalement facultatif."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ è gratuito e lo sarà sempre. Se ti è utile, puoi contribuire ai costi di sviluppo e test. Del tutto facoltativo."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ бесплатен и всегда таким останется. Если он вам полезен, вы можете поддержать разработку и покрытие расходов на тестирование. Это полностью по желанию."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ 是免费的，并将永远免费。如果它对你有用，你可以出一份力，帮助分担开发和测试成本。完全自愿。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ 是免費的，並將永遠免費。如果它對你有用，你可以出一份力，幫助分擔開發與測試成本。完全自願。"
-          }
-        }
-      }
-    },
     "%@ is your active band. Pair or switch bands in Devices.": {
       "localizations": {
         "de": {
@@ -2527,46 +2475,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@%lld 對比基準"
-          }
-        }
-      }
-    },
-    "%@+ downloads so far, %lld donors.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@+ Downloads bisher, %2$lld Spender."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@+ downloads so far, %2$lld donors."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@+ descargas hasta ahora, %lld donantes."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@+ download finora, %2$lld donatori."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "迄今已有 %1$@+ 次下载，%2$lld 位捐赠者。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "迄今已有 %1$@+ 次下載，%2$lld 位捐贈者。"
           }
         }
       }
@@ -33298,40 +33206,6 @@
         }
       }
     },
-    "Don't ask about donations again": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nicht mehr nach Spenden fragen"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No volver a preguntar sobre donaciones"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non chiedere più delle donazioni"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不要再询问关于捐赠的事"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不要再詢問關於捐贈的事"
-          }
-        }
-      }
-    },
     "Don't ask again": {
       "localizations": {
         "de": {
@@ -33482,126 +33356,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "沒看到它？這很正常。"
-          }
-        }
-      }
-    },
-    "Donate": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spenden"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Donar"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dona"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "捐赠"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "捐贈"
-          }
-        }
-      }
-    },
-    "Donate or get in touch. Totally optional.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spende oder melde dich. Völlig optional."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dona o ponte en contacto. Totalmente opcional."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dona o mettiti in contatto, del tutto facoltativo."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "捐赠或取得联系，完全自愿。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "捐贈或取得聯繫，完全自願。"
-          }
-        }
-      }
-    },
-    "Donation QR code": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spenden-QR-Code"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Donation QR code"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Código QR de donación"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Code QR de don"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codice QR per donazione"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "QR-код для пожертвования"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "捐赠二维码"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "捐贈 QR 碼"
           }
         }
       }
@@ -45948,93 +45702,6 @@
         }
       }
     },
-    "I keep this project anonymous, so crypto is the only way to chip in, no Patreon, no PayPal, no name attached. Quick, global, and private for both of us.": {
-      "extractionState": "stale",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ich halte dieses Projekt anonym, daher ist Krypto die einzige Möglichkeit, beizutragen, kein Patreon, kein PayPal, kein Name. Schnell, weltweit und privat für uns beide."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I keep this project anonymous, so crypto is the only way to chip in, no Patreon, no PayPal, no name attached. Quick, global, and private for both of us."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mantengo este proyecto de forma anónima, así que las criptomonedas son la única forma de contribuir: sin Patreon, sin PayPal, sin nombres. Rápido, global y privado para ambos."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je maintiens ce projet anonyme, donc la crypto est le seul moyen de contribuer, pas de Patreon, pas de PayPal, pas de nom attaché. Rapide, mondial et privé pour nous deux."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mantengo questo progetto anonimo, quindi le cripto sono l'unico modo per contribuire, niente Patreon, niente PayPal, nessun nome collegato. Veloce, globale e privato per entrambi."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проект остаётся анонимным, поэтому поддержать его можно только криптовалютой: без Patreon, PayPal и привязки к имени. Это быстро, доступно из любой страны и приватно для нас обоих."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我让这个项目保持匿名，所以加密货币是唯一的支持方式，，没有 Patreon，没有 PayPal，不附带任何名字。快捷、全球通用，对你我双方都私密。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我讓這個專案保持匿名，所以加密貨幣是唯一的支持方式，，沒有 Patreon，沒有 PayPal，不附帶任何名字。快捷、全球通用，對你我雙方都私密。"
-          }
-        }
-      }
-    },
-    "I keep this project anonymous, so crypto is the only way to chip in: no Patreon, no PayPal, no name attached. Quick, global, and private for both of us.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ich halte dieses Projekt anonym, daher ist Krypto der einzige Weg, etwas beizusteuern: kein Patreon, kein PayPal, kein Name. Schnell, global und privat für uns beide."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mantengo este proyecto anónimo, así que las criptomonedas son la única forma de aportar: sin Patreon, sin PayPal, sin nombres. Rápido, global y privado para ambos."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mantengo questo progetto anonimo, quindi le criptovalute sono l'unico modo per contribuire, niente Patreon, niente PayPal, nessun nome collegato. Veloce, globale e privato per entrambi."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我让这个项目保持匿名，所以加密货币是唯一的支持方式，没有 Patreon，没有 PayPal，不附带任何名字。快捷、全球通用，对你我双方都私密。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我讓這個專案保持匿名，所以加密貨幣是唯一的支持方式，沒有 Patreon，沒有 PayPal，不附帶任何名字。快捷、全球通用，對你我雙方都私密。"
-          }
-        }
-      }
-    },
     "I understand": {
       "localizations": {
         "de": {
@@ -46337,40 +46004,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "閒置"
-          }
-        }
-      }
-    },
-    "If it's saving you a subscription, a suggested $50+ (a fraction of a year of WHOOP) genuinely keeps the project alive. Anything is appreciated. Crypto only; the project stays anonymous.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wenn es dir ein Abo erspart, halten vorgeschlagene 50 $+ (ein Bruchteil eines WHOOP-Jahres) das Projekt wirklich am Leben. Alles wird geschätzt. Nur Krypto; das Projekt bleibt anonym."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Si te está ahorrando una suscripción, una sugerencia de $50+ (una fracción de un año de WHOOP) realmente mantiene vivo el proyecto. Cualquier cantidad se agradece. Solo cripto; el proyecto se mantiene anónimo."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se ti fa risparmiare un abbonamento, un suggerimento di $50+, una frazione di un anno di WHOOP, mantiene davvero vivo il progetto. Qualsiasi cifra è apprezzata. Solo cripto; il progetto resta anonimo."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "如果它为你省下了一笔订阅费，建议捐赠 50 美元以上，只是 WHOOP 一年费用的一小部分，就能实实在在地让这个项目存活下去。任何金额都令人感激。仅限加密货币；项目保持匿名。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "如果它為你省下了一筆訂閱費，建議捐贈 50 美元以上，只是 WHOOP 一年費用的一小部分，就能實實在在地讓這個專案存活下去。任何金額都令人感激。僅限加密貨幣；專案保持匿名。"
           }
         }
       }
@@ -57589,58 +57222,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "NOOP ist ein inoffizielles Projekt: nicht mit WHOOP, Inc. verbunden, nicht von ihr unterstützt oder gesponsert. „WHOOP“ ist deren Marke und wird nur verwendet, um die Hardware zu benennen, mit der NOOP arbeitet."
-          }
-        }
-      }
-    },
-    "NOOP is free and always will be, nothing is locked. It cost real money and a lot of unpaid hours to build, and there's a Windows app, an Android app and an iOS app I want to ship next. If it's useful to you and you want to help with the development and testing costs, even a few quid in crypto genuinely keeps it moving, and honestly it keeps me motivated to keep building.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP ist kostenlos und bleibt es, nichts ist gesperrt. Es hat echtes Geld und viele unbezahlte Stunden gekostet, und es gibt eine Windows-App, eine Android-App und eine iOS-App, die ich als Nächstes veröffentlichen möchte. Wenn es dir nützt und du bei den Entwicklungs- und Testkosten helfen möchtest, hält es schon mit ein paar Euro in Krypto wirklich am Laufen, und ehrlich gesagt motiviert es mich, weiterzubauen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP is free and always will be, nothing is locked. It cost real money and a lot of unpaid hours to build, and there's a Windows app, an Android app and an iOS app I want to ship next. If it's useful to you and you want to help with the development and testing costs, even a few quid in crypto genuinely keeps it moving, and honestly it keeps me motivated to keep building."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP es gratis y siempre lo será, nada está bloqueado. Cuesta dinero real y muchas horas no remuneradas construirlo, y hay una app para Windows, una para Android y una para iOS que quiero lanzar a continuación. Si te resulta útil y quieres ayudar con los costes de desarrollo y pruebas, incluso unos pocos euros en cripto realmente lo mantienen en marcha y, sinceramente, me mantienen motivado para seguir construyendo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP est et sera toujours gratuit, rien n'est verrouillé. Il m'a coûté de l'argent et beaucoup d'heures non rémunérées à construire, et il y a une app Windows, une app Android et une app iOS que je veux livrer ensuite. Si cela vous est utile et que vous voulez aider avec les coûts de développement et de test, même quelques euros en crypto maintient vraiment le projet en vie, et honnêtement ça me motive à continuer."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP è gratuito e lo sarà sempre, nulla è bloccato. Costruirlo è costato soldi veri e tante ore non pagate, e ci sono un'app Windows, un'app Android e un'app iOS che voglio rilasciare presto. Se ti è utile e vuoi aiutare con i costi di sviluppo e test, anche pochi euro in cripto lo fanno davvero andare avanti e, sinceramente, mi tengono motivato a continuare a costruirlo."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP бесплатен и всегда таким останется, все функции открыты. На его создание ушли реальные деньги и много неоплаченных часов, а впереди, приложения для Windows, Android и iOS, которые я хочу выпустить. Если NOOP вам полезен и вы хотите помочь с расходами на разработку и тестирование, даже небольшая сумма в криптовалюте действительно помогает проекту двигаться дальше и мотивирует меня продолжать."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP 是免费的，并将永远免费，没有任何功能被锁定。它的构建花费了真金白银和大量无偿的时间，而我接下来还想推出 Windows 版、Android 版和 iOS 版应用。如果它对你有用，并且你愿意帮助分担开发和测试成本，哪怕是几块钱的加密货币也确实能让它继续前行，老实说，这也让我有动力继续开发。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP 是免費的，並將永遠免費，沒有任何功能被鎖定。它的建構花費了真金白銀和大量無償的時間，而我接下來還想推出 Windows 版、Android 版和 iOS 版應用程式。如果它對你有用，並且你願意幫助分擔開發與測試成本，哪怕是幾塊錢的加密貨幣也確實能讓它繼續前行，老實說，這也讓我有動力繼續開發。"
           }
         }
       }
@@ -79539,58 +79120,6 @@
         }
       }
     },
-    "Scan with any %@ wallet": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit einer beliebigen %@-Wallet scannen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scan with any %@ wallet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Escanea con cualquier monedero de %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scanner avec n'importe quel portefeuille %@"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scansiona con qualsiasi wallet %@"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отсканируйте любым кошельком %@"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "用任意 %@ 钱包扫描"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "用任意 %@ 錢包掃描"
-          }
-        }
-      }
-    },
     "Scanning your data…": {
       "localizations": {
         "de": {
@@ -81212,58 +80741,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "顯示 %@"
-          }
-        }
-      }
-    },
-    "Show %@ donation address": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@-Spendenadresse anzeigen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show %@ donation address"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostrar la dirección de donación de %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afficher l'adresse de don %@"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostra l'indirizzo per donazioni %@"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показать адрес для пожертвования в %@"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示 %@ 捐赠地址"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "顯示 %@ 捐贈地址"
           }
         }
       }
@@ -87716,93 +87193,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "支持 NOOP"
-          }
-        }
-      }
-    },
-    "Support NOOP, donate or get in touch": {
-      "extractionState": "stale",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP unterstützen, spenden oder Kontakt aufnehmen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Support NOOP, donate or get in touch"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apoya a NOOP: dona o ponte en contacto"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soutenir NOOP, faire un don ou nous contacter"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sostieni NOOP, fai una donazione o mettiti in contatto"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поддержите NOOP, сделайте пожертвование или свяжитесь с нами"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "支持 NOOP，，捐赠或取得联系"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "支持 NOOP，，捐贈或取得聯繫"
-          }
-        }
-      }
-    },
-    "Support NOOP: donate or get in touch": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NOOP unterstützen: spenden oder melden"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apoya a NOOP: dona o ponte en contacto"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sostieni NOOP, fai una donazione o mettiti in contatto"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "支持 NOOP，捐赠或取得联系"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "支持 NOOP，捐贈或取得聯繫"
           }
         }
       }

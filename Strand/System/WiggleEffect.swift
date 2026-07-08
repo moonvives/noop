@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A periodic attention "wiggle" — a small rotation burst every `period` seconds that settles back
-/// to rest. Used on the home Support button as a gentle, recurring nudge that people can donate.
+/// to rest. Used to draw attention to selected controls.
 struct WiggleEffect: ViewModifier {
     var period: Double = 4
     @State private var angle: Double = 0
@@ -19,6 +19,6 @@ struct WiggleEffect: ViewModifier {
 }
 
 extension View {
-    /// Gentle recurring wiggle to draw the eye (e.g. the Support/donate button).
+    /// Gentle recurring wiggle to draw the eye.
     func attentionWiggle(period: Double = 4) -> some View { modifier(WiggleEffect(period: period)) }
 }

@@ -1378,11 +1378,8 @@ fun TodayScreen(
         if (selectedDayOffset == 0) {
             item { AutoWorkoutNudgeCard(viewModel = viewModel, days = days) }
         }
-        // Honest, dismissible 12-hourly donation ask, a card in the flow, never a dialog.
-        item { DonationNudgeCard() }
-        // Support, an in-content card (heart.fill in metricRose, "Donate or get in touch, totally
-        // optional.", chevron). The Support heart left the header cluster for parity with iOS, where
-        // Support is an in-flow supportRow near the donation nudge (still reachable via More → Support).
+        // Support, an in-content card. The Support heart left the header cluster for parity with iOS,
+        // where Support is an in-flow supportRow (still reachable via More → Support).
         item { SupportRow(onSupport = onSupport) }
         // Strap battery only while the link is up AND a real reading exists, a stale % from a
         // dropped connection must not present as live (#159).
@@ -1939,8 +1936,7 @@ private fun LiquidTodayHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // (a) Support / donate heart — a filled heart in the charge-green tint (iOS chargeColor). NOOP is
-            // free forever; donations are optional. Mirrors iOS `heart.fill` → showSupport.
+            // (a) Support heart, matching iOS `heart.fill` → showSupport.
             HeaderHeartButton(onSupport = onSupport)
             // (b) Profile avatar (the photo set in Settings, or the NOOP loop mark) → Settings. Mirrors iOS.
             Box(
@@ -1983,7 +1979,7 @@ private fun HeaderHeartButton(onSupport: () -> Unit) {
             )
             .semantics {
                 contentDescription =
-                    "Support NOOP. It's free; donations are optional and help development."
+                    "Support NOOP: help and contact."
             },
         contentAlignment = Alignment.Center,
     ) {
@@ -2134,8 +2130,8 @@ private fun LiquidWordmark() {
     }
 }
 
-/** In-content Support card (iOS supportRow): heart.fill in metricRose, the donation copy, a chevron.
- *  The whole card is the tap target. Lives near the donation nudge in the Today flow. */
+/** In-content Support card (iOS supportRow): heart.fill in metricRose, contact copy, and a chevron.
+ *  The whole card is the tap target. */
 @Composable
 private fun SupportRow(onSupport: () -> Unit) {
     // liquidPress on the whole tappable card (the SAME interactionSource drives the clickable + the press).
@@ -2149,7 +2145,7 @@ private fun SupportRow(onSupport: () -> Unit) {
                 indication = null,
                 onClick = onSupport,
             )
-            .semantics { contentDescription = "Support NOOP: donate or get in touch" },
+            .semantics { contentDescription = "Support NOOP: help and contact" },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -2167,7 +2163,7 @@ private fun SupportRow(onSupport: () -> Unit) {
             ) {
                 Text("Support NOOP", style = NoopType.headline, color = Palette.textPrimary)
                 Text(
-                    "Donate or get in touch. Totally optional.",
+                    "Help, contact, and attribution.",
                     style = NoopType.subhead,
                     color = Palette.textSecondary,
                 )

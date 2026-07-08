@@ -544,7 +544,7 @@ object AppChangelog {
             title = "NOOP has a new home",
             date = "June 2026",
             items = listOf(
-                "**NOOP now lives at noop.fans.** After the project's GitHub was taken offline, NOOP moved to its own independent home - code, releases, the wiki and issues. **Settings → About** now links straight there, and **Check for updates** reads from the new home (if GitHub ever comes back it'll be kept as a mirror). Nothing on your device changed and everything keeps working - this just points the app at where the project lives now. Keeping it online costs real money, so if NOOP is useful to you, please consider a donation. #KeepNOOPAlive",
+                "**NOOP now lives at noop.fans.** After the project's GitHub was taken offline, NOOP moved to its own independent home - code, releases, the wiki and issues. **Settings → About** now links straight there, and **Check for updates** reads from the new home (if GitHub ever comes back it'll be kept as a mirror). Nothing on your device changed and everything keeps working - this just points the app at where the project lives now.",
             ),
         ),
         Release(
@@ -1378,14 +1378,6 @@ object AppChangelog {
             date = "June 2026",
             items = listOf(
                 "New (Mac, iOS and Android, experimental): a WHOOP 5.0/MG \"deep data\" unlock under Settings → Experimental. 5/MG straps give a fresh third-party app only live heart rate; the official app switches on the deeper streams by writing a set of feature flags. NOOP can now send that exact, documented sequence to your strap (opt-in, one button, only when worn + bonded). It writes to the strap but is reversible - it just changes which data the strap emits - and it is the same thing the official app does. Experimental: it may do nothing on your firmware yet. If you have a 5/MG, turning it on and sharing your strap log is exactly what we need to finish 5.0/MG support. iPhone/Android only (a Mac cannot write to a 5/MG). Built on the public protocol work of judes.club, Asherlc/dofek and b-nnett/goose. (#174)",
-            ),
-        ),
-        Release(
-            version = "2.4.0",
-            title = "A small, honest ask",
-            date = "June 2026",
-            items = listOf(
-                "New (Mac, iOS and Android): a small card on the Today screen - at most once every 12 hours - asking whether NOOP is proving useful, with the honest numbers: a WHOOP membership runs $300-480 a year, NOOP is free, and 5,000+ downloads in, 7 people have donated. \"Later\" snoozes it 12 hours; \"Don't ask again\" turns it off forever. It's a card in the flow, never a pop-over, and the stats are baked in at release time - the app still never touches the network.",
             ),
         ),
         Release(
