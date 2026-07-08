@@ -59,6 +59,6 @@ print(f"scrubbed {total} occurrence(s) across {files} file(s)")
 PY
 
 # Verify: no residual home-path bytes anywhere in the bundle.
-residual=$(grep -rac "$HOME" "$APP" 2>/dev/null | awk -F: '{s+=$2} END {print s+0}')
+residual=$(find "$APP" -type f -exec strings -a {} + 2>/dev/null | grep -c "$HOME" || true)
 echo "residual home-path hits: ${residual:-0}"
 [ "${residual:-0}" -eq 0 ] && echo "✓ clean" || { echo "✗ residual paths remain" >&2; exit 1; }
