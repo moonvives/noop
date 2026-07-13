@@ -1,5 +1,5 @@
 //  LiquidTodayView.swift
-//  NOOP · Liquid design language — the Today screen, rebuilt in the liquid finish.
+//  VITAE One · text-led daily dashboard.
 //
 //  This is the FULL Today, re-created faithfully from the locked mockup
 //  (scratchpad/liquid-metal-home.html): sky title + record/add/battery controls,
@@ -19,8 +19,6 @@ import StrandAnalytics
 struct LiquidTodayView: View {
     @EnvironmentObject var repo: Repository
     @EnvironmentObject var router: NavRouter
-    @EnvironmentObject var profile: ProfileStore
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Shared with the real Today's card-customise editor so the two stay in sync.
     @AppStorage(DashboardCardPrefs.selectionKey) private var dashboardCardsRaw = ""
@@ -33,6 +31,17 @@ struct LiquidTodayView: View {
     @State private var stepsEst: Double?           // steps_est, day-keyed to the selected day (fallback)
     @State private var hrValues: [Double] = []     // hrBuckets since midnight → 5-min means
     @State private var workouts: [WorkoutRow] = [] // newest-first
+    // G Band writes these through Apple Health. They are displayed with explicit source provenance;
+    // none of the unvalidated estimates are allowed into VITAE scores.
+    @State private var vwarRestingHr: Double?
+    @State private var vwarHrv: Double?
+    @State private var vwarSpo2: Double?
+    @State private var vwarBodyTemp: Double?
+    @State private var vwarDistanceKm: Double?
+    @State private var vwarActiveKcal: Double?
+    @State private var vwarGlucoseEstimate: Double?
+    @State private var vwarAsleepMin: Double?
+    @State private var vwarSteps: Double?
 
     // sheets / expanders
     @State private var guideSection: ScoreSection?
@@ -186,6 +195,7 @@ struct LiquidTodayView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     scene
+                    vwarHealthSection
                     heartRateSection
                     yourCardsSection
                     synthesisSection
@@ -207,25 +217,7 @@ struct LiquidTodayView: View {
         }
         .coordinateSpace(name: Self.pullSpace)
         .onPreferenceChange(PullOffsetKey.self) { handlePull($0) }
-        // The sky is a FIXED full-bleed backdrop drawn behind the scroll content, edge-to-edge under the
-        // status bar. A ScrollView background does not scroll with the content, so pulling down never
-        // moves the sky (the exact behaviour the scaffold uses on the classic Today).
-        .background(alignment: .top) {
-            ZStack(alignment: .top) {
-                StrandPalette.surfaceBase
-                // Reduce-motion (and low-power) users get the same sky posed still — no twinkle/breath.
-                // Also static until the first data load settles, so launch isn't fighting a live sky too.
-                Group {
-                    if reduceMotion || !dataLoaded { LiquidSkyStatic(hour: liveHour) }
-                    else { LiquidSky(hour: liveHour) }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 340, alignment: .top)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-            }
-            .ignoresSafeArea()
-        }
+        .background(StrandPalette.surfaceBase.ignoresSafeArea())
         // Swipe left/right to change DAYS (WHOOP-style). Tab-swipe is disabled on Today in RootTabView so
         // this owns the horizontal gesture here.
         .simultaneousGesture(daySwipeGesture)
@@ -342,33 +334,32 @@ struct LiquidTodayView: View {
                         .liquidPopoverAdaptation()
                 }
                 Spacer(minLength: 8)
-                HStack(spacing: 8) {
-                    // Support: a tap opens project info, attribution, and contact.
+                HStack(spacing: 14) {
                     Button { showSupport = true } label: {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 19, weight: .semibold))
-                            .foregroundStyle(StrandPalette.chargeColor)
-                            .frame(width: 34, height: 34)
-                            .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
+                        Text("SUPPORT")
+                            .font(StrandFont.overlineScaled(9))
+                            .tracking(1.1)
+                            .foregroundStyle(StrandPalette.textSecondary)
                     }
-                    .buttonStyle(LiquidPressStyle())
-                    .accessibilityLabel("Support NOOP: help and contact.")
-                    // Profile pic (the one set in Settings) → opens Settings, matching the classic Today.
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Support and contact")
                     Button { showSettings = true } label: {
-                        ProfileAvatarView(imageData: profile.avatarImageData, size: 34)
-                            .frame(width: 34, height: 34)
+                        Text("PROFILE")
+                            .font(StrandFont.overlineScaled(9))
+                            .tracking(1.1)
+                            .foregroundStyle(StrandPalette.textPrimary)
                     }
-                    .buttonStyle(LiquidPressStyle())
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Profile and settings")
-                    LiquidAddButton()
-                    LiquidBatteryButton()
                 }
             }
-            // Subtle NOOP wordmark in the sky between header and hero. Perfectly centred (a letter row has
-            // no trailing tracking gap the way `Text(...).tracking()` does), with a tap easter egg.
-            LiquidWordmark()
-                .padding(.top, 30)
-            heroCard.padding(.top, 22)
+            Text("VITAE ONE")
+                .font(StrandFont.overlineScaled(10))
+                .tracking(2.2)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 28)
+            heroCard.padding(.top, 18)
             if liveSessionsBeta {
                 liveSessionStartRow.padding(.top, 10)
             }
@@ -381,9 +372,6 @@ struct LiquidTodayView: View {
     private var liveSessionStartRow: some View {
         Button { showLiveSession = true } label: {
             HStack(spacing: 10) {
-                Image(systemName: "shield.lefthalf.filled")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(StrandPalette.metricCyan)
                 Text("Start session")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textPrimary)
@@ -394,7 +382,9 @@ struct LiquidTodayView: View {
                     .background(Capsule().fill(.white.opacity(0.05))
                         .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 1)))
                 Spacer(minLength: 8)
-                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                Text("OPEN")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
             .padding(.horizontal, 14)
@@ -412,12 +402,12 @@ struct LiquidTodayView: View {
 
     private var heroCard: some View {
         HStack(alignment: .top, spacing: 4) {
-            HeroScoreCell(label: "Charge", score: displayDay?.recovery, tint: StrandPalette.chargeColor,
-                          pill: "WHOOP", animated: dataLoaded, onGuide: { guideSection = .charge })
-            HeroScoreCell(label: "Effort", score: displayDay?.strain, tint: StrandPalette.effortColor,
-                          pill: nil, animated: dataLoaded, onGuide: { guideSection = .effort })
-            HeroScoreCell(label: "Rest", score: restScore, tint: StrandPalette.restColor,
-                          pill: "WHOOP", animated: dataLoaded, onGuide: { guideSection = .rest })
+            HeroScoreCell(label: "Recovery", score: displayDay?.recovery, tint: StrandPalette.chargeColor,
+                          pill: "DERIVED", animated: dataLoaded, onGuide: { guideSection = .charge })
+            HeroScoreCell(label: "Load", score: displayDay?.strain, tint: StrandPalette.effortColor,
+                          pill: "DERIVED", animated: dataLoaded, onGuide: { guideSection = .effort })
+            HeroScoreCell(label: "Sleep", score: restScore, tint: StrandPalette.restColor,
+                          pill: "DERIVED", animated: dataLoaded, onGuide: { guideSection = .rest })
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 12)
@@ -431,6 +421,37 @@ struct LiquidTodayView: View {
     }
 
     // MARK: - Heart rate
+
+    private var vwarHealthSection: some View {
+        VStack(spacing: 8) {
+            sectionHead("VWAR LOOP LIFE", trailing: "G Band via Apple Health")
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                ktile("Rest HR", intText(vwarRestingHr), "bpm", StrandPalette.metricRose,
+                      fracOver(vwarRestingHr, 100))
+                ktile("HRV", intText(vwarHrv), "ms", StrandPalette.metricCyan,
+                      fracOver(vwarHrv, 120))
+                ktile("SpO₂", unitText(vwarSpo2, "%", decimals: 1), "", StrandPalette.metricCyan,
+                      frac(vwarSpo2))
+                ktile("Temperature", unitText(vwarBodyTemp, "°C", decimals: 1), "",
+                      StrandPalette.metricAmber, fracOver(vwarBodyTemp, 42))
+                ktile("Distance", unitText(vwarDistanceKm, "km", decimals: 2), "",
+                      StrandPalette.chargeColor, fracOver(vwarDistanceKm, 10))
+                ktile("Active energy", intText(vwarActiveKcal), "kcal", StrandPalette.effortColor,
+                      fracOver(vwarActiveKcal, 800))
+                ktile("Steps", stepsText, "", StrandPalette.chargeColor,
+                      fracOver(stepCount, 10_000))
+                ktile("Sleep", vwarSleepText, "", StrandPalette.restColor,
+                      fracOver(vwarAsleepMin, 480))
+                ktile("Glucose estimate", intText(vwarGlucoseEstimate), "mg/dL",
+                      StrandPalette.statusWarning, nil)
+            }
+            Text("Glucose is an unvalidated G Band wrist estimate. It is stored only for transparent review and is excluded from Recovery, Load, Sleep, coaching, and health decisions. ECG and blood pressure stay unavailable until a safe direct protocol is validated.")
+                .font(StrandFont.caption)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 2)
+        }
+    }
 
     private var heartRateSection: some View {
         VStack(spacing: 8) {
@@ -450,7 +471,7 @@ struct LiquidTodayView: View {
                         HStack(spacing: 4) {
                             Spacer()
                             Text("Full day").font(StrandFont.caption).foregroundStyle(StrandPalette.accent)
-                            Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold))
+                            Text("OPEN").font(StrandFont.overlineScaled(9)).tracking(1.1)
                                 .foregroundStyle(StrandPalette.accent)
                         }
                     }
@@ -563,7 +584,7 @@ struct LiquidTodayView: View {
                 }
                 Spacer(minLength: 8)
                 Text(value).font(StrandFont.number(17)).foregroundStyle(StrandPalette.textPrimary)
-                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                Text("OPEN").font(StrandFont.overlineScaled(9)).tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
             .padding(.horizontal, 14)
@@ -768,11 +789,8 @@ struct LiquidTodayView: View {
                         HStack {
                             Text("Synced from").font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
                             Spacer()
-                            HStack(spacing: 4) {
-                                Text("View sources").font(StrandFont.subhead).foregroundStyle(StrandPalette.textTertiary)
-                                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(StrandPalette.textTertiary)
-                            }
+                            Text("VIEW SOURCES").font(StrandFont.overlineScaled(9)).tracking(1.1)
+                                .foregroundStyle(StrandPalette.textTertiary)
                         }
                         LiquidStrapBatteryRow()
                     }
@@ -832,6 +850,15 @@ struct LiquidTodayView: View {
         async let fitA = repo.exploreSeries(key: "fitness_age", source: "my-whoop")
         async let vitA = repo.exploreSeries(key: "vitality", source: "my-whoop")
         async let stepsA = repo.exploreSeries(key: "steps_est", source: "my-whoop")
+        async let vwarRestingHrA = repo.series(key: "resting_hr", source: "apple-health")
+        async let vwarHrvA = repo.series(key: "hrv", source: "apple-health")
+        async let vwarSpo2A = repo.series(key: "spo2", source: "apple-health")
+        async let vwarBodyTempA = repo.series(key: "body_temp_c", source: "apple-health")
+        async let vwarDistanceA = repo.series(key: "walking_running_km", source: "apple-health")
+        async let vwarActiveKcalA = repo.series(key: "active_kcal", source: "apple-health")
+        async let vwarGlucoseA = repo.series(key: "glucose_estimate_mg_dl", source: "apple-health")
+        async let vwarSleepA = repo.series(key: "asleep_min", source: "apple-health")
+        async let vwarStepsA = repo.series(key: "steps", source: "apple-health")
         async let hrA = repo.hrBuckets(from: from, to: to, bucketSeconds: 300)
         async let wkA = repo.workoutRows()
 
@@ -861,6 +888,20 @@ struct LiquidTodayView: View {
         let stepsSeries = await stepsA
         let stepsByDay = Dictionary(stepsSeries.map { ($0.day, $0.value) }, uniquingKeysWith: { _, last in last })
         stepsEst = stepsByDay[selectedDayKey] ?? (selectedDayOffset == 0 ? stepsSeries.last?.value : nil)
+
+        func valueForSelectedDay(_ rows: [(day: String, value: Double)]) -> Double? {
+            let byDay = Dictionary(rows.map { ($0.day, $0.value) }, uniquingKeysWith: { _, last in last })
+            return byDay[selectedDayKey] ?? (selectedDayOffset == 0 ? rows.last?.value : nil)
+        }
+        vwarRestingHr = valueForSelectedDay(await vwarRestingHrA)
+        vwarHrv = valueForSelectedDay(await vwarHrvA)
+        vwarSpo2 = valueForSelectedDay(await vwarSpo2A)
+        vwarBodyTemp = valueForSelectedDay(await vwarBodyTempA)
+        vwarDistanceKm = valueForSelectedDay(await vwarDistanceA)
+        vwarActiveKcal = valueForSelectedDay(await vwarActiveKcalA)
+        vwarGlucoseEstimate = valueForSelectedDay(await vwarGlucoseA)
+        vwarAsleepMin = valueForSelectedDay(await vwarSleepA)
+        vwarSteps = valueForSelectedDay(await vwarStepsA)
         hrValues = (await hrA).map { $0.bpm }
         workouts = await wkA
 
@@ -901,7 +942,7 @@ struct LiquidTodayView: View {
         return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"
     }
 
-    private var stepCount: Double? { displayDay?.steps.map(Double.init) ?? stepsEst }
+    private var stepCount: Double? { displayDay?.steps.map(Double.init) ?? stepsEst ?? vwarSteps }
 
     private var liveHour: Double {
         let c = Calendar.current.dateComponents([.hour, .minute], from: Date())
@@ -932,6 +973,12 @@ struct LiquidTodayView: View {
         let f = NumberFormatter()
         f.numberStyle = .decimal
         return f.string(from: NSNumber(value: Int(s))) ?? "\(Int(s))"
+    }
+
+    private var vwarSleepText: String {
+        guard let minutes = vwarAsleepMin else { return "–" }
+        let total = Int(minutes.rounded())
+        return "\(total / 60)h \(total % 60)m"
     }
 
     // The user's Effort display scale (#268), 0–100 by default or the WHOOP 0–21 axis if chosen — the SAME
@@ -1081,10 +1128,7 @@ private struct HeroScoreCell: View {
                 .allowsHitTesting(false)   // taps fall through to the vessel → splash
             }
             Button(action: onGuide) {
-                HStack(spacing: 3) {
-                    Text(label.uppercased()).font(StrandFont.overline).tracking(1.6)
-                    Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).opacity(0.6)
-                }
+                Text(label.uppercased()).font(StrandFont.overline).tracking(1.6)
                 .foregroundStyle(StrandPalette.textSecondary)
             }
             .buttonStyle(.plain)

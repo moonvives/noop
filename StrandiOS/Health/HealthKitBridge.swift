@@ -80,7 +80,8 @@ final class HealthKitBridge: ObservableObject {
     // noisier and surfaces a privacy ask we don't honour.
     private static let quantityReadIds: [HKQuantityTypeIdentifier] = [
         .heartRate, .restingHeartRate, .heartRateVariabilitySDNN, .oxygenSaturation,
-        .respiratoryRate, .bodyTemperature, .stepCount, .activeEnergyBurned,
+        .respiratoryRate, .bodyTemperature, .stepCount, .distanceWalkingRunning,
+        .activeEnergyBurned, .bloodGlucose,
         .basalEnergyBurned, .vo2Max,
         // Body composition — READ-ONLY (#20). Imported under the apple-health source like the file
         // importer already ingests; deliberately NOT in quantityWriteIds (we never write these back).
@@ -153,7 +154,8 @@ final class HealthKitBridge: ObservableObject {
     /// We deliberately do NOT observe the body-composition reads (weight/BMI/etc.) — those don't move a
     /// score and a manual weigh-in shouldn't wake the app every hour.
     private static let liveQuantityIds: [HKQuantityTypeIdentifier] = [
-        .heartRateVariabilitySDNN, .restingHeartRate, .activeEnergyBurned, .heartRate, .vo2Max
+        .heartRateVariabilitySDNN, .restingHeartRate, .activeEnergyBurned, .heartRate, .vo2Max,
+        .oxygenSaturation, .bodyTemperature, .stepCount, .distanceWalkingRunning, .bloodGlucose
     ]
 
     /// Long-lived observer queries, retained so HealthKit doesn't tear them down. Keyed by the sample
@@ -303,8 +305,14 @@ final class HealthKitBridge: ObservableObject {
         await collect(.respiratoryRate, unit: HKUnit.count().unitDivided(by: .minute()), start: start, end: end, op: .discreteAverage) { day, v in
             var a = agg(day); a.respRate = v; byDay[day] = a
         }
+        await collect(.bodyTemperature, unit: .degreeCelsius(), start: start, end: end, op: .discreteMostRecent) { day, v in
+            var a = agg(day); a.bodyTempC = v; byDay[day] = a
+        }
         await collect(.stepCount, unit: .count(), start: start, end: end, op: .cumulativeSum) { day, v in
             var a = agg(day); a.steps = v; byDay[day] = a
+        }
+        await collect(.distanceWalkingRunning, unit: .meter(), start: start, end: end, op: .cumulativeSum) { day, v in
+            var a = agg(day); a.walkingRunningM = v; byDay[day] = a
         }
         await collect(.activeEnergyBurned, unit: .kilocalorie(), start: start, end: end, op: .cumulativeSum) { day, v in
             var a = agg(day); a.activeKcal = v; byDay[day] = a
@@ -314,6 +322,14 @@ final class HealthKitBridge: ObservableObject {
         }
         await collect(.vo2Max, unit: HKUnit(from: "ml/kg*min"), start: start, end: end, op: .discreteAverage) { day, v in
             var a = agg(day); a.vo2max = v; byDay[day] = a
+        }
+        // G Band can write a wrist-derived glucose estimate into HealthKit. Preserve the value for
+        // transparent display and export, but never feed it into recovery, load, sleep, or clinical logic.
+        // HealthKit's canonical concentration unit here is mg/dL.
+        let milligramsPerDeciliter = HKUnit.gramUnit(with: .milli)
+            .unitDivided(by: HKUnit.literUnit(with: .deci))
+        await collect(.bloodGlucose, unit: milligramsPerDeciliter, start: start, end: end, op: .discreteMostRecent) { day, v in
+            var a = agg(day); a.glucoseEstimateMgDl = v; byDay[day] = a
         }
 
         // Body composition — READ-ONLY import under the apple-health source (#20). Weight, lean mass
@@ -383,8 +399,22 @@ final class HealthKitBridge: ObservableObject {
                 coreMin: a.coreMin
             )
         }
-        let points = AppleHealthAggregator.metricPoints(aggregates)
+        var points = AppleHealthAggregator.metricPoints(aggregates)
             .map { MetricPoint(day: $0.day, key: $0.key, value: $0.value) }
+        // VWAR / G Band fields that are not part of the shared AppleDailyAggregate schema. They remain
+        // generic metric-series points so the Apple Health page and VITAE Today can render them without
+        // pretending they are validated DailyMetric inputs.
+        for (day, a) in byDay {
+            if let value = a.bodyTempC {
+                points.append(MetricPoint(day: day, key: "body_temp_c", value: value))
+            }
+            if let value = a.walkingRunningM {
+                points.append(MetricPoint(day: day, key: "walking_running_km", value: value / 1_000))
+            }
+            if let value = a.glucoseEstimateMgDl {
+                points.append(MetricPoint(day: day, key: "glucose_estimate_mg_dl", value: value))
+            }
+        }
 
         // Workouts the user logged in Apple Health (Apple Watch rings, gym apps, etc.). macOS already
         // imports these from a static Health export and Android reads them from Health Connect; iOS now
@@ -489,7 +519,8 @@ final class HealthKitBridge: ObservableObject {
 
     private struct DayAgg {
         var restingHr: Double?; var avgHr: Double?; var maxHr: Double?; var hrv: Double?
-        var spo2: Double?; var respRate: Double?; var steps: Double?
+        var spo2: Double?; var respRate: Double?; var bodyTempC: Double?; var steps: Double?
+        var walkingRunningM: Double?; var glucoseEstimateMgDl: Double?
         var activeKcal: Double?; var basalKcal: Double?; var vo2max: Double?
         var weightKg: Double?; var bodyFatPct: Double?; var leanMassKg: Double?; var bmi: Double?
         var asleepMin: Double?; var deepMin: Double?; var remMin: Double?; var coreMin: Double?

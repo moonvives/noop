@@ -99,7 +99,8 @@ struct AppleHealthView: View {
     private static let seriesKeys = [
         "steps", "active_kcal", "vo2max",
         "resting_hr", "hrv", "spo2", "resp_rate", "asleep_min",
-        "weight", "body_fat", "lean_mass", "bmi"
+        "weight", "body_fat", "lean_mass", "bmi",
+        "body_temp_c", "walking_running_km", "glucose_estimate_mg_dl"
     ]
 
     // yyyy-MM-dd → Date (en_US_POSIX / UTC), per the project's date contract.
@@ -229,6 +230,7 @@ struct AppleHealthView: View {
                     tileGrid
                     heartSection
                     activitySection
+                    vwarSection
                     bodySection
                     sleepSection
                 }
@@ -486,6 +488,15 @@ struct AppleHealthView: View {
             statTile(key: "vo2max", label: "VO₂ Max",
                      accent: StrandPalette.accent, unit: "ml/kg",
                      fmt: { String(format: "%.1f", $0) })
+            statTile(key: "walking_running_km", label: "Walk + run",
+                     accent: StrandPalette.metricCyan, unit: "km",
+                     fmt: { String(format: "%.2f", $0) })
+            statTile(key: "body_temp_c", label: "Body temperature",
+                     accent: StrandPalette.metricAmber, unit: "°C",
+                     fmt: { String(format: "%.1f", $0) })
+            statTile(key: "glucose_estimate_mg_dl", label: "Glucose estimate",
+                     accent: StrandPalette.statusWarning, unit: "mg/dL",
+                     fmt: { "\(Int($0.rounded()))" })
             statTile(key: "weight", label: "Weight",
                      accent: StrandPalette.accent,
                      fmt: { massLabel($0) })
@@ -582,6 +593,28 @@ struct AppleHealthView: View {
             chartCard(title: "Active energy", key: "active_kcal",
                       gradient: amberGradient, fallback: 0...1000,
                       fmt: { "\(intString($0)) kcal" })
+        }
+    }
+
+    // MARK: - VWAR / G Band fields bridged through Apple Health
+
+    private var vwarSection: some View {
+        VStack(alignment: .leading, spacing: NoopMetrics.gap) {
+            SectionHeader("VWAR via Apple Health", overline: "G BAND",
+                          trailing: range.caption)
+            chartCard(title: "Body temperature", key: "body_temp_c",
+                      gradient: amberGradient, fallback: 34...40,
+                      fmt: { String(format: "%.1f °C", $0) })
+            chartCard(title: "Walking + running distance", key: "walking_running_km",
+                      gradient: cyanGradient, fallback: 0...20,
+                      fmt: { String(format: "%.2f km", $0) })
+            chartCard(title: "Blood glucose estimate", key: "glucose_estimate_mg_dl",
+                      gradient: amberGradient, fallback: 50...220,
+                      fmt: { "\(Int($0.rounded())) mg/dL" })
+            Text("The glucose value is an unvalidated wrist estimate imported from G Band. It is excluded from every VITAE score and must not guide diagnosis, medication, food, or exercise decisions.")
+                .font(StrandFont.caption)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

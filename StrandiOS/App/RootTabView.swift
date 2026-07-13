@@ -362,10 +362,10 @@ struct RootTabView: View {
                 HStack(spacing: 6) {
                     Text(title).strandOverline()
                     Spacer(minLength: 8)
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 11, weight: .semibold))
+                    Text(isOpen ? "CLOSE" : "OPEN")
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(1.1)
                         .foregroundStyle(StrandPalette.textTertiary)
-                        .rotationEffect(.degrees(isOpen ? 0 : -90))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
@@ -392,18 +392,16 @@ struct RootTabView: View {
 }
 
 /// One tappable destination row in the More index. A `NavigationLink` whose label is the standard app row:
-/// the SF Symbol icon tinted `StrandPalette.accent`, the title in the body text colour, a `Spacer`, and a
-/// trailing `chevron.right` in `textTertiary`. ~44pt min height + the card's row insets keep the whole row a
+/// the title in the body text colour and a text-only OPEN affordance. ~44pt min height + the card's row insets keep the whole row a
 /// comfortable tap target. Each destination keeps the per-screen wrapper the old `link()` applied
 /// (`surfaceBase` background, inline title-bar, toolbar background) so pushed pages look identical to before.
 private struct MoreRow<Destination: View>: View {
     let title: LocalizedStringKey
-    let icon: String
     @ViewBuilder let destination: () -> Destination
 
     init(_ title: LocalizedStringKey, _ icon: String,
          @ViewBuilder _ destination: @escaping () -> Destination) {
-        self.title = title; self.icon = icon; self.destination = destination
+        self.title = title; self.destination = destination
     }
 
     var body: some View {
@@ -414,19 +412,13 @@ private struct MoreRow<Destination: View>: View {
                 .toolbarBackground(StrandPalette.surfaceBase, for: .navigationBar)
         } label: {
             HStack(spacing: 14) {
-                // Pin the icon to the accent explicitly. A plain inherited tint gets re-resolved by iOS to
-                // its default blue a beat after first render — so the icons flashed green→blue (#184). The
-                // explicit foregroundStyle on the image overrides that; the title keeps the primary colour.
-                Image(systemName: icon)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundStyle(StrandPalette.accent)
-                    .frame(width: 26, alignment: .center)
                 Text(title)
                     .font(StrandFont.body)
                     .foregroundStyle(StrandPalette.textPrimary)
                 Spacer(minLength: 8)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                Text("OPEN")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
             .padding(.horizontal, 16)
@@ -479,10 +471,10 @@ private struct QuickActionSheet: View {
                 .padding(.bottom, 10)
 
             VStack(spacing: 8) {
-                row("Live HR", icon: "waveform.path.ecg", tint: StrandPalette.metricRose) { onPick(.live) }
-                row("Start workout", icon: "figure.run", tint: StrandPalette.effortColor) { onPick(.workout) }
-                row("Log journal", icon: "square.and.pencil", tint: StrandPalette.accent) { onPick(.journal) }
-                row("Breathe", icon: "wind", tint: StrandPalette.restColor) { onPick(.breathe) }
+                row("Live HR", tint: StrandPalette.metricRose) { onPick(.live) }
+                row("Start workout", tint: StrandPalette.effortColor) { onPick(.workout) }
+                row("Log journal", tint: StrandPalette.accent) { onPick(.journal) }
+                row("Breathe", tint: StrandPalette.restColor) { onPick(.breathe) }
             }
             .padding(.horizontal, 16)
 
@@ -501,21 +493,20 @@ private struct QuickActionSheet: View {
         )
     }
 
-    /// One flat action row: hued line-icon tile + title, inset surface, hairline border.
-    private func row(_ title: LocalizedStringKey, icon: String, tint: Color, action: @escaping () -> Void) -> some View {
+    /// One flat, text-only action row with a restrained metric accent.
+    private func row(_ title: LocalizedStringKey, tint: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 13) {
-                Image(systemName: icon)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(tint)
-                    .frame(width: 38, height: 38)
-                    .background(RoundedRectangle(cornerRadius: 11, style: .continuous).fill(StrandPalette.surfaceInset))
+                Rectangle()
+                    .fill(tint)
+                    .frame(width: 3, height: 28)
                 Text(title)
                     .font(StrandFont.headline)
                     .foregroundStyle(StrandPalette.textPrimary)
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                Text("OPEN")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
             .padding(.vertical, 10)
@@ -538,11 +529,11 @@ private struct FloatingTabBar: View {
     /// Fires when the user taps the ALREADY-active tab (2026-07-02: re-tap should refresh).
     var onReselect: (Int) -> Void = { _ in }
 
-    private struct Item: Identifiable { let title: LocalizedStringKey; let icon: String; let tag: Int; var id: Int { tag } }
-    private let nav = [Item(title: "Today", icon: "square.grid.2x2", tag: 0),
-                       Item(title: "Trends", icon: "chart.line.uptrend.xyaxis", tag: 1),
-                       Item(title: "Sleep", icon: "bed.double", tag: 2),
-                       Item(title: "More", icon: "ellipsis", tag: 3)]
+    private struct Item: Identifiable { let title: LocalizedStringKey; let tag: Int; var id: Int { tag } }
+    private let nav = [Item(title: "Today", tag: 0),
+                       Item(title: "Trends", tag: 1),
+                       Item(title: "Sleep", tag: 2),
+                       Item(title: "More", tag: 3)]
 
     var body: some View {
         // One frosted glass bar, four evenly-spaced tabs. The quick-action "+" now lives in the
@@ -553,25 +544,10 @@ private struct FloatingTabBar: View {
             tabButton(nav[2])
             tabButton(nav[3])
         }
-        .padding(.vertical, 7)
+        .padding(.vertical, 10)
         .padding(.horizontal, 8)
-        .liquidGlass(in: Capsule())
-        // Over the liquid Today the sky ends at ~340pt, so the bar floats on flat opaque surfaceBase —
-        // a blur material has nothing to dissolve and hardens into a solid lozenge (2026-07-02:
-        // "clips into a solid shape"). A faint translucent scrim INSIDE the same Capsule keeps the pill
-        // reading as tinted glass, not a slab, even against dead-flat colour.
-        .background(.white.opacity(0.06), in: Capsule())
-        // Soft top-lit rim instead of one hard hairline, so there's no crisp cut-out edge.
-        .overlay(
-            Capsule().strokeBorder(
-                LinearGradient(colors: [.white.opacity(0.22), .white.opacity(0.04)],
-                               startPoint: .top, endPoint: .bottom),
-                lineWidth: 0.75)
-        )
-        // Lighter, wider shadow: real elevation without stamping a dark halo on the flat canvas.
-        .shadow(color: .black.opacity(0.22), radius: 18, x: 0, y: 8)
-        .padding(.horizontal, 22)
-        .padding(.bottom, 4)
+        .background(StrandPalette.surfaceRaised)
+        .overlay(alignment: .top) { Rectangle().fill(StrandPalette.hairline).frame(height: 1) }
     }
 
     private func tabButton(_ item: Item) -> some View {
@@ -583,11 +559,13 @@ private struct FloatingTabBar: View {
                 withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.24)) { selection = item.tag }
             }
         } label: {
-            VStack(spacing: 3) {
-                Image(systemName: item.icon)
-                    .font(.system(size: 18, weight: active ? .semibold : .regular))
+            VStack(spacing: 6) {
                 Text(item.title)
-                    .font(.system(size: 10, weight: active ? .semibold : .medium))
+                    .font(StrandFont.overlineScaled(10))
+                    .tracking(1.1)
+                Rectangle()
+                    .fill(active ? StrandPalette.accent : .clear)
+                    .frame(height: 2)
             }
             .foregroundStyle(active ? StrandPalette.accent : StrandPalette.textSecondary)
             .frame(maxWidth: .infinity)

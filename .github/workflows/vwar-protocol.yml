@@ -1,0 +1,30 @@
+name: VWAR protocol
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Packages/VWARProtocol/**'
+      - 'docs/VWAR_BLE_CAPTURE.md'
+      - '.github/workflows/vwar-protocol.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Packages/VWARProtocol/**'
+      - 'docs/VWAR_BLE_CAPTURE.md'
+      - '.github/workflows/vwar-protocol.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: vwar-protocol-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test VWARProtocol
+        run: swift test --package-path Packages/VWARProtocol
