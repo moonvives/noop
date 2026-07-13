@@ -10,9 +10,14 @@ let package = Package(
     platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
         .library(name: "VWARProtocol", targets: ["VWARProtocol"]),
+        .executable(name: "vitae-vwar-capture", targets: ["VWARCollector"]),
     ],
     targets: [
         .target(name: "VWARProtocol"),
+        .executableTarget(
+            name: "VWARCollector",
+            dependencies: ["VWARProtocol"]
+        ),
         .testTarget(
             name: "VWARProtocolTests",
             dependencies: ["VWARProtocol"]
