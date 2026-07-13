@@ -1,6 +1,7 @@
 # VITAE VWAR desktop collector
 
-`vitae-vwar-capture` is the clean-room macOS collector for the VWAR Loop Life / G Band protocol.
+VITAE VWAR is the clean-room macOS application and command-line collector for the VWAR Loop Life /
+G Band protocol.
 It follows the useful architectural lesson from Goose — preserve raw transport evidence before parsing —
 but contains no Goose code. Goose's Rust core declares itself `UNLICENSED`, so VITAE uses an original
 implementation and its own versioned capture schema.
@@ -20,7 +21,16 @@ implementation and its own versioned capture schema.
 It never sends a proprietary write, changes device settings, installs firmware, replays an unknown
 command, bypasses authentication, or contacts a G Band cloud service.
 
-## Build on macOS
+## Install the macOS application
+
+Download `VITAE-VWAR-Desktop.app.zip`, extract it, and move `VITAE VWAR.app` to Applications. The build
+is ad-hoc signed because the project does not store or use an Apple Developer identity. On first open,
+Control-click the app, choose Open, and confirm. macOS will then request Bluetooth permission.
+
+The application provides device scan, name/UUID selection, capture duration, destination folder,
+start/stop controls, and a selectable live log. The standalone CLI is included for automation.
+
+## Build from source on macOS
 
 Requirements: macOS 13 or newer, Xcode Command Line Tools, and Bluetooth permission for Terminal.
 
@@ -28,6 +38,7 @@ Requirements: macOS 13 or newer, Xcode Command Line Tools, and Bluetooth permiss
 git clone https://github.com/moonvives/noop.git
 cd noop
 swift build -c release --package-path Packages/VWARProtocol --product vitae-vwar-capture
+swift build -c release --package-path Packages/VWARProtocol --product VITAEVWARDesktop
 ```
 
 The executable is created at:
