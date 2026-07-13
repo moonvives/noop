@@ -1,5 +1,5 @@
 name: 🐞 Bug report
-description: Report something in NOOP that doesn't work the way it should
+description: Relate algo que não funciona como deveria no VITAE One VWAR Loop Life
 labels: [bug]
 body:
   - type: markdown
@@ -20,13 +20,13 @@ body:
 
         ---
 
-        NOOP runs **entirely on your device** — there are no servers or accounts for us to check, so a bug is almost always diagnosed from your **strap log**. A report without one (and without an obvious repro) usually can't be investigated and may be closed asking for the log.
+        VITAE One VWAR Loop Life funciona **no seu dispositivo** — não há servidor ou conta para consultar. Um problema de Bluetooth quase sempre exige o **registro da pulseira**, com dados pessoais removidos. Sem registro ou reprodução clara, a investigação pode não ser possível.
 
         **Please don't strip out the fields below.** "Live HR works but no data" alone has half a dozen different causes — the version, platform, strap model and log are how we tell which one you've actually hit. A few seconds filling this in saves a day of back-and-forth. 🙏
   - type: input
     id: version
     attributes:
-      label: NOOP version
+      label: Versão do VITAE One VWAR Loop Life
       description: Settings → What's New, or the release tag (e.g. 2.0).
       placeholder: "2.0"
     validations:
@@ -141,7 +141,7 @@ body:
     attributes:
       label: Before you submit
       options:
-        - label: I attached my exported NOOP .zip (not a screenshot of the Live screen). If my bug is a clearly reproducible UI issue I described exactly how to see it instead.
+        - label: Anexei o .zip exportado pelo VITAE One VWAR Loop Life (não apenas uma captura de tela) ou descrevi uma reprodução visual exata.
           required: true
         - label: I attached or pasted a strap log above — **or** my bug is a clearly reproducible UI issue that doesn't need one (e.g. a typo, a button that does nothing) and I've described exactly how to see it.
           required: true

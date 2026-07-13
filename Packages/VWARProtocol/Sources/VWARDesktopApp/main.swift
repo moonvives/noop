@@ -56,7 +56,7 @@ private final class DesktopAppModel: ObservableObject {
     private func run(arguments: [String], activity: String) {
         guard !isRunning else { return }
         guard let helper = helperURL else {
-            console = "The bundled capture helper is missing. Reinstall the complete VITAE VWAR app."
+            console = "The bundled capture helper is missing. Reinstall the complete VITAE One VWAR Loop Life app."
             lastRunSucceeded = false
             return
         }
@@ -143,11 +143,11 @@ private struct ContentView: View {
     private var header: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("VITAE ONE")
+                Text("VITAE ONE VWAR LOOP LIFE")
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .tracking(2.2)
                     .foregroundStyle(Color.white.opacity(0.55))
-                Text("VWAR Desktop Collector")
+                Text("Coletor VWAR Loop Life")
                     .font(.system(size: 25, weight: .semibold, design: .rounded))
             }
             Spacer()

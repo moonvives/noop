@@ -399,9 +399,11 @@ struct RootView: View {
             // In-app logo: the open recovery-ring mark so the wordmark reads as a true lockup
             // (README logo system — mark + "NOOP"). Flat gold gradient, low glow per the v3 restraint.
             BrandMark(size: 22)
-            Text("NOOP")
+            Text("VITAE One VWAR Loop Life")
                 .font(StrandFont.rounded(20, weight: .bold))
                 .foregroundStyle(StrandPalette.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.58)
             Spacer()
         }
         // Top padding clears the traffic-light controls (the window hides its title bar, so they sit

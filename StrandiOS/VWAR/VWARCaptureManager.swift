@@ -199,7 +199,7 @@ final class VWARCaptureManager: NSObject, ObservableObject {
         let id = peripheral.identifier
         transcript = CaptureTranscript(
             deviceModel: "VWAR Loop Life",
-            collectorVersion: "VITAE One iOS read-only 1",
+            collectorVersion: "VITAE One VWAR Loop Life iOS read-only 1",
             startedAt: Date(),
             peripheral: PeripheralSnapshot(
                 capturedAt: Date(),
@@ -306,7 +306,7 @@ final class VWARCaptureManager: NSObject, ObservableObject {
         switch state {
         case .poweredOn: return "Bluetooth ativo"
         case .poweredOff: return "Ative o Bluetooth nos Ajustes."
-        case .unauthorized: return "Autorize o Bluetooth para o VITAE One nos Ajustes."
+        case .unauthorized: return "Autorize o Bluetooth para o VITAE One VWAR Loop Life nos Ajustes."
         case .unsupported: return "Este dispositivo não oferece Bluetooth Low Energy."
         case .resetting: return "O Bluetooth está reiniciando."
         case .unknown: return "O estado do Bluetooth ainda não está disponível."

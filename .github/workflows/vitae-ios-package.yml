@@ -1,4 +1,4 @@
-name: VITAE iOS package
+name: VITAE One VWAR Loop Life iOS package
 
 on:
   pull_request:
@@ -57,19 +57,19 @@ jobs:
           APP_PATH="$(find build/Build/Products/Release-iphoneos -maxdepth 1 -type d -name '*.app' | head -n 1)"
           test -n "$APP_PATH"
           mkdir -p artifact/Payload
-          ditto "$APP_PATH" artifact/Payload/VITAEOne.app
+          ditto "$APP_PATH" artifact/Payload/VITAEOneVWARLoopLife.app
           (
             cd artifact
-            ditto -c -k --sequesterRsrc --keepParent Payload VITAE-One-unsigned.ipa
+            ditto -c -k --sequesterRsrc --keepParent Payload VITAE-One-VWAR-Loop-Life-unsigned.ipa
           )
           cp docs/VITAE_INSTALL.md artifact/README.md
 
       - name: Upload ready-to-sign package
         uses: actions/upload-artifact@v4
         with:
-          name: VITAE-One-iOS-ready-to-sign
+          name: VITAE-One-VWAR-Loop-Life-iOS-ready-to-sign
           path: |
-            artifact/VITAE-One-unsigned.ipa
+            artifact/VITAE-One-VWAR-Loop-Life-unsigned.ipa
             artifact/README.md
           if-no-files-found: error
           retention-days: 14

@@ -1,4 +1,4 @@
-name: VWAR desktop collector
+name: VITAE One VWAR Loop Life desktop collector
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Package macOS app and CLI
         run: |
-          APP="artifact/VITAE VWAR.app"
+          APP="artifact/VITAE One VWAR Loop Life.app"
           mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
           mkdir -p artifact
           cp Packages/VWARProtocol/.build/release/VITAEVWARDesktop "$APP/Contents/MacOS/"
@@ -45,24 +45,24 @@ jobs:
           cp docs/VWAR_DESKTOP_COLLECTOR.md artifact/README.md
           chmod +x artifact/vitae-vwar-capture "$APP/Contents/MacOS/VITAEVWARDesktop" "$APP/Contents/Resources/vitae-vwar-capture"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleDevelopmentRegion string en' "$APP/Contents/Info.plist"
-          /usr/libexec/PlistBuddy -c 'Add :CFBundleDisplayName string VITAE VWAR' "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleDisplayName string VITAE One VWAR Loop Life' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string VITAEVWARDesktop' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string com.vitae.vwar.desktop' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleInfoDictionaryVersion string 6.0' "$APP/Contents/Info.plist"
-          /usr/libexec/PlistBuddy -c 'Add :CFBundleName string VITAE VWAR' "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleName string VITAE One VWAR Loop Life' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundlePackageType string APPL' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 1.0' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 1' "$APP/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :LSMinimumSystemVersion string 13.0' "$APP/Contents/Info.plist"
-          /usr/libexec/PlistBuddy -c 'Add :NSBluetoothAlwaysUsageDescription string VITAE VWAR reads Bluetooth services and notifications from your selected Loop Life band to create a local protocol capture.' "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :NSBluetoothAlwaysUsageDescription string VITAE One VWAR Loop Life reads Bluetooth services and notifications from your selected Loop Life band to create a local protocol capture.' "$APP/Contents/Info.plist"
           plutil -lint "$APP/Contents/Info.plist"
           codesign --force --deep --sign - "$APP"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" artifact/VITAE-VWAR-Desktop.app.zip
+          ditto -c -k --sequesterRsrc --keepParent "$APP" artifact/VITAE-One-VWAR-Loop-Life-Desktop.app.zip
 
       - name: Upload desktop collector
         uses: actions/upload-artifact@v4
         with:
-          name: VITAE-VWAR-Desktop-macOS
+          name: VITAE-One-VWAR-Loop-Life-Desktop-macOS
           path: artifact/
           if-no-files-found: error
           retention-days: 14

@@ -1,13 +1,13 @@
 ---
 name: Feature request
-about: Suggest an idea or improvement for NOOP
+about: Sugira uma melhoria para VITAE One VWAR Loop Life
 labels: enhancement
 ---
 
 <!--
-NOOP stays fully offline and on-device by design. Requests that would require
+VITAE One VWAR Loop Life permanece local e offline por padrão. Solicitações que exigem
 a server, an account, cloud sync, or sending data off the device are out of
-scope — see the README and DISCLAIMER for what NOOP is and isn't.
+escopo — consulte o README e o DISCLAIMER para entender os limites do produto.
 -->
 
 ## The problem
@@ -16,7 +16,7 @@ What are you trying to do that's hard or impossible today?
 
 ## The idea
 
-What you'd like NOOP to do.
+Descreva o que você gostaria que VITAE One VWAR Loop Life fizesse.
 
 ## Alternatives you've considered
 

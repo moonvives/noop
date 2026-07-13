@@ -1,6 +1,6 @@
-# VITAE VWAR desktop collector
+# VITAE One VWAR Loop Life — coletor desktop
 
-VITAE VWAR is the clean-room macOS application and command-line collector for the VWAR Loop Life /
+VITAE One VWAR Loop Life is the clean-room macOS application and command-line collector for the VWAR Loop Life /
 G Band protocol.
 It follows the useful architectural lesson from Goose — preserve raw transport evidence before parsing —
 but contains no Goose code. Goose's Rust core declares itself `UNLICENSED`, so VITAE uses an original
@@ -23,7 +23,7 @@ command, bypasses authentication, or contacts a G Band cloud service.
 
 ## Install the macOS application
 
-Download `VITAE-VWAR-Desktop.app.zip`, extract it, and move `VITAE VWAR.app` to Applications. The build
+Download `VITAE-One-VWAR-Loop-Life-Desktop.app.zip`, extract it, and move `VITAE One VWAR Loop Life.app` to Applications. The build
 is ad-hoc signed because the project does not store or use an Apple Developer identity. On first open,
 Control-click the app, choose Open, and confirm. macOS will then request Bluetooth permission.
 
