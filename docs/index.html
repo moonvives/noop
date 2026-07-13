@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090c11">
+  <meta name="description" content="VITAE One VWAR Loop Life: análise diária premium, privada e local para sua pulseira VWAR Loop Life.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="VITAE One VWAR Loop Life">
+  <meta property="og:description" content="Seu corpo, em contexto. Dados locais, calendário diário e análise avançada no iPhone e iPad.">
+  <title>VITAE One VWAR Loop Life</title>
+  <link rel="stylesheet" href="site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VITAE One VWAR Loop Life",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "iOS 17+, iPadOS 17+",
+    "isAccessibleForFree": true,
+    "description": "Aplicativo local-first para análise de dados autorizados da VWAR Loop Life."
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="#inicio" aria-label="VITAE One VWAR Loop Life, início">
+      <span>VITAE ONE</span>
+      <small>VWAR LOOP LIFE</small>
+    </a>
+    <nav aria-label="Navegação principal">
+      <a href="#painel">Painel</a>
+      <a href="#metodo">Método</a>
+      <a href="#instalar">Instalar</a>
+      <a href="https://github.com/moonvives/noop">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="inicio">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <p class="eyebrow">ANÁLISE PRIVADA · LOCAL · SEM ASSINATURA</p>
+        <h1>Seu corpo.<br>Seu contexto.<br><span>Seus dados.</span></h1>
+        <p class="lead">Uma experiência diária de alto nível para a VWAR Loop Life, desenhada para o iPad Pro e pronta para o iPhone. Sem feed, sem ruído e sem números inventados.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/moonvives/noop/actions/workflows/vitae-ios-package.yml">Obter pacote iOS</a>
+          <a class="button secondary" href="VITAE_INSTALL.md">Ler instalação</a>
+        </div>
+        <p class="fineprint">O IPA público é não assinado. Para preservar HealthKit, assine com sua própria equipe Apple no Xcode.</p>
+      </div>
+
+      <div class="instrument" aria-label="Prévia do painel diário">
+        <div class="instrument-top">
+          <div>
+            <p class="eyebrow accent">VITAE ONE VWAR LOOP LIFE</p>
+            <h2>Seu dia, com precisão</h2>
+            <p id="live-date" class="date-line">Carregando data local</p>
+          </div>
+          <div class="clock-block">
+            <time id="live-time">--:--</time>
+            <span>HORA LOCAL</span>
+          </div>
+        </div>
+
+        <div class="calendar-control">
+          <div>
+            <label for="site-calendar">CALENDÁRIO</label>
+            <p id="calendar-month">Mês e ano</p>
+          </div>
+          <input id="site-calendar" type="date" aria-label="Selecionar data da prévia">
+        </div>
+        <div id="week-strip" class="week-strip" aria-label="Semana selecionada"></div>
+
+        <div class="score-grid">
+          <article class="score-card recovery">
+            <div class="score-ring" aria-hidden="true"><span>—</span></div>
+            <div><p>RECUPERAÇÃO</p><strong>Aguardando dados</strong><small>Baseline pessoal</small></div>
+          </article>
+          <article class="score-card strain">
+            <div class="score-ring" aria-hidden="true"><span>—</span></div>
+            <div><p>CARGA</p><strong>Aguardando dados</strong><small>TRIMP documentado</small></div>
+          </article>
+          <article class="score-card sleep">
+            <div class="score-ring" aria-hidden="true"><span>—</span></div>
+            <div><p>SONO</p><strong>Aguardando dados</strong><small>Horário e arquitetura</small></div>
+          </article>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-heading">
+            <div><p>FREQUÊNCIA CARDÍACA</p><strong>Série intradiária</strong></div>
+            <span>DADOS REAIS NO APP</span>
+          </div>
+          <svg viewBox="0 0 720 190" role="img" aria-label="Estrutura do gráfico interativo de frequência cardíaca">
+            <defs>
+              <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ff6079" stop-opacity=".34"/>
+                <stop offset="1" stop-color="#ff6079" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g class="grid-lines"><path d="M0 40H720M0 95H720M0 150H720"/></g>
+            <path class="chart-area" d="M0 148 C45 136 68 144 103 122 S165 66 203 89 S260 140 311 116 S378 48 427 76 S492 132 535 105 S597 58 642 83 S687 112 720 70 L720 190H0Z"/>
+            <path class="chart-line" d="M0 148 C45 136 68 144 103 122 S165 66 203 89 S260 140 311 116 S378 48 427 76 S492 132 535 105 S597 58 642 83 S687 112 720 70"/>
+          </svg>
+          <div class="axis"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="painel" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">PAINEL AVANÇADO</p>
+        <h2>Profundidade sem transformar bem-estar em espetáculo.</h2>
+        <p>Cada painel responde a uma pergunta concreta e permite inspecionar o ponto real no gráfico. Ausência de sensor continua sendo ausência, não uma estimativa decorativa.</p>
+      </div>
+      <div class="feature-grid">
+        <article><p>01</p><h3>Baseline de HRV</h3><span>RMSSD filtrado, faixa interquartil móvel e comparação apenas com seu próprio histórico.</span></article>
+        <article><p>02</p><h3>Sono em contexto</h3><span>Horário de início e fim, duração, eficiência e arquitetura quando a origem fornece estágios.</span></article>
+        <article><p>03</p><h3>Capacidade e carga</h3><span>Recuperação e carga na mesma escala, com cobertura visível e análise por período.</span></article>
+        <article><p>04</p><h3>Matriz de vitais</h3><span>HRV, frequência de repouso, SpO₂ e temperatura comparados ao baseline individual.</span></article>
+        <article><p>05</p><h3>Calendário real</h3><span>Semana interativa, calendário gráfico e recálculo completo para o dia selecionado.</span></article>
+        <article><p>06</p><h3>Pesquisa VWAR direta</h3><span>Inventário GATT e captura notify/indicate somente leitura, com exportação anonimizada.</span></article>
+      </div>
+    </section>
+
+    <section id="metodo" class="section method shell">
+      <div>
+        <p class="eyebrow">MÉTODO E LIMITES</p>
+        <h2>Transparência antes de pontuação.</h2>
+      </div>
+      <div class="method-list">
+        <div><span>01</span><p><strong>Dados autorizados.</strong> Saúde da Apple é a ponte diária recomendada entre G Band e VITAE.</p></div>
+        <div><span>02</span><p><strong>Cálculo local.</strong> HRV, carga e baselines são processados no dispositivo, sem conta obrigatória.</p></div>
+        <div><span>03</span><p><strong>Sem falsa clínica.</strong> ECG, pressão e glicose estimada no pulso não entram em scores ou recomendações.</p></div>
+        <div><span>04</span><p><strong>Sem protocolo inventado.</strong> Payload proprietário só ganha significado depois de evidência reproduzível.</p></div>
+      </div>
+    </section>
+
+    <section id="instalar" class="section install shell">
+      <p class="eyebrow">IPHONE E IPAD</p>
+      <h2>Pronto para sua assinatura Apple.</h2>
+      <p>O GitHub compila um IPA sem credenciais e sem dados pessoais. Assine no Xcode com sua equipe para preservar as permissões do HealthKit.</p>
+      <div class="actions centered">
+        <a class="button primary" href="https://github.com/moonvives/noop/actions/workflows/vitae-ios-package.yml">Abrir artefatos do GitHub</a>
+        <a class="button secondary" href="https://github.com/moonvives/noop">Ver código-fonte</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer shell">
+    <div class="wordmark"><span>VITAE ONE</span><small>VWAR LOOP LIFE</small></div>
+    <p>Bem-estar e observação pessoal. Não é dispositivo médico.</p>
+    <p>Atualizado em 2026.</p>
+  </footer>
+  <script src="site.js"></script>
+</body>
+</html>

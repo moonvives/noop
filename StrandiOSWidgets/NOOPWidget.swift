@@ -98,7 +98,9 @@ struct NOOPWidgetView: View {
     private var home: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("NOOP").font(.system(size: 13, weight: .bold))
+                Text("VITAE ONE VWAR LOOP LIFE").font(.system(size: 13, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.52)
                     .foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 Circle().fill(snap.bonded ? StrandPalette.statusPositive : StrandPalette.statusCritical)
@@ -133,7 +135,9 @@ struct NOOPWidgetView: View {
     private var large: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("NOOP").font(.system(size: 13, weight: .bold))
+                Text("VITAE ONE VWAR LOOP LIFE").font(.system(size: 13, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.62)
                     .foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 Circle().fill(snap.bonded ? StrandPalette.statusPositive : StrandPalette.statusCritical)

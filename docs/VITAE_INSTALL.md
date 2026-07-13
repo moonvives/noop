@@ -1,49 +1,56 @@
-# Install VITAE One on iPhone or iPad
+# Instalar VITAE One VWAR Loop Life no iPhone ou iPad
 
-VITAE One is an iOS source build. The GitHub artifact contains an unsigned IPA so no Apple account,
-certificate, provisioning profile, or personal health data is ever stored in the repository.
+VITAE One VWAR Loop Life é um aplicativo iOS distribuído como código-fonte e IPA não assinado. Nenhuma
+conta Apple, certificado, perfil de provisionamento ou dado pessoal de saúde é armazenado no repositório.
 
-## Required for the G Band bridge
+## Ponte diária com o G Band
 
 The daily VWAR path is:
 
 ```text
-VWAR Loop Life → G Band → Apple Health → VITAE One
+VWAR Loop Life → G Band → Saúde da Apple → VITAE One VWAR Loop Life
 ```
 
-In G Band, enable Apple Health and allow Heart Rate, Walking + Running Distance, Active Energy,
-Blood Glucose, Blood Oxygen, Steps, Sleep, and Body Temperature. In VITAE One, open Apple Health,
-choose Enable, approve reads, then run Sync.
+No G Band, ative a Saúde da Apple e permita frequência cardíaca, distância caminhando + correndo,
+energia ativa, glicose, oxigênio no sangue, passos, sono e temperatura corporal. No VITAE One VWAR
+Loop Life, abra Saúde da Apple, escolha Ativar, aprove as leituras e execute Sincronizar.
 
-The glucose value written by G Band is an unvalidated wrist estimate. VITAE One displays it with an
-experimental label and excludes it from every score, insight, and coaching input. Blood pressure and
-ECG are not imported through this bridge.
+O valor de glicose escrito pelo G Band é uma estimativa de pulso não validada. O VITAE One VWAR Loop
+Life o identifica como experimental e o exclui de toda pontuação, insight e orientação. Pressão arterial
+e ECG não são importados por essa ponte.
 
-## iPad Pro and direct VWAR research mode
+## Painel premium no iPad Pro e pesquisa VWAR direta
 
-On iPad, VITAE One opens a Portuguese performance dashboard designed for large displays. It includes
-interactive day/range inspection, recovery and load trends, an HRV personal-baseline band, real sleep
-timing and architecture, training balance, and vital-data coverage. Runtime screens never use demo data:
-missing measurements are shown as missing.
+No iPad, o VITAE One VWAR Loop Life abre um painel em português pensado para telas grandes. Ele mostra
+o dia da semana, data completa, ano, hora e minutos em tempo real, inclui calendário gráfico e navegação
+semanal, e recalcula a análise para o dia escolhido. Há tendências de recuperação e carga, baseline
+pessoal de HRV, horário e arquitetura reais do sono, equilíbrio de treino e cobertura dos vitais. As
+telas de uso diário nunca inventam dados: medições ausentes continuam ausentes.
 
-Open **VWAR DIRETO** to create a clean-room Bluetooth capture from the Loop Life. This mode inventories
-GATT services and characteristics, reads only characteristics that advertise read access, subscribes to
-notify/indicate channels, decodes only published Bluetooth-SIG Battery and Heart Rate payloads, and can
-export a redacted JSON transcript. It sends no proprietary commands. Vendor payloads remain raw until
-owner-generated captures support a fixture-backed decoder.
+Abra **VWAR DIRETO** para criar uma captura Bluetooth clean-room da Loop Life. Esse modo inventaria
+serviços e características GATT, lê apenas características que anunciam acesso de leitura, assina canais
+notify/indicate, decodifica somente payloads públicos Bluetooth-SIG de bateria e frequência cardíaca e
+exporta um registro JSON anonimizado. Nenhum comando proprietário é enviado. Payloads do fabricante
+permanecem brutos até existirem capturas do proprietário e fixtures reproduzíveis que sustentem um decoder.
 
-## Recommended installation
+## Instalação recomendada
 
-Build from Xcode with your own Apple development team and a provisioning profile that includes
-HealthKit. This keeps the HealthKit entitlement intact.
+Compile no Xcode com sua própria equipe Apple e um perfil que inclua HealthKit. Isso preserva a
+autorização necessária para ler a Saúde da Apple.
 
-1. Install Xcode and XcodeGen on the Mac.
-2. Clone `moonvives/noop` and check out the VITAE branch or merged revision.
-3. Give the app, widget, and App Group bundle identifiers values owned by your Apple team.
-4. Set your `DEVELOPMENT_TEAM` in `project.yml`.
-5. Run `xcodegen generate`.
-6. Open `Strand.xcodeproj`, select the iPhone, and run the `NOOPiOS` scheme.
+1. Instale Xcode e XcodeGen no Mac.
+2. Clone `moonvives/noop` e use a revisão mais recente do branch `main`.
+3. Substitua os identificadores do app, widget e App Group por valores da sua equipe Apple.
+4. Defina `DEVELOPMENT_TEAM` em `project.yml`.
+5. Execute `xcodegen generate`.
+6. Abra `Strand.xcodeproj`, selecione seu iPhone ou iPad e execute o esquema interno `NOOPiOS`.
 
-An IPA re-signed by a generic sideloading service may lose the HealthKit entitlement. If that happens,
-VITAE One cannot appear in Health data access and cannot receive G Band data. Do not provide Apple
-credentials or health exports to third-party signing services.
+Um IPA reassinado por um serviço genérico pode perder o entitlement do HealthKit. Nesse caso, o VITAE
+One VWAR Loop Life não aparecerá no acesso aos dados de Saúde e não receberá os dados do G Band. Não
+forneça credenciais Apple nem exportações de saúde a serviços de assinatura de terceiros.
+
+## Nome do arquivo
+
+O workflow publica `VITAE-One-VWAR-Loop-Life-unsigned.ipa` dentro do artefato
+`VITAE-One-VWAR-Loop-Life-iOS-ready-to-sign`. O IPA precisa ser assinado para o seu aparelho antes da
+instalação; o arquivo do GitHub não contém identidade Apple.

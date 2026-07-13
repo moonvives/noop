@@ -1,5 +1,5 @@
 //  LiquidTodayView.swift
-//  VITAE One · text-led daily dashboard.
+//  VITAE One VWAR Loop Life · text-led daily dashboard.
 //
 //  This is the FULL Today, re-created faithfully from the locked mockup
 //  (scratchpad/liquid-metal-home.html): sky title + record/add/battery controls,
@@ -353,7 +353,7 @@ struct LiquidTodayView: View {
                     .accessibilityLabel("Profile and settings")
                 }
             }
-            Text("VITAE ONE")
+            Text("VITAE ONE VWAR LOOP LIFE")
                 .font(StrandFont.overlineScaled(10))
                 .tracking(2.2)
                 .foregroundStyle(StrandPalette.textTertiary)

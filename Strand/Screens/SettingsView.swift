@@ -1692,12 +1692,14 @@ struct SettingsView: View {
         SettingsSection(
             icon: "info.circle.fill",
             title: "About",
-            blurb: "NOOP: all your data, none of the cloud."
+            blurb: "VITAE One VWAR Loop Life: seus dados, sem nuvem obrigatória."
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 10) {
-                    Text("NOOP")
+                    Text("VITAE One VWAR Loop Life")
                         .font(StrandFont.title2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.62)
                         .foregroundStyle(StrandPalette.textPrimary)
                     StatePill("v\(bundleVersionString)", tone: .neutral, showsDot: false)
                     Spacer()

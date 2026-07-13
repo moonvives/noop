@@ -322,9 +322,11 @@ struct NOOPChargeView: View {
         VStack(alignment: .leading, spacing: 3) {
             // Header: the wordmark + the snapshot age (or a sync hint when empty).
             HStack(spacing: 4) {
-                Text("NOOP")
+                Text("VITAE ONE VWAR LOOP LIFE")
                     .font(StrandFont.rounded(11, weight: .bold))
-                    .tracking(0.5)
+                    .tracking(0.2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.42)
                     .foregroundStyle(StrandPalette.textSecondary)
                 Spacer(minLength: 0)
                 Text(headerTrailing)

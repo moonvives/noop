@@ -367,7 +367,7 @@ private final class VWARCollector: NSObject, CBCentralManagerDelegate, CBPeriphe
         try writeJSON(ProtocolEvidenceBuilder.build(from: events), to: directory.appendingPathComponent("protocol-evidence.json"))
         try writeJSON(standardMetrics, to: directory.appendingPathComponent("standard-metrics.json"))
         let notes = """
-        # VITAE VWAR capture
+        # VITAE One VWAR Loop Life capture
 
         Result: \(reason)
         Started: \(Self.isoFormatter.string(from: startedAt))
@@ -470,7 +470,7 @@ private final class VWARCollector: NSObject, CBCentralManagerDelegate, CBPeriphe
 
 private func printUsage() {
     print("""
-    VITAE VWAR Loop Life desktop collector
+    VITAE One VWAR Loop Life desktop collector
 
       vitae-vwar-capture --list [--scan-timeout 30]
       vitae-vwar-capture --name "Loop" [--duration 300] [--output ~/Documents/VITAE-VWAR-Capture]

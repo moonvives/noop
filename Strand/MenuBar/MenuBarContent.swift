@@ -146,10 +146,12 @@ public struct MenuBarContent: View {
     private var header: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("NOOP")
+                Text("VITAE One VWAR Loop Life")
                     .font(StrandFont.headline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.68)
                     .foregroundStyle(StrandPalette.textPrimary)
-                Text("ALL YOUR DATA · NONE OF THE CLOUD")
+                Text("SEUS DADOS · SEM NUVEM OBRIGATÓRIA")
                     .font(StrandFont.overline)
                     .tracking(StrandFont.overlineTracking)
                     .foregroundStyle(StrandPalette.textTertiary)
