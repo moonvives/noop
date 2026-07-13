@@ -93,6 +93,39 @@ final class VWARProtocolTests: XCTestCase {
         XCTAssertEqual(evidence[0].changingByteOffsets, [1, 3])
     }
 
+    func testStandardBatteryDecoderRejectsImpossiblePercentage() {
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let valid = StandardMetricDecoder.decode(
+            serviceUUID: "180F",
+            characteristicUUID: "2A19",
+            payload: [87],
+            capturedAt: date
+        )
+        XCTAssertEqual(valid.map(\.kind), [.batteryPercent])
+        XCTAssertEqual(valid.map(\.value), [87])
+
+        XCTAssertTrue(StandardMetricDecoder.decode(
+            serviceUUID: "180F",
+            characteristicUUID: "2A19",
+            payload: [101],
+            capturedAt: date
+        ).isEmpty)
+    }
+
+    func testStandardHeartRateDecoderHandlesUInt16AndRRIntervals() {
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        // UInt16 HR + RR present; 72 bpm and 1024 ticks = 1000 ms.
+        let samples = StandardMetricDecoder.decode(
+            serviceUUID: "180D",
+            characteristicUUID: "00002A37-0000-1000-8000-00805F9B34FB",
+            payload: [0x11, 0x48, 0x00, 0x00, 0x04],
+            capturedAt: date
+        )
+        XCTAssertEqual(samples.map(\.kind), [.heartRateBPM, .rrIntervalMilliseconds])
+        XCTAssertEqual(samples[0].value, 72)
+        XCTAssertEqual(samples[1].value, 1_000, accuracy: 0.001)
+    }
+
     private func event(_ sequence: Int, _ payloadHex: String, _ date: Date) -> BLECaptureEvent {
         BLECaptureEvent(
             sequence: sequence,
