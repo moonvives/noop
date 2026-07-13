@@ -11,6 +11,7 @@ let package = Package(
     products: [
         .library(name: "VWARProtocol", targets: ["VWARProtocol"]),
         .executable(name: "vitae-vwar-capture", targets: ["VWARCollector"]),
+        .executable(name: "VITAEVWARDesktop", targets: ["VWARDesktopApp"]),
     ],
     targets: [
         .target(name: "VWARProtocol"),
@@ -18,6 +19,7 @@ let package = Package(
             name: "VWARCollector",
             dependencies: ["VWARProtocol"]
         ),
+        .executableTarget(name: "VWARDesktopApp"),
         .testTarget(
             name: "VWARProtocolTests",
             dependencies: ["VWARProtocol"]
