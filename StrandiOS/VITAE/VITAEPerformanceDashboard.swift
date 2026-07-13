@@ -1151,22 +1151,22 @@ private struct SleepCompositionBar: View {
         VStack(alignment: .leading, spacing: 18) {
             GeometryReader { geometry in
                 HStack(spacing: 2) {
-                    ForEach(composition.parts, id: \.0) { stage, value in
+                    ForEach(composition.parts) { part in
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
-                            .fill(stage.color)
-                            .frame(width: max(3, geometry.size.width * value / composition.total))
+                            .fill(part.stage.color)
+                            .frame(width: max(3, geometry.size.width * part.value / composition.total))
                     }
                 }
             }
             .frame(height: 54)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 10)], spacing: 10) {
-                ForEach(composition.parts, id: \.0) { stage, value in
+                ForEach(composition.parts) { part in
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(stage.label.uppercased())
+                        Text(part.stage.label.uppercased())
                             .font(StrandFont.overlineScaled(8))
                             .tracking(1.0)
-                            .foregroundStyle(stage.color)
-                        Text("\(Int(value / 60))h \(Int(value.truncatingRemainder(dividingBy: 60)))min")
+                            .foregroundStyle(part.stage.color)
+                        Text("\(Int(part.value / 60))h \(Int(part.value.truncatingRemainder(dividingBy: 60)))min")
                             .font(StrandFont.bodyNumber)
                             .foregroundStyle(StrandPalette.textPrimary)
                     }
@@ -1354,12 +1354,22 @@ private struct SleepStagePoint: Identifiable {
 }
 
 private struct SleepComposition {
+    struct Part: Identifiable {
+        let stage: SleepStageKind
+        let value: Double
+        var id: SleepStageKind { stage }
+    }
+
     let awake: Double
     let light: Double
     let deep: Double
     let rem: Double
     var total: Double { awake + light + deep + rem }
-    var parts: [(SleepStageKind, Double)] { [(.awake, awake), (.light, light), (.deep, deep), (.rem, rem)].filter { $0.1 > 0 } }
+    var parts: [Part] {
+        [Part(stage: .awake, value: awake), Part(stage: .light, value: light),
+         Part(stage: .deep, value: deep), Part(stage: .rem, value: rem)]
+            .filter { $0.value > 0 }
+    }
 }
 
 private enum CoverageLevel {
