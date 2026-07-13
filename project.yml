@@ -50,6 +50,10 @@ packages:
     path: Packages/StrandImport
   StrandDesign:
     path: Packages/StrandDesign
+  # Clean-room VWAR / G Band capture models and Bluetooth-SIG standard metric decoders. CoreBluetooth
+  # stays in the iOS app layer; proprietary payloads remain raw until fixture-backed evidence exists.
+  VWARProtocol:
+    path: Packages/VWARProtocol
   # Clean-room local Oura ring BLE protocol (framing, auth, decoders, driver). Pure value types,
   # zero CoreBluetooth, so it stays headless/JVM-testable; the app target imports it for OuraLiveSource.
   OuraProtocol:
@@ -123,6 +127,7 @@ targets:
       - package: StrandAnalytics
       - package: StrandImport
       - package: StrandDesign
+      - package: VWARProtocol
       - package: MarkdownUI
       - package: ZIPFoundation
       - package: OuraProtocol
@@ -266,6 +271,7 @@ targets:
       - package: StrandAnalytics
       - package: StrandImport
       - package: StrandDesign
+      - package: VWARProtocol
       - package: MarkdownUI
       - package: ZIPFoundation
       - target: NOOPiOSWidgets

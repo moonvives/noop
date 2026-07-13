@@ -35,7 +35,17 @@ struct RootTabView: View {
 
     /// The Today tab root, honouring the liquid/classic preference.
     @ViewBuilder private var todayTabRoot: some View {
-        if liquidTodayEnabled { LiquidTodayView() } else { TodayView() }
+        // The 12.9-inch iPad gets the dense VITAE performance command centre: text-led navigation,
+        // interactive Charts, honest baseline bands, and the read-only VWAR research console. iPhone keeps
+        // the existing daily flow byte-for-byte. The dashboard itself uses adaptive grids, so portrait and
+        // landscape both remain readable on every iPad size.
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            VITAEPerformanceDashboard()
+        } else if liquidTodayEnabled {
+            LiquidTodayView()
+        } else {
+            TodayView()
+        }
     }
 
     init() {
