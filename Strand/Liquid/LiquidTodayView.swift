@@ -1,5 +1,5 @@
 //  LiquidTodayView.swift
-//  NOOP · Liquid design language — the Today screen, rebuilt in the liquid finish.
+//  VITAE One · text-led daily dashboard.
 //
 //  This is the FULL Today, re-created faithfully from the locked mockup
 //  (scratchpad/liquid-metal-home.html): sky title + record/add/battery controls,
@@ -19,8 +19,6 @@ import StrandAnalytics
 struct LiquidTodayView: View {
     @EnvironmentObject var repo: Repository
     @EnvironmentObject var router: NavRouter
-    @EnvironmentObject var profile: ProfileStore
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Shared with the real Today's card-customise editor so the two stay in sync.
     @AppStorage(DashboardCardPrefs.selectionKey) private var dashboardCardsRaw = ""
@@ -207,25 +205,7 @@ struct LiquidTodayView: View {
         }
         .coordinateSpace(name: Self.pullSpace)
         .onPreferenceChange(PullOffsetKey.self) { handlePull($0) }
-        // The sky is a FIXED full-bleed backdrop drawn behind the scroll content, edge-to-edge under the
-        // status bar. A ScrollView background does not scroll with the content, so pulling down never
-        // moves the sky (the exact behaviour the scaffold uses on the classic Today).
-        .background(alignment: .top) {
-            ZStack(alignment: .top) {
-                StrandPalette.surfaceBase
-                // Reduce-motion (and low-power) users get the same sky posed still — no twinkle/breath.
-                // Also static until the first data load settles, so launch isn't fighting a live sky too.
-                Group {
-                    if reduceMotion || !dataLoaded { LiquidSkyStatic(hour: liveHour) }
-                    else { LiquidSky(hour: liveHour) }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 340, alignment: .top)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-            }
-            .ignoresSafeArea()
-        }
+        .background(StrandPalette.surfaceBase.ignoresSafeArea())
         // Swipe left/right to change DAYS (WHOOP-style). Tab-swipe is disabled on Today in RootTabView so
         // this owns the horizontal gesture here.
         .simultaneousGesture(daySwipeGesture)
@@ -342,33 +322,32 @@ struct LiquidTodayView: View {
                         .liquidPopoverAdaptation()
                 }
                 Spacer(minLength: 8)
-                HStack(spacing: 8) {
-                    // Support: a tap opens project info, attribution, and contact.
+                HStack(spacing: 14) {
                     Button { showSupport = true } label: {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 19, weight: .semibold))
-                            .foregroundStyle(StrandPalette.chargeColor)
-                            .frame(width: 34, height: 34)
-                            .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
+                        Text("SUPPORT")
+                            .font(StrandFont.overlineScaled(9))
+                            .tracking(1.1)
+                            .foregroundStyle(StrandPalette.textSecondary)
                     }
-                    .buttonStyle(LiquidPressStyle())
-                    .accessibilityLabel("Support NOOP: help and contact.")
-                    // Profile pic (the one set in Settings) → opens Settings, matching the classic Today.
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Support and contact")
                     Button { showSettings = true } label: {
-                        ProfileAvatarView(imageData: profile.avatarImageData, size: 34)
-                            .frame(width: 34, height: 34)
+                        Text("PROFILE")
+                            .font(StrandFont.overlineScaled(9))
+                            .tracking(1.1)
+                            .foregroundStyle(StrandPalette.textPrimary)
                     }
-                    .buttonStyle(LiquidPressStyle())
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Profile and settings")
-                    LiquidAddButton()
-                    LiquidBatteryButton()
                 }
             }
-            // Subtle NOOP wordmark in the sky between header and hero. Perfectly centred (a letter row has
-            // no trailing tracking gap the way `Text(...).tracking()` does), with a tap easter egg.
-            LiquidWordmark()
-                .padding(.top, 30)
-            heroCard.padding(.top, 22)
+            Text("VITAE ONE")
+                .font(StrandFont.overlineScaled(10))
+                .tracking(2.2)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 28)
+            heroCard.padding(.top, 18)
             if liveSessionsBeta {
                 liveSessionStartRow.padding(.top, 10)
             }
@@ -381,9 +360,6 @@ struct LiquidTodayView: View {
     private var liveSessionStartRow: some View {
         Button { showLiveSession = true } label: {
             HStack(spacing: 10) {
-                Image(systemName: "shield.lefthalf.filled")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(StrandPalette.metricCyan)
                 Text("Start session")
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textPrimary)
@@ -394,7 +370,9 @@ struct LiquidTodayView: View {
                     .background(Capsule().fill(.white.opacity(0.05))
                         .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 1)))
                 Spacer(minLength: 8)
-                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                Text("OPEN")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
             .padding(.horizontal, 14)
@@ -412,12 +390,12 @@ struct LiquidTodayView: View {
 
     private var heroCard: some View {
         HStack(alignment: .top, spacing: 4) {
-            HeroScoreCell(label: "Charge", score: displayDay?.recovery, tint: StrandPalette.chargeColor,
-                          pill: "WHOOP", animated: dataLoaded, onGuide: { guideSection = .charge })
-            HeroScoreCell(label: "Effort", score: displayDay?.strain, tint: StrandPalette.effortColor,
-                          pill: nil, animated: dataLoaded, onGuide: { guideSection = .effort })
-            HeroScoreCell(label: "Rest", score: restScore, tint: StrandPalette.restColor,
-                          pill: "WHOOP", animated: dataLoaded, onGuide: { guideSection = .rest })
+            HeroScoreCell(label: "Recovery", score: displayDay?.recovery, tint: StrandPalette.chargeColor,
+                          pill: "DERIVED", animated: dataLoaded, onGuide: { guideSection = .charge })
+            HeroScoreCell(label: "Load", score: displayDay?.strain, tint: StrandPalette.effortColor,
+                          pill: "DERIVED", animated: dataLoaded, onGuide: { guideSection = .effort })
+            HeroScoreCell(label: "Sleep", score: restScore, tint: StrandPalette.restColor,
+                          pill: "DERIVED", animated: dataLoaded, onGuide: { guideSection = .rest })
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 12)
@@ -450,7 +428,7 @@ struct LiquidTodayView: View {
                         HStack(spacing: 4) {
                             Spacer()
                             Text("Full day").font(StrandFont.caption).foregroundStyle(StrandPalette.accent)
-                            Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold))
+                            Text("OPEN").font(StrandFont.overlineScaled(9)).tracking(1.1)
                                 .foregroundStyle(StrandPalette.accent)
                         }
                     }
@@ -563,7 +541,7 @@ struct LiquidTodayView: View {
                 }
                 Spacer(minLength: 8)
                 Text(value).font(StrandFont.number(17)).foregroundStyle(StrandPalette.textPrimary)
-                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                Text("OPEN").font(StrandFont.overlineScaled(9)).tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
             .padding(.horizontal, 14)
@@ -768,11 +746,8 @@ struct LiquidTodayView: View {
                         HStack {
                             Text("Synced from").font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
                             Spacer()
-                            HStack(spacing: 4) {
-                                Text("View sources").font(StrandFont.subhead).foregroundStyle(StrandPalette.textTertiary)
-                                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(StrandPalette.textTertiary)
-                            }
+                            Text("VIEW SOURCES").font(StrandFont.overlineScaled(9)).tracking(1.1)
+                                .foregroundStyle(StrandPalette.textTertiary)
                         }
                         LiquidStrapBatteryRow()
                     }
@@ -1081,10 +1056,7 @@ private struct HeroScoreCell: View {
                 .allowsHitTesting(false)   // taps fall through to the vessel → splash
             }
             Button(action: onGuide) {
-                HStack(spacing: 3) {
-                    Text(label.uppercased()).font(StrandFont.overline).tracking(1.6)
-                    Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).opacity(0.6)
-                }
+                Text(label.uppercased()).font(StrandFont.overline).tracking(1.6)
                 .foregroundStyle(StrandPalette.textSecondary)
             }
             .buttonStyle(.plain)
