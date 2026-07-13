@@ -113,10 +113,6 @@ final class VWARCaptureManager: NSObject, ObservableObject {
         )
     }
 
-    deinit {
-        reconnectWorkItem?.cancel()
-    }
-
     func startScan() {
         exportURL = nil
         lastExportError = nil
