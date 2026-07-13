@@ -31,6 +31,17 @@ struct LiquidTodayView: View {
     @State private var stepsEst: Double?           // steps_est, day-keyed to the selected day (fallback)
     @State private var hrValues: [Double] = []     // hrBuckets since midnight → 5-min means
     @State private var workouts: [WorkoutRow] = [] // newest-first
+    // G Band writes these through Apple Health. They are displayed with explicit source provenance;
+    // none of the unvalidated estimates are allowed into VITAE scores.
+    @State private var vwarRestingHr: Double?
+    @State private var vwarHrv: Double?
+    @State private var vwarSpo2: Double?
+    @State private var vwarBodyTemp: Double?
+    @State private var vwarDistanceKm: Double?
+    @State private var vwarActiveKcal: Double?
+    @State private var vwarGlucoseEstimate: Double?
+    @State private var vwarAsleepMin: Double?
+    @State private var vwarSteps: Double?
 
     // sheets / expanders
     @State private var guideSection: ScoreSection?
@@ -184,6 +195,7 @@ struct LiquidTodayView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     scene
+                    vwarHealthSection
                     heartRateSection
                     yourCardsSection
                     synthesisSection
@@ -409,6 +421,37 @@ struct LiquidTodayView: View {
     }
 
     // MARK: - Heart rate
+
+    private var vwarHealthSection: some View {
+        VStack(spacing: 8) {
+            sectionHead("VWAR LOOP LIFE", trailing: "G Band via Apple Health")
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                ktile("Rest HR", intText(vwarRestingHr), "bpm", StrandPalette.metricRose,
+                      fracOver(vwarRestingHr, 100))
+                ktile("HRV", intText(vwarHrv), "ms", StrandPalette.metricCyan,
+                      fracOver(vwarHrv, 120))
+                ktile("SpO₂", unitText(vwarSpo2, "%", decimals: 1), "", StrandPalette.metricCyan,
+                      frac(vwarSpo2))
+                ktile("Temperature", unitText(vwarBodyTemp, "°C", decimals: 1), "",
+                      StrandPalette.metricAmber, fracOver(vwarBodyTemp, 42))
+                ktile("Distance", unitText(vwarDistanceKm, "km", decimals: 2), "",
+                      StrandPalette.chargeColor, fracOver(vwarDistanceKm, 10))
+                ktile("Active energy", intText(vwarActiveKcal), "kcal", StrandPalette.effortColor,
+                      fracOver(vwarActiveKcal, 800))
+                ktile("Steps", stepsText, "", StrandPalette.chargeColor,
+                      fracOver(stepCount, 10_000))
+                ktile("Sleep", vwarSleepText, "", StrandPalette.restColor,
+                      fracOver(vwarAsleepMin, 480))
+                ktile("Glucose estimate", intText(vwarGlucoseEstimate), "mg/dL",
+                      StrandPalette.statusWarning, nil)
+            }
+            Text("Glucose is an unvalidated G Band wrist estimate. It is stored only for transparent review and is excluded from Recovery, Load, Sleep, coaching, and health decisions. ECG and blood pressure stay unavailable until a safe direct protocol is validated.")
+                .font(StrandFont.caption)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 2)
+        }
+    }
 
     private var heartRateSection: some View {
         VStack(spacing: 8) {
@@ -807,6 +850,15 @@ struct LiquidTodayView: View {
         async let fitA = repo.exploreSeries(key: "fitness_age", source: "my-whoop")
         async let vitA = repo.exploreSeries(key: "vitality", source: "my-whoop")
         async let stepsA = repo.exploreSeries(key: "steps_est", source: "my-whoop")
+        async let vwarRestingHrA = repo.series(key: "resting_hr", source: "apple-health")
+        async let vwarHrvA = repo.series(key: "hrv", source: "apple-health")
+        async let vwarSpo2A = repo.series(key: "spo2", source: "apple-health")
+        async let vwarBodyTempA = repo.series(key: "body_temp_c", source: "apple-health")
+        async let vwarDistanceA = repo.series(key: "walking_running_km", source: "apple-health")
+        async let vwarActiveKcalA = repo.series(key: "active_kcal", source: "apple-health")
+        async let vwarGlucoseA = repo.series(key: "glucose_estimate_mg_dl", source: "apple-health")
+        async let vwarSleepA = repo.series(key: "asleep_min", source: "apple-health")
+        async let vwarStepsA = repo.series(key: "steps", source: "apple-health")
         async let hrA = repo.hrBuckets(from: from, to: to, bucketSeconds: 300)
         async let wkA = repo.workoutRows()
 
@@ -836,6 +888,20 @@ struct LiquidTodayView: View {
         let stepsSeries = await stepsA
         let stepsByDay = Dictionary(stepsSeries.map { ($0.day, $0.value) }, uniquingKeysWith: { _, last in last })
         stepsEst = stepsByDay[selectedDayKey] ?? (selectedDayOffset == 0 ? stepsSeries.last?.value : nil)
+
+        func valueForSelectedDay(_ rows: [(day: String, value: Double)]) -> Double? {
+            let byDay = Dictionary(rows.map { ($0.day, $0.value) }, uniquingKeysWith: { _, last in last })
+            return byDay[selectedDayKey] ?? (selectedDayOffset == 0 ? rows.last?.value : nil)
+        }
+        vwarRestingHr = valueForSelectedDay(await vwarRestingHrA)
+        vwarHrv = valueForSelectedDay(await vwarHrvA)
+        vwarSpo2 = valueForSelectedDay(await vwarSpo2A)
+        vwarBodyTemp = valueForSelectedDay(await vwarBodyTempA)
+        vwarDistanceKm = valueForSelectedDay(await vwarDistanceA)
+        vwarActiveKcal = valueForSelectedDay(await vwarActiveKcalA)
+        vwarGlucoseEstimate = valueForSelectedDay(await vwarGlucoseA)
+        vwarAsleepMin = valueForSelectedDay(await vwarSleepA)
+        vwarSteps = valueForSelectedDay(await vwarStepsA)
         hrValues = (await hrA).map { $0.bpm }
         workouts = await wkA
 
@@ -876,7 +942,7 @@ struct LiquidTodayView: View {
         return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"
     }
 
-    private var stepCount: Double? { displayDay?.steps.map(Double.init) ?? stepsEst }
+    private var stepCount: Double? { displayDay?.steps.map(Double.init) ?? stepsEst ?? vwarSteps }
 
     private var liveHour: Double {
         let c = Calendar.current.dateComponents([.hour, .minute], from: Date())
@@ -907,6 +973,12 @@ struct LiquidTodayView: View {
         let f = NumberFormatter()
         f.numberStyle = .decimal
         return f.string(from: NSNumber(value: Int(s))) ?? "\(Int(s))"
+    }
+
+    private var vwarSleepText: String {
+        guard let minutes = vwarAsleepMin else { return "–" }
+        let total = Int(minutes.rounded())
+        return "\(total / 60)h \(total % 60)m"
     }
 
     // The user's Effort display scale (#268), 0–100 by default or the WHOOP 0–21 axis if chosen — the SAME
