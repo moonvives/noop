@@ -678,17 +678,16 @@ fun DataSourcesScreen(vm: AppViewModel) {
         }
         }
 
-        // --- Oura / Fitbit / Garmin own-data export — on-device ---
+        // --- Garmin / Oura / Fitbit own-data export — on-device ---
         item {
         SourceCard(
-            title = "Oura / Fitbit / Garmin export",
+            title = "Garmin / Oura / Fitbit data export",
             icon = Icons.Filled.Watch,
             tint = Palette.metricPurple,
-            subtitle = "Import your own data export from Oura, Fitbit or Garmin: sleep, resting heart " +
-                "rate, HRV, steps and more, where the export has them. Download it from the brand's app " +
-                "(Oura: Account → Export Data; Fitbit: Google Takeout; Garmin: Export Your Data), then " +
-                "choose the file here. Fully offline; nothing leaves your phone. Each brand's own " +
-                "readiness or sleep score is kept for reference only. Your scores stay yours.",
+            subtitle = "Import your Garmin Connect Export Your Data archive for sleep, resting heart " +
+                "rate, HRV, steps and more, where the export contains them. This route is fully offline. " +
+                "Oura Account Export Data and Fitbit Google Takeout archives are supported here too. " +
+                "Nothing leaves your phone, and third-party readiness or sleep scores remain reference only.",
         ) {
             val hasDays = (wearableDays ?: 0) > 0
             StatePill(

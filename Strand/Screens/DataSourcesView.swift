@@ -263,9 +263,9 @@ struct DataSourcesView: View {
     }
 
     private var wearableCard: some View {
-        card(title: String(localized: "Oura / Fitbit / Garmin export"), icon: "figure.mind.and.body",
+        card(title: String(localized: "Garmin / Oura / Fitbit data export"), icon: "figure.mind.and.body",
              tint: StrandPalette.metricPurple,
-             subtitle: String(localized: "Import your own data export from Oura, Fitbit or Garmin: sleep, resting heart rate, HRV, steps and more, where the export has them. Download it from the brand's app (Oura: Account → Export Data; Fitbit: Google Takeout; Garmin: Export Your Data), then choose the file here. Fully offline; nothing leaves \(Platform.deviceNounPhrase). Each brand's own readiness or sleep score is kept for reference only. Your scores stay yours.")) {
+             subtitle: String(localized: "Import your own Garmin Connect Export Your Data archive for sleep, resting heart rate, HRV, steps and more, where the export contains them. This route works offline even when a sideload signature cannot use Apple Health. Oura Account Export Data and Fitbit Google Takeout archives are supported here too. Nothing leaves \(Platform.deviceNounPhrase), and third-party readiness or sleep scores remain reference only.")) {
             HStack(spacing: NoopMetrics.space3) {
                 Button { presentImporter(.wearable) } label: {
                     Label(wearableImporting ? "Importing…" : "Choose export…", systemImage: "tray.and.arrow.down")

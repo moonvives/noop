@@ -7,7 +7,7 @@ enum AppChangelog {
 
     /// Bump this when you add a release below. The "What's New" sheet shows automatically when the
     /// stored last-seen version is behind this. (Decoupled from the bundle version on purpose.)
-    static let currentVersion = "9.0.0"
+    static let currentVersion = "9.1.0"
 
     struct Release: Identifiable {
         let version: String
@@ -19,6 +19,17 @@ enum AppChangelog {
 
     /// Newest first.
     static let releases: [Release] = [
+        Release(
+            version: "9.1.0",
+            title: "Garmin conectado, com origem verificável",
+            date: "13 de julho de 2026",
+            items: [
+                "**Garmin Connect no painel.** No iPhone, VWAR Loop Life agora identifica amostras realmente gravadas pelo Garmin Connect no Apple Health e mostra o estado da conexão sem confundir um app instalado com dados compartilhados.",
+                "**Três caminhos honestos.** Histórico pelo Apple Health, frequência cardíaca ao vivo pelo Bluetooth padrão e importação offline do arquivo Export Your Data da Garmin funcionam como rotas independentes.",
+                "**Alternativa para sideload.** Se AltStore, SideStore ou uma assinatura gratuita remover o direito HealthKit, o app direciona para Bluetooth ou importação offline em vez de exibir uma configuração impossível.",
+                "**Limites explícitos.** Connect IQ não é apresentado como acesso ao histórico, rotas GPS ausentes não são recriadas e nenhuma amostra que não chegou ao app é inventada.",
+                "**Privacidade por fonte.** A verificação guarda somente o nome técnico da origem e as categorias encontradas; valores de saúde, conta, serial e identificadores pessoais não entram nesse inventário.",
+            ]),
         Release(
             version: "9.0.0",
             title: "VWAR Loop Life, calendário e análise pessoal",

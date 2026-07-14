@@ -4,7 +4,7 @@ import Foundation
 enum ProjectInfo {
     static let appName = "VWAR Loop Life"
     static let tagline = "Your strap. Your data. Your machine. Local-first, no cloud."
-    static let version = "9.0.0"
+    static let version = "9.1.0"
     /// Public contact for questions, feedback, bug reports. Baked into every platform.
     static let contactEmail = "thenoopapp@gmail.com"
 

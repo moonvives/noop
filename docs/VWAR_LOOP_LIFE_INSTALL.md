@@ -6,7 +6,7 @@ abrir no iPhone.
 
 ## Instalação rápida com AltStore ou SideStore
 
-1. Baixe `VWAR-Loop-Life-v9.0.0-ios.ipa` na [versão 9.0 do GitHub](https://github.com/moonvives/noop/releases/tag/v9.0.0).
+1. Baixe `VWAR-Loop-Life-v9.1.0-ios.ipa` na [versão 9.1 do GitHub](https://github.com/moonvives/noop/releases/tag/v9.1.0).
 2. Abra o arquivo `.ipa` no AltStore ou SideStore.
 3. Assine com o seu Apple ID e conclua a instalação no iPhone.
 4. Se o iOS solicitar, autorize o perfil em Ajustes > Geral > VPN e Gerenciamento de Dispositivo.
@@ -46,7 +46,18 @@ A glicose de pulso informada pelo G Band é uma estimativa não validada e perma
 recuperação, carga, sono, análise avançada e recomendações. Pressão arterial e ECG não entram por essa
 ponte. Use dispositivos médicos e orientação profissional para decisões de saúde.
 
-## O que há na versão 9.0
+## Sincronizar um Garmin
+
+Com uma compilação que preserva o HealthKit, use **Garmin Connect > Mais > Configurações > Apps
+conectados > Apple Health**, conecte as categorias desejadas e mantenha o Garmin Connect aberto ao
+sincronizar o relógio. Depois, no VWAR Loop Life, abra **Apple Health** e use **Verificar Garmin agora**.
+O estado detectado depende de amostras Garmin reais, não apenas da instalação do aplicativo.
+
+Sem HealthKit, ative a transmissão de frequência cardíaca em um relógio Garmin compatível e adicione-o
+em **Dispositivos**, ou importe o arquivo **Export Your Data** em **Fontes de dados**. Consulte o
+[guia Garmin](GARMIN_CONNECT.md) para capacidades e limites de cada rota.
+
+## O que há na versão 9.1
 
 - marca visível VWAR Loop Life em iPhone, iPad, Mac, Apple Watch e widgets;
 - dia da semana, data completa, ano e relógio atualizado por minuto;
@@ -54,4 +65,6 @@ ponte. Use dispositivos médicos e orientação profissional para decisões de s
 - análise avançada local comparada ao próprio baseline de até 28 dias;
 - painel iPad com HRV, carga, sono, matriz de vitais e cobertura dos dados;
 - integração G Band via Apple Health e coletor BLE de pesquisa somente leitura;
+- integração Garmin com origem verificada no Apple Health, frequência cardíaca Bluetooth e arquivo
+  de exportação offline;
 - armazenamento local-first, sem conta e sem assinatura obrigatória.

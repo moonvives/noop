@@ -5,7 +5,7 @@
 #
 #   Tools/release.sh <version> <asset> [<asset> ...] [-- "release notes"]
 #   e.g. Tools/release.sh 4.7.0 \
-#          dist/VWAR-Loop-Life-v9.0.0-macos.zip dist/VWAR-Loop-Life-v9.0.0-ios.ipa dist/VWAR-Loop-Life-v9.0.0.apk \
+#          dist/VWAR-Loop-Life-v9.1.0-macos.zip dist/VWAR-Loop-Life-v9.1.0-ios.ipa dist/VWAR-Loop-Life-v9.1.0.apk \
 #          -- "Bug fixes and the new Lab Book."
 #
 # GitHub is CANONICAL — the release is created there FIRST (moonvives/noop, marked
