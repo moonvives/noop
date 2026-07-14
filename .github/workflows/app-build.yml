@@ -38,6 +38,8 @@ concurrency:
 jobs:
   build:
     runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     strategy:
       fail-fast: false
       matrix:
@@ -69,6 +71,10 @@ jobs:
 
       - name: Generate Xcode project
         run: xcodegen generate
+
+      - name: Verify Portuguese iOS 26 surface
+        if: matrix.scheme == 'NOOPiOS'
+        run: python3 Tools/verify-ios-ptbr.py
 
       - name: Build ${{ matrix.scheme }}
         run: >-

@@ -5,6 +5,26 @@ with VWAR, G Band, Apple, Garmin, or WHOOP. Health data stays on the user's devi
 integration is explicitly enabled. Downloads are on the
 [Releases](https://github.com/moonvives/noop/releases) page.
 
+## 10.0.0: Centro de comando iOS/iPadOS 26
+
+Released 2026-07-13.
+
+- Raised the real iPhone and iPad deployment target to iOS/iPadOS 26.0 and pinned Apple CI to Xcode
+  26.3, so the packaged app is compiled against the matching SDK instead of merely advertising it.
+- Replaced the iPad-only advanced branch with one adaptive daily command centre for iPhone and iPad.
+- Made the weekly calendar operational: selecting a date reloads that day's heart rate, activity,
+  sleep, scores and contextual comparisons, with previous/next week navigation and a Today reset.
+- Added VWAR Intelligence, a deterministic and unit-tested personal-baseline interpreter for
+  recovery, sleep and load. It reports current value, personal median, reference coverage and
+  missingness without inventing a causal explanation.
+- Kept every deep chart interactive by touch or drag and made dense grids responsive to the iPhone
+  16 Pro Max and 12.9-inch iPad Pro layouts.
+- Adopted native Liquid Glass for the text-only navigation surface and removed the legacy iOS visual
+  fallback now that iOS 26 is the minimum.
+- Preserved verified integration boundaries for VWAR/G Band, Apple Health, Garmin, Bluetooth and
+  offline imports. Experimental ECG, blood-pressure and glucose estimates remain outside scores and
+  recommendations.
+
 ## 9.1.0: Garmin com origem verificável
 
 Released 2026-07-13.
