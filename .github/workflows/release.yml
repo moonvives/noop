@@ -187,7 +187,7 @@ jobs:
         run: |
           set -euo pipefail
           ls -lh dist
-          notes="VWAR Loop Life ${TAG}: integração Garmin com origem verificável, Bluetooth ao vivo, importação offline e pacotes prontos para assinatura."
+          notes="VWAR Loop Life ${TAG}: integração Garmin verificada para iPhone e iPad arm64, Bluetooth ao vivo, importação offline e pacotes prontos para assinatura."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" --title "VWAR Loop Life ${TAG}" --notes "$notes" --latest
