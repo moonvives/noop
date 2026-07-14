@@ -291,7 +291,7 @@ struct VITAEPerformanceDashboard: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(intelligenceHeadline)
-                        .font(StrandFont.title3)
+                        .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(intelligenceSummary)
