@@ -6,7 +6,7 @@ import SwiftUI
 private final class DesktopAppModel: ObservableObject {
     @Published var deviceSelector = ""
     @Published var duration = "600"
-    @Published var outputDirectory = NSString(string: "~/Documents/VITAE-VWAR-Capture").expandingTildeInPath
+    @Published var outputDirectory = NSString(string: "~/Documents/VWAR-Loop-Life-Capture").expandingTildeInPath
     @Published var console = "Scan nearby devices, then select the VWAR Loop Life by name or UUID."
     @Published var isRunning = false
     @Published var activity = "READY"
@@ -56,7 +56,7 @@ private final class DesktopAppModel: ObservableObject {
     private func run(arguments: [String], activity: String) {
         guard !isRunning else { return }
         guard let helper = helperURL else {
-            console = "The bundled capture helper is missing. Reinstall the complete VITAE VWAR app."
+            console = "The bundled capture helper is missing. Reinstall the complete VWAR Loop Life app."
             lastRunSucceeded = false
             return
         }
@@ -111,13 +111,13 @@ private final class DesktopAppModel: ObservableObject {
         let bundled = Bundle.main.bundleURL
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("Resources", isDirectory: true)
-            .appendingPathComponent("vitae-vwar-capture")
+            .appendingPathComponent("vwar-loop-life-capture")
         if FileManager.default.isExecutableFile(atPath: bundled.path) { return bundled }
 
-        // Supports `swift run VITAEVWARDesktop` during development when both products share .build.
+        // Supports `swift run VWARLoopLifeDesktop` during development when both products share .build.
         let sibling = URL(fileURLWithPath: CommandLine.arguments[0])
             .deletingLastPathComponent()
-            .appendingPathComponent("vitae-vwar-capture")
+            .appendingPathComponent("vwar-loop-life-capture")
         return FileManager.default.isExecutableFile(atPath: sibling.path) ? sibling : nil
     }
 }
@@ -143,11 +143,11 @@ private struct ContentView: View {
     private var header: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("VITAE ONE")
+                Text("VWAR LOOP LIFE")
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .tracking(2.2)
                     .foregroundStyle(Color.white.opacity(0.55))
-                Text("VWAR Desktop Collector")
+                Text("Protocol Collector")
                     .font(.system(size: 25, weight: .semibold, design: .rounded))
             }
             Spacer()
@@ -277,7 +277,7 @@ private struct TextButtonStyle: ButtonStyle {
 }
 
 @main
-private struct VITAEVWARDesktopApp: App {
+private struct VWARLoopLifeDesktopApp: App {
     var body: some Scene {
         WindowGroup { ContentView() }
             .windowStyle(.hiddenTitleBar)

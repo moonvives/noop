@@ -1,32 +1,32 @@
-name: 🐞 Bug report
-description: Report something in NOOP that doesn't work the way it should
+name: Bug report
+description: Report something in VWAR Loop Life that doesn't work the way it should
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        ### 💬 Just have a question, or "how do I…"?
+        ### Just have a question, or "how do I…"?
         **Stop — this form is only for confirmed bugs.** If you want help, want to know how something works, or you're not sure it's a bug, you'll get a faster answer here:
-        - **[Discussions](https://github.com/ParthJadhav/noop/discussions)** — questions, ideas, "is this normal?", feature requests.
+        - **[Discussions](https://github.com/moonvives/noop/discussions)** — questions, ideas, "is this normal?", feature requests.
         - **[Discord](https://discord.com/invite/nHK9FHczu)** — the quickest place for a quick question or setup help.
 
-        Please use those instead of opening an issue. A question filed as a bug just gets pointed back here, so you'll get sorted faster by starting in the right place. 🙏
+        Please use those instead of opening an issue. A question filed as a bug just gets pointed back here, so you'll get sorted faster by starting in the right place.
 
-        ### ⛔ Next — is this already answered?
+        ### Next — is this already answered?
         Many "bugs" are expected behaviour or a known limit. **Please check these before filing — it's the fastest way to an answer:**
-        - **[FAQ](https://github.com/ParthJadhav/noop/wiki/FAQ)** — live HR, recovery/sleep, steps, importing, privacy, updates.
-        - **[WHOOP 5.0 / MG status](https://github.com/ParthJadhav/noop/wiki/WHOOP-5.0-and-MG-Status)** — SpO₂, steps, recovery/sleep on the newer straps (the most common topic).
-        - **[Troubleshooting](https://github.com/ParthJadhav/noop/wiki/Troubleshooting)** — pairing, "syncs but no data", generic HR straps.
+        - **[FAQ](https://github.com/moonvives/noop/wiki/FAQ)** — live HR, recovery/sleep, steps, importing, privacy, updates.
+        - **[WHOOP 5.0 / MG status](https://github.com/moonvives/noop/wiki/WHOOP-5.0-and-MG-Status)** — SpO₂, steps, recovery/sleep on the newer straps (the most common topic).
+        - **[Troubleshooting](https://github.com/moonvives/noop/wiki/Troubleshooting)** — pairing, "syncs but no data", generic HR straps.
 
         ---
 
-        NOOP runs **entirely on your device** — there are no servers or accounts for us to check, so a bug is almost always diagnosed from your **strap log**. A report without one (and without an obvious repro) usually can't be investigated and may be closed asking for the log.
+        VWAR Loop Life runs **primarily on your device** — there are no project accounts or telemetry for us to check, so a bug is usually diagnosed from your **strap log**. A report without one (and without an obvious repro) may be closed asking for the log.
 
-        **Please don't strip out the fields below.** "Live HR works but no data" alone has half a dozen different causes — the version, platform, strap model and log are how we tell which one you've actually hit. A few seconds filling this in saves a day of back-and-forth. 🙏
+        **Please don't strip out the fields below.** "Live HR works but no data" alone has several different causes — the version, platform, strap model and log are how we tell which one you've actually hit.
   - type: input
     id: version
     attributes:
-      label: NOOP version
+      label: VWAR Loop Life version
       description: Settings → What's New, or the release tag (e.g. 2.0).
       placeholder: "2.0"
     validations:
@@ -141,13 +141,13 @@ body:
     attributes:
       label: Before you submit
       options:
-        - label: I attached my exported NOOP .zip (not a screenshot of the Live screen). If my bug is a clearly reproducible UI issue I described exactly how to see it instead.
+        - label: I attached my exported VWAR Loop Life .zip (not a screenshot of the Live screen). If my bug is a clearly reproducible UI issue I described exactly how to see it instead.
           required: true
         - label: I attached or pasted a strap log above — **or** my bug is a clearly reproducible UI issue that doesn't need one (e.g. a typo, a button that does nothing) and I've described exactly how to see it.
           required: true
-        - label: I checked the [Troubleshooting guide](https://github.com/ParthJadhav/noop/wiki/Troubleshooting) — especially "history syncs but no data" (most often the strap isn't banking history to flash; charge it to 100% and reconnect).
+        - label: I checked the [Troubleshooting guide](https://github.com/moonvives/noop/wiki/Troubleshooting) — especially "history syncs but no data" (most often the strap isn't banking history to flash; charge it to 100% and reconnect).
           required: true
-        - label: I checked the [FAQ](https://github.com/ParthJadhav/noop/wiki/FAQ) and — if I'm on a WHOOP 5.0 / MG — the [5.0/MG status page](https://github.com/ParthJadhav/noop/wiki/WHOOP-5.0-and-MG-Status), and this isn't an already-known limit (e.g. SpO₂, or recovery/sleep on the 5/MG).
+        - label: I checked the [FAQ](https://github.com/moonvives/noop/wiki/FAQ) and — if I'm on a WHOOP 5.0 / MG — the [5.0/MG status page](https://github.com/moonvives/noop/wiki/WHOOP-5.0-and-MG-Status), and this isn't an already-known limit (e.g. SpO₂, or recovery/sleep on the 5/MG).
           required: true
         - label: I've left out anything personal (strap serial, account email, raw export).
           required: true

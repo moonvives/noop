@@ -5,7 +5,7 @@ import StrandDesign
 import SwiftUI
 import WhoopStore
 
-/// The iPad-first daily command centre for VITAE One.
+/// The iPad-first daily command centre for VWAR Loop Life.
 ///
 /// It uses the same measured Repository rows and audited analytics as the phone UI, but gives a 12.9-inch
 /// display a denser information hierarchy: three honest scores, a scrub-able intraday HR trace, personal
@@ -36,6 +36,7 @@ struct VITAEPerformanceDashboard: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 header
+                calendarStrip
                 rangeSelector
                 scoreGrid
                 chartGrid
@@ -66,7 +67,7 @@ struct VITAEPerformanceDashboard: View {
     private var header: some View {
         HStack(alignment: .top, spacing: 24) {
             VStack(alignment: .leading, spacing: 7) {
-                Text("VITAE ONE")
+                Text("VWAR LOOP LIFE")
                     .font(StrandFont.overline)
                     .tracking(2.5)
                     .foregroundStyle(VITAELuxury.teal)
@@ -74,12 +75,26 @@ struct VITAEPerformanceDashboard: View {
                     .font(StrandFont.rounded(38, weight: .semibold))
                     .tracking(-0.8)
                     .foregroundStyle(StrandPalette.textPrimary)
-                Text(Self.longDateFormatter.string(from: Date()))
-                    .font(StrandFont.subhead)
-                    .foregroundStyle(StrandPalette.textSecondary)
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    Text(Self.longDateFormatter.string(from: context.date))
+                        .font(StrandFont.subhead)
+                        .foregroundStyle(StrandPalette.textSecondary)
+                }
             }
             Spacer(minLength: 18)
             VStack(alignment: .trailing, spacing: 10) {
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("AGORA")
+                            .font(StrandFont.overlineScaled(9))
+                            .tracking(1.1)
+                            .foregroundStyle(StrandPalette.textTertiary)
+                        Text(Self.timeFormatter.string(from: context.date))
+                            .font(StrandFont.number(22))
+                            .monospacedDigit()
+                            .foregroundStyle(StrandPalette.textPrimary)
+                    }
+                }
                 Button("VWAR DIRETO") { showVWARResearch = true }
                     .buttonStyle(VITAETextButtonStyle(active: vwar.phase.isActive))
                 HStack(spacing: 9) {
@@ -100,6 +115,35 @@ struct VITAEPerformanceDashboard: View {
             }
         }
         .accessibilityElement(children: .contain)
+    }
+
+    private var calendarStrip: some View {
+        HStack(spacing: 8) {
+            ForEach(Self.currentWeek, id: \.self) { date in
+                let today = Calendar.current.isDateInToday(date)
+                VStack(spacing: 7) {
+                    Text(Self.weekdayFormatter.string(from: date).uppercased())
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(0.7)
+                    Text(Self.dayNumberFormatter.string(from: date))
+                        .font(StrandFont.number(17))
+                        .monospacedDigit()
+                }
+                .foregroundStyle(today ? VITAELuxury.base : StrandPalette.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(today ? VITAELuxury.teal : VITAELuxury.panel)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(today ? VITAELuxury.teal : VITAELuxury.border, lineWidth: 1)
+                )
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Calendário da semana atual")
     }
 
     private var rangeSelector: some View {
@@ -470,7 +514,7 @@ struct VITAEPerformanceDashboard: View {
                 .font(StrandFont.overline)
                 .tracking(1.6)
                 .foregroundStyle(StrandPalette.textTertiary)
-            Text("VITAE calcula HRV por RMSSD após filtragem de intervalos inválidos e ectópicos. A carga usa TRIMP e transformação logarítmica. A recuperação compara seus próprios baselines, não uma tabela genérica. Toda pontuação exige dados mínimos; quando faltam sinais, o app mostra ausência em vez de inventar um resultado.")
+            Text("VWAR Loop Life calcula HRV por RMSSD após filtragem de intervalos inválidos e ectópicos. A carga usa TRIMP e transformação logarítmica. A recuperação compara seus próprios baselines, não uma tabela genérica. Toda pontuação exige dados mínimos; quando faltam sinais, o app mostra ausência em vez de inventar um resultado.")
                 .font(StrandFont.body)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -736,7 +780,30 @@ struct VITAEPerformanceDashboard: View {
     private static let longDateFormatter: DateFormatter = {
         let value = DateFormatter()
         value.locale = Locale(identifier: "pt_BR")
-        value.dateFormat = "EEEE, d 'de' MMMM"
+        value.dateFormat = "EEEE, d 'de' MMMM 'de' yyyy"
+        return value
+    }()
+
+    private static var currentWeek: [Date] {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "pt_BR")
+        calendar.firstWeekday = 2
+        let start = calendar.dateInterval(of: .weekOfYear, for: Date())?.start
+            ?? calendar.startOfDay(for: Date())
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+    }
+
+    private static let weekdayFormatter: DateFormatter = {
+        let value = DateFormatter()
+        value.locale = Locale(identifier: "pt_BR")
+        value.dateFormat = "EEEEE"
+        return value
+    }()
+
+    private static let dayNumberFormatter: DateFormatter = {
+        let value = DateFormatter()
+        value.locale = Locale(identifier: "pt_BR")
+        value.dateFormat = "d"
         return value
     }()
 
@@ -822,7 +889,7 @@ private struct VWARResearchView: View {
                 .font(StrandFont.overlineScaled(9))
                 .tracking(1.2)
                 .foregroundStyle(VITAELuxury.amber)
-            Text("O VITAE somente lê características anunciadas e assina notificações. Ele não envia comandos proprietários, não altera firmware e não atribui significado médico a bytes desconhecidos.")
+            Text("O VWAR Loop Life somente lê características anunciadas e assina notificações. Ele não envia comandos proprietários, não altera firmware e não atribui significado médico a bytes desconhecidos.")
                 .font(StrandFont.subhead)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1173,7 +1240,7 @@ private struct SleepCompositionBar: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            Text("A fonte informou totais por estágio, sem linha temporal. O VITAE não inventa a ordem dos ciclos.")
+            Text("A fonte informou totais por estágio, sem linha temporal. O VWAR Loop Life não inventa a ordem dos ciclos.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textTertiary)
         }

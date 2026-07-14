@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090b0b">
+  <meta name="description" content="VWAR Loop Life: inteligência local-first para recuperação, carga e sono.">
+  <title>VWAR Loop Life</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --base: #090b0b;
+      --panel: #111414;
+      --raised: #171b1a;
+      --line: rgba(255,255,255,.11);
+      --muted: #969e9a;
+      --text: #f3f6f4;
+      --signal: #b9ff39;
+      --cyan: #72e8d1;
+      --rose: #ff7e93;
+      --max: 1180px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 78% 4%, rgba(114,232,209,.09), transparent 28rem),
+        radial-gradient(circle at 9% 28%, rgba(185,255,57,.06), transparent 24rem),
+        var(--base);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .shell { width: min(calc(100% - 36px), var(--max)); margin: 0 auto; }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 78px; border-bottom: 1px solid var(--line);
+    }
+    .brand { font-size: 12px; font-weight: 750; letter-spacing: .2em; }
+    .nav-links { display: flex; align-items: center; gap: 24px; color: var(--muted); font-size: 13px; }
+    .nav-links a:hover { color: var(--text); }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 46px; padding: 0 20px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--raised);
+      color: var(--text); font-size: 12px; font-weight: 750; letter-spacing: .08em;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.24); }
+    .button.primary { background: var(--signal); color: #10150a; border-color: var(--signal); }
+    .hero {
+      min-height: 710px; display: grid; grid-template-columns: 1.08fr .92fr;
+      align-items: center; gap: 70px; padding: 76px 0 92px;
+    }
+    .eyebrow { color: var(--signal); font-size: 11px; font-weight: 800; letter-spacing: .2em; }
+    h1 { margin: 18px 0 22px; max-width: 790px; font-size: clamp(52px, 8vw, 104px); line-height: .91; letter-spacing: -.065em; }
+    .lead { max-width: 650px; color: #b2b9b5; font-size: clamp(18px, 2vw, 22px); line-height: 1.55; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+    .status { margin-top: 24px; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+    .dashboard {
+      position: relative; padding: 20px; border: 1px solid var(--line); border-radius: 30px;
+      background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.018));
+      box-shadow: 0 38px 100px rgba(0,0,0,.42);
+    }
+    .dashboard::before {
+      content: ""; position: absolute; inset: -1px; pointer-events: none; border-radius: inherit;
+      background: linear-gradient(125deg, rgba(185,255,57,.28), transparent 27%, transparent 72%, rgba(114,232,209,.18));
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; padding: 1px;
+    }
+    .dash-top { display: flex; justify-content: space-between; align-items: flex-start; padding: 4px 3px 18px; }
+    .date { font-size: 20px; font-weight: 650; letter-spacing: -.02em; text-transform: capitalize; }
+    .year { margin-top: 4px; color: var(--muted); font-size: 12px; letter-spacing: .08em; }
+    .time { font-variant-numeric: tabular-nums; font-size: 31px; font-weight: 650; letter-spacing: -.04em; }
+    .calendar { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+    .day {
+      min-height: 58px; border: 1px solid var(--line); border-radius: 13px; padding: 8px 5px;
+      display: grid; place-items: center; gap: 3px; color: var(--muted); background: rgba(255,255,255,.018);
+    }
+    .day small { font-size: 9px; font-weight: 750; letter-spacing: .09em; }
+    .day strong { font-size: 15px; font-variant-numeric: tabular-nums; }
+    .day.current { background: var(--signal); border-color: var(--signal); color: #11160b; }
+    .scores { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 12px; }
+    .score { min-height: 124px; padding: 15px; border-radius: 18px; border: 1px solid var(--line); background: var(--panel); }
+    .score span { display: block; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .13em; }
+    .score strong { display: block; margin-top: 22px; font-size: 31px; font-variant-numeric: tabular-nums; }
+    .score i { display: block; height: 3px; margin-top: 14px; border-radius: 99px; background: var(--signal); opacity: .8; }
+    .score:nth-child(2) i { background: var(--rose); }
+    .score:nth-child(3) i { background: var(--cyan); }
+    section { padding: 102px 0; border-top: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; align-items: start; margin-bottom: 48px; }
+    h2 { margin: 0; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -.05em; }
+    .section-copy { margin: 0; color: #a9b0ac; font-size: 18px; line-height: 1.65; }
+    .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .card { min-height: 230px; padding: 25px; border: 1px solid var(--line); border-radius: 22px; background: rgba(255,255,255,.025); }
+    .card .index { color: var(--signal); font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+    .card h3 { margin: 54px 0 12px; font-size: 24px; letter-spacing: -.035em; }
+    .card p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .method { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .method .card { min-height: 270px; }
+    .signal-line { height: 1px; margin: 34px 0; background: linear-gradient(90deg, var(--signal), transparent); }
+    .download { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 38px; border-radius: 26px; background: var(--signal); color: #11160b; }
+    .download h2 { max-width: 660px; }
+    .download .button { color: var(--text); background: #10130f; border-color: #10130f; flex: 0 0 auto; }
+    footer { padding: 52px 0 70px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .footer-row { display: flex; justify-content: space-between; gap: 30px; border-top: 1px solid var(--line); padding-top: 28px; }
+    @media (max-width: 900px) {
+      .nav-links a:not(.button) { display: none; }
+      .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 70px; }
+      .dashboard { max-width: 590px; }
+      .section-head, .method { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 190px; }
+      .download { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 540px) {
+      .shell { width: min(calc(100% - 24px), var(--max)); }
+      .nav { height: 68px; }
+      .nav-links { gap: 0; }
+      .hero { gap: 46px; padding-bottom: 72px; }
+      .dashboard { padding: 13px; border-radius: 23px; }
+      .scores { gap: 5px; }
+      .score { min-height: 110px; padding: 12px 9px; }
+      .score strong { font-size: 25px; }
+      .day { min-height: 52px; }
+      section { padding: 76px 0; }
+      .download { padding: 28px; }
+      .footer-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell nav">
+    <a class="brand" href="#top">VWAR LOOP LIFE</a>
+    <nav class="nav-links" aria-label="Navegação principal">
+      <a href="#experience">Experiência</a>
+      <a href="#method">Método</a>
+      <a href="VWAR_LOOP_LIFE_INSTALL.md" class="button">INSTALAR</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
+      <div>
+        <div class="eyebrow">INTELIGÊNCIA LOCAL-FIRST</div>
+        <h1>Seu dia em contexto.</h1>
+        <p class="lead">Recuperação, carga, sono e vitais da VWAR Loop Life em uma leitura diária precisa, discreta e construída sobre o seu próprio baseline.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa">BAIXAR IPA</a>
+          <a class="button" href="https://github.com/moonvives/noop">ABRIR GITHUB</a>
+        </div>
+        <div class="status">VERSÃO 9.0.0 · IPHONE · IPAD · MAC · APPLE WATCH</div>
+      </div>
+
+      <div class="dashboard" aria-label="Prévia do painel diário">
+        <div class="dash-top">
+          <div>
+            <div class="date" id="date">Hoje</div>
+            <div class="year" id="year">CALENDÁRIO</div>
+          </div>
+          <div class="time" id="clock">00:00</div>
+        </div>
+        <div class="calendar" id="calendar"></div>
+        <div class="scores">
+          <div class="score"><span>RECUPERAÇÃO</span><strong>82</strong><i></i></div>
+          <div class="score"><span>CARGA</span><strong>46</strong><i></i></div>
+          <div class="score"><span>SONO</span><strong>91</strong><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="experience">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Feito para usar todos os dias.</h2>
+          <p class="section-copy">Informação essencial primeiro, profundidade quando você quiser. Sem distrações, sem pontuação inventada e sem esconder de onde cada leitura veio.</p>
+        </div>
+        <div class="grid">
+          <article class="card"><div class="index">01 · TEMPO</div><h3>Calendário vivo</h3><p>Dia da semana, data, ano, hora e minuto, com navegação semanal e mês completo dentro do app.</p></article>
+          <article class="card"><div class="index">02 · CONTEXTO</div><h3>Baseline pessoal</h3><p>HRV, frequência de repouso e sono comparados a até 28 dias do seu próprio histórico.</p></article>
+          <article class="card"><div class="index">03 · CONFIANÇA</div><h3>Ausência honesta</h3><p>O app mostra quando está calibrando e mantém em branco o que os sensores não sustentam.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="method">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Análise avançada, limites claros.</h2>
+          <p class="section-copy">O cálculo permanece no dispositivo. Leituras experimentais de glicose, pressão e ECG não entram nos scores nem em recomendações.</p>
+        </div>
+        <div class="method">
+          <article class="card"><div class="index">SINAIS</div><div class="signal-line"></div><h3>Recuperação e carga</h3><p>HRV filtrada, frequência de repouso, sono e tendências pessoais alimentam uma leitura de bem-estar, não um diagnóstico.</p></article>
+          <article class="card"><div class="index">PRIVACIDADE</div><div class="signal-line"></div><h3>Seus dados, no seu dispositivo</h3><p>Sem conta obrigatória. O Coach opcional exige chave própria e consentimento antes de enviar um resumo compacto.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell download">
+        <h2>Instale a versão pronta para assinar.</h2>
+        <a class="button" href="https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa">ABRIR DOWNLOAD</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <div class="footer-row">
+      <div>VWAR LOOP LIFE · PROJETO INDEPENDENTE</div>
+      <div>Bem-estar e desempenho. Não substitui equipamento ou orientação médica.</div>
+    </div>
+  </footer>
+
+  <script>
+    const locale = 'pt-BR';
+    const weekdays = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+    function updateTime() {
+      const now = new Date();
+      document.querySelector('#clock').textContent = now.toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit'});
+      document.querySelector('#date').textContent = now.toLocaleDateString(locale,{weekday:'long',day:'numeric',month:'long'});
+      document.querySelector('#year').textContent = now.toLocaleDateString(locale,{year:'numeric'});
+    }
+    function renderWeek() {
+      const now = new Date();
+      const mondayOffset = (now.getDay() + 6) % 7;
+      const monday = new Date(now); monday.setDate(now.getDate() - mondayOffset);
+      const root = document.querySelector('#calendar'); root.replaceChildren();
+      for (let i=0;i<7;i++) {
+        const date = new Date(monday); date.setDate(monday.getDate()+i);
+        const cell = document.createElement('div');
+        cell.className = 'day' + (date.toDateString() === now.toDateString() ? ' current' : '');
+        cell.innerHTML = `<small>${weekdays[date.getDay()]}</small><strong>${date.getDate()}</strong>`;
+        root.appendChild(cell);
+      }
+    }
+    updateTime(); renderWeek(); setInterval(updateTime, 30000);
+  </script>
+</body>
+</html>

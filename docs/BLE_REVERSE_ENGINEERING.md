@@ -1,11 +1,11 @@
 # BLE Reverse Engineering
 
-How NOOP talks to a WHOOP strap directly over Bluetooth Low Energy — no WHOOP cloud and no account.
+How VWAR Loop Life talks to a WHOOP strap directly over Bluetooth Low Energy — no WHOOP cloud and no account.
 This document explains how the strap's private GATT protocol was understood, how the
 frame format and checksums work, how WHOOP 4.0 ("Harvard") and WHOOP 5.0 ("puffin") differ, what each
 data stream contains, and how to extend the decoder for new packet types or sensors.
 
-> **Interoperability, not impersonation.** NOOP is a companion app for a strap *you own*. It reads the
+> **Interoperability, not impersonation.** VWAR Loop Life is a companion app for a strap *you own*. It reads the
 > data *your* device already records and stores it locally on *your* machine. Nothing here replicates,
 > circumvents, or interoperates with WHOOP's servers.
 >
@@ -82,7 +82,7 @@ Standard Battery     180F / 2A19   → battery percent
 
 The two standard services (`180D` heart rate, `180F` battery) are a useful sanity check: the standard
 `2A37` Heart Rate Measurement characteristic streams HR and R-R intervals at ~1 Hz **without bonding**,
-which made it the reliable baseline while the custom channels were being mapped. NOOP still treats
+which made it the reliable baseline while the custom channels were being mapped. VWAR Loop Life still treats
 `2A37` as the *reliable* HR/R-R source and lets the custom streams supply everything else (see
 `parseStandardHR` in `BLEManager.swift`).
 
@@ -90,7 +90,7 @@ which made it the reliable baseline while the custom channels were being mapped.
 
 The custom notify characteristics (`…0003/0004/0005`) stay silent until the link is bonded. The key
 discovery is that **one "with-response" (confirmed) write is enough** to trigger iOS/macOS just-works
-bonding — there is no PIN, no pairing UI. NOOP performs this with a benign `GET_BATTERY_LEVEL`
+bonding — there is no PIN, no pairing UI. VWAR Loop Life performs this with a benign `GET_BATTERY_LEVEL`
 (`didDiscoverCharacteristicsFor` in `BLEManager.swift`):
 
 ```swift
@@ -108,7 +108,7 @@ stop serving historical data.
 
 ### The connect handshake
 
-Once bonded, NOOP runs a WHOOP-faithful lifecycle exactly once
+Once bonded, VWAR Loop Life runs a WHOOP-faithful lifecycle exactly once
 (`didWriteValueFor` → handshake block):
 
 1. `GET_HELLO_HARVARD` (35) + `GET_ADVERTISING_NAME_HARVARD` (76) — greet the strap.
@@ -224,7 +224,7 @@ Bluetooth menu; for interoperability with a strap **you own**, an OS-level just-
 nonetheless sufficient — no app-side step is required. (The strap holds one central at a time, so the
 phone must be disconnected first; the firmware logs a `BLE Bond failure` for a contended attempt.)
 
-**How NOOP's Apple app (macOS/iOS) triggers it (v1.5):** it writes `CLIENT_HELLO` to `fd4b0002` *with response*.
+**How VWAR Loop Life's Apple app (macOS/iOS) triggers it (v1.5):** it writes `CLIENT_HELLO` to `fd4b0002` *with response*.
 That single confirmed write makes CoreBluetooth bring up the just-works bond *before* the puffin notify
 subscriptions are attempted — without it those subscriptions are rejected with *"Authentication is
 insufficient"* and the handshake hangs at "Finishing the secure pairing handshake…" forever (issue #17).
@@ -289,7 +289,7 @@ The IMU variant is well-characterised and on-device-verified:
 - Roughly 36% of the frame (a header gap and a tail from offset 1292) is **still unmapped** and kept
   raw — an honest gap, not an invented field.
 
-### Why NOOP disables it on connect
+### Why VWAR Loop Life disables it on connect
 
 The type-43 flood is expensive on two axes the strap can't spare:
 
@@ -307,7 +307,7 @@ send(.sendR10R11Realtime, payload: [0x00])   // stop the type-43 realtime flood 
 
 Because the flood can resume, the backfill idle-watchdog deliberately ignores type-43/40 frames and
 only re-arms on genuine offload frames (`BLEManager.isOffloadFrame` → types 47/48/49/50). With the raw
-stream off, NOOP's primary metric source becomes the **historical offload** (next section).
+stream off, VWAR Loop Life's primary metric source becomes the **historical offload** (next section).
 
 ### On-demand raw capture
 
@@ -369,7 +369,7 @@ as-is (`unit: "raw_adc"`) — SpO₂ %, skin temperature in °C, and respiratory
 ### Safe offload + trim
 
 The strap streams `HISTORY_START → type-47 records → METADATA (HISTORY_END) → … → HISTORY_COMPLETE`.
-Each `METADATA` chunk carries a **`trim_cursor`** (u32 at frame offset 17). NOOP persists the decoded +
+Each `METADATA` chunk carries a **`trim_cursor`** (u32 at frame offset 17). VWAR Loop Life persists the decoded +
 raw rows first, then sends `HISTORICAL_DATA_RESULT` (23) as a confirmed write echoing the chunk's
 `end_data` — only then may the strap forget that chunk. This makes the offload resumable: the durable
 `strap_trim` cursor means the next session resumes exactly where the last one stopped.
@@ -656,13 +656,13 @@ with `RUN_HAPTICS_PATTERN` (command **79**):
 RUN_HAPTICS_PATTERN payload = [patternId, numLoops, 0, 0, 0]   // 5 bytes
 ```
 
-NOOP uses **`patternId = 2`** — the characteristic graduated "alarm" buzz, observed as the one the
+VWAR Loop Life uses **`patternId = 2`** — the characteristic graduated "alarm" buzz, observed as the one the
 official app fires, for interoperability (`buzzStrapOnce`, `AppModel.buzz`). `numLoops` sets the
-length; `STOP_HAPTICS` (122) cancels an in-progress pattern. All notification patterns in NOOP map to
+length; `STOP_HAPTICS` (122) cancels an in-progress pattern. All notification patterns in VWAR Loop Life map to
 this confirmed preset and vary only the repeat count, so behaviour is predictable on real hardware.
 
 Haptics tie into the firmware **alarm**: `SET_ALARM_TIME` (66) arms a UTC alarm that buzzes even if
-NOOP is closed (event `STRAP_DRIVEN_ALARM_EXECUTED`=57); always `SET_CLOCK` first so the RTC is
+VWAR Loop Life is closed (event `STRAP_DRIVEN_ALARM_EXECUTED`=57); always `SET_CLOCK` first so the RTC is
 UTC-correct.
 
 ### WHOOP 5 / MG haptic — the "maverick" opcode (hardware-verified)
@@ -674,7 +674,7 @@ sends, matched byte-for-byte (#48), and shipped in `BLEManager.send()`:
 
 ```text
 puffin cmd 0x13, body = [0x01, effects…, loopControl u16 LE, overallLoop]
-NOOP's "notify" preset → effects 47, 152  →  body = [01 2F 98 00 00 00 00 00 00 00 00 00]  (12 bytes)
+VWAR Loop Life's "notify" preset → effects 47, 152  →  body = [01 2F 98 00 00 00 00 00 00 00 00 00]  (12 bytes)
 ```
 
 The 12-byte body makes the inner record 15 bytes, so the puffin framing **pads it to a 4-byte
@@ -719,7 +719,7 @@ read-only `whoop_probe.py` — see the linux-capture README.
 ## 7. Sensor inventory
 
 Combining the type-47 DSP record (§5), the type-43 raw streams (§4), and the `EventNumber` enum, the
-WHOOP 4.0 strap exposes the following sensors and actuators. NOOP only consumes what the device already
+WHOOP 4.0 strap exposes the following sensors and actuators. VWAR Loop Life only consumes what the device already
 measures:
 
 | Sensor / actuator | How it surfaces in the protocol |
@@ -733,7 +733,7 @@ measures:
 | **Haptic motor** | `RUN_HAPTICS_PATTERN` / `STOP_HAPTICS`; events `HAPTICS_FIRED` (60), `HAPTICS_TERMINATED` (100). |
 | **Battery / charge** | standard `2A19`; type-48 `BATTERY_LEVEL` (SoC/mV/charging ~every 8 min); events `CHARGING_ON/OFF`. |
 
-**Sensors the strap does NOT have** (and that NOOP therefore never fabricates): **no microphone, no
+**Sensors the strap does NOT have** (and that VWAR Loop Life therefore never fabricates): **no microphone, no
 speaker, no GPS, no display.** All feedback to the wearer is via the single haptic motor; all
 "location" or "audio" context, if any, comes from imported data, never the strap.
 
@@ -787,7 +787,7 @@ the command set, keep it reversible and non-destructive.
 
 ## Summary
 
-NOOP interoperates with a WHOOP strap you own by: scanning for its hidden custom GATT service,
+VWAR Loop Life interoperates with a WHOOP strap you own by: scanning for its hidden custom GATT service,
 triggering just-works bonding with a single confirmed `GET_BATTERY_LEVEL` write, reassembling the
 `0xAA` CRC-framed messages, and decoding them with a data-driven schema. The expensive type-43 raw
 flood is switched off on connect (`SEND_R10_R11_REALTIME [0x00]`), leaving the periodically-offloaded

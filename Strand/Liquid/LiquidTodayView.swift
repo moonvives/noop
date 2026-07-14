@@ -1,5 +1,5 @@
 //  LiquidTodayView.swift
-//  VITAE One · text-led daily dashboard.
+//  VWAR Loop Life · text-led daily dashboard.
 //
 //  This is the FULL Today, re-created faithfully from the locked mockup
 //  (scratchpad/liquid-metal-home.html): sky title + record/add/battery controls,
@@ -32,7 +32,7 @@ struct LiquidTodayView: View {
     @State private var hrValues: [Double] = []     // hrBuckets since midnight → 5-min means
     @State private var workouts: [WorkoutRow] = [] // newest-first
     // G Band writes these through Apple Health. They are displayed with explicit source provenance;
-    // none of the unvalidated estimates are allowed into VITAE scores.
+    // none of the unvalidated estimates are allowed into VWAR Loop Life scores.
     @State private var vwarRestingHr: Double?
     @State private var vwarHrv: Double?
     @State private var vwarSpo2: Double?
@@ -123,11 +123,11 @@ struct LiquidTodayView: View {
     /// The big header title: Today / Yesterday / weekday for older days.
     private var dayTitle: String {
         switch selectedDayOffset {
-        case 0: return "Today"
-        case 1: return "Yesterday"
+        case 0: return "Hoje"
+        case 1: return "Ontem"
         default:
-            let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "EEEE"
-            return f.string(from: selectedLogicalDay)
+            let f = DateFormatter(); f.locale = Locale(identifier: "pt_BR"); f.dateFormat = "EEEE"
+            return f.string(from: selectedLogicalDay).capitalized(with: f.locale)
         }
     }
     /// Two-way binding for the graphical calendar: reads the shown day, writes back an offset.
@@ -199,6 +199,7 @@ struct LiquidTodayView: View {
                     heartRateSection
                     yourCardsSection
                     synthesisSection
+                    advancedAnalysisSection
                     recoveryVitalsSection
                     keyMetricsSection
                     lastWorkoutsSection
@@ -353,16 +354,129 @@ struct LiquidTodayView: View {
                     .accessibilityLabel("Profile and settings")
                 }
             }
-            Text("VITAE ONE")
+            Text("VWAR LOOP LIFE")
                 .font(StrandFont.overlineScaled(10))
                 .tracking(2.2)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 28)
-            heroCard.padding(.top, 18)
+            premiumCalendarCard.padding(.top, 18)
+            heroCard.padding(.top, 12)
             if liveSessionsBeta {
                 liveSessionStartRow.padding(.top, 10)
             }
+        }
+    }
+
+    /// A persistent, text-only calendar. It keeps the current week visible, exposes the full month,
+    /// and refreshes the clock exactly once a minute without waking the health-data pipeline.
+    private var premiumCalendarCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("CALENDÁRIO")
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(1.5)
+                        .foregroundStyle(StrandPalette.textTertiary)
+                    Text(monthYearLine)
+                        .font(StrandFont.rounded(17, weight: .semibold))
+                        .foregroundStyle(StrandPalette.textPrimary)
+                }
+                Spacer(minLength: 10)
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("AGORA")
+                            .font(StrandFont.overlineScaled(8))
+                            .tracking(1.2)
+                            .foregroundStyle(StrandPalette.textTertiary)
+                        Text(Self.clockFormatter.string(from: context.date))
+                            .font(StrandFont.number(18))
+                            .monospacedDigit()
+                            .foregroundStyle(StrandPalette.textPrimary)
+                    }
+                }
+            }
+
+            HStack(spacing: 5) {
+                ForEach(weekDates, id: \.self) { date in
+                    let selected = displayCalendar.isDate(date, inSameDayAs: selectedLogicalDay)
+                    let future = displayCalendar.compare(
+                        date,
+                        to: Repository.logicalDay(Date()),
+                        toGranularity: .day
+                    ) == .orderedDescending
+                    Button { selectCalendarDate(date) } label: {
+                        VStack(spacing: 6) {
+                            Text(Self.weekdayFormatter.string(from: date).uppercased())
+                                .font(StrandFont.overlineScaled(8))
+                                .tracking(0.5)
+                            Text(Self.dayNumberFormatter.string(from: date))
+                                .font(StrandFont.number(15))
+                                .monospacedDigit()
+                        }
+                        .foregroundStyle(selected ? StrandPalette.surfaceBase : StrandPalette.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                .fill(selected ? StrandPalette.accent : Color.white.opacity(0.035))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                .strokeBorder(selected ? StrandPalette.accent : StrandPalette.hairline, lineWidth: 1)
+                        )
+                        .opacity(future ? 0.28 : 1)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(future)
+                    .accessibilityLabel(Self.accessibleDateFormatter.string(from: date))
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                }
+            }
+
+            Button { showDayPicker = true } label: {
+                Text("ABRIR MÊS COMPLETO")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.15)
+                    .foregroundStyle(StrandPalette.accent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 3)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(15)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(heroFill)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(.white.opacity(0.11), lineWidth: 1)
+                )
+        )
+    }
+
+    private var displayCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "pt_BR")
+        calendar.firstWeekday = 2
+        return calendar
+    }
+
+    private var weekDates: [Date] {
+        let start = displayCalendar.dateInterval(of: .weekOfYear, for: selectedLogicalDay)?.start
+            ?? displayCalendar.startOfDay(for: selectedLogicalDay)
+        return (0..<7).compactMap { displayCalendar.date(byAdding: .day, value: $0, to: start) }
+    }
+
+    private var monthYearLine: String {
+        Self.monthYearFormatter.string(from: selectedLogicalDay).uppercased()
+    }
+
+    private func selectCalendarDate(_ date: Date) {
+        let anchor = Repository.logicalDay(Date())
+        guard displayCalendar.compare(date, to: anchor, toGranularity: .day) != .orderedDescending else { return }
+        withAnimation(StrandMotion.interactive) {
+            selectedDayOffset = Self.pickedDayOffset(pickedDate: date, anchorLogicalDay: anchor)
         }
     }
 
@@ -656,6 +770,96 @@ struct LiquidTodayView: View {
         }
     }
 
+    // MARK: - Advanced on-device analysis
+
+    /// A factual, baseline-relative layer for daily use. It never consumes G Band's unvalidated
+    /// glucose, ECG, or blood-pressure estimates and never sends a reading to a network service.
+    private var advancedAnalysisSection: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("ANÁLISE AVANÇADA")
+                        .font(StrandFont.overline)
+                        .tracking(1.6)
+                        .foregroundStyle(StrandPalette.textSecondary)
+                    Spacer(minLength: 8)
+                    Text(analysisConfidence)
+                        .font(StrandFont.overlineScaled(8.5))
+                        .tracking(1.0)
+                        .foregroundStyle(StrandPalette.textTertiary)
+                }
+
+                Text(advancedAnalysisSummary)
+                    .font(StrandFont.body)
+                    .foregroundStyle(StrandPalette.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                VStack(spacing: 0) {
+                    analysisRow(
+                        "HRV",
+                        value: comparisonText(current: analysisHrv, baseline: hrvBaseline, unit: "ms"),
+                        detail: baselineDetail(current: analysisHrv, baseline: hrvBaseline, lowerIsBetter: false)
+                    )
+                    analysisRow(
+                        "FC EM REPOUSO",
+                        value: comparisonText(current: analysisRhr, baseline: rhrBaseline, unit: "bpm"),
+                        detail: baselineDetail(current: analysisRhr, baseline: rhrBaseline, lowerIsBetter: true)
+                    )
+                    analysisRow(
+                        "SONO",
+                        value: sleepComparisonText,
+                        detail: baselineDetail(
+                            current: displayDay?.totalSleepMin,
+                            baseline: sleepBaseline,
+                            lowerIsBetter: false
+                        )
+                    )
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.white.opacity(0.025))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(StrandPalette.hairline, lineWidth: 1)
+                )
+
+                Text("Comparação com até 28 dias do seu próprio histórico. Bem-estar e desempenho, não diagnóstico médico.")
+                    .font(StrandFont.caption)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func analysisRow(_ label: String, value: String, detail: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(label)
+                    .font(StrandFont.overlineScaled(8.5))
+                    .tracking(1.0)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                Text(detail)
+                    .font(StrandFont.caption)
+                    .foregroundStyle(StrandPalette.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            Spacer(minLength: 8)
+            Text(value)
+                .font(StrandFont.number(14))
+                .foregroundStyle(StrandPalette.textPrimary)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(StrandPalette.hairline).frame(height: 1).padding(.leading, 12)
+        }
+    }
+
     // MARK: - Recovery vitals
 
     private var recoveryVitalsSection: some View {
@@ -937,6 +1141,74 @@ struct LiquidTodayView: View {
         }
     }
 
+    private var analysisBaselineDays: [DailyMetric] {
+        Array(repo.days.filter { $0.day < selectedDayKey }.suffix(28))
+    }
+
+    private var analysisHrv: Double? { displayDay?.avgHrv ?? vitalsDay?.avgHrv }
+    private var analysisRhr: Double? { (displayDay?.restingHr ?? vitalsDay?.restingHr).map(Double.init) }
+    private var hrvBaseline: Double? { average(analysisBaselineDays.compactMap(\.avgHrv)) }
+    private var rhrBaseline: Double? {
+        average(analysisBaselineDays.compactMap { $0.restingHr.map(Double.init) })
+    }
+    private var sleepBaseline: Double? { average(analysisBaselineDays.compactMap(\.totalSleepMin)) }
+
+    private var analysisConfidence: String {
+        let samples = analysisBaselineDays.filter {
+            $0.avgHrv != nil || $0.restingHr != nil || $0.totalSleepMin != nil
+        }.count
+        if samples >= 21 { return "CONFIANÇA ALTA" }
+        if samples >= 7 { return "EM CONSTRUÇÃO" }
+        return "CALIBRANDO"
+    }
+
+    private var advancedAnalysisSummary: String {
+        switch readiness.level {
+        case .primed:
+            return "Seus sinais pessoais favorecem capacidade hoje. Aumente a carga somente se o corpo e a técnica confirmarem essa leitura."
+        case .balanced:
+            return "Os sinais estão próximos do seu padrão. Priorize consistência e qualidade antes de ampliar volume ou intensidade."
+        case .strained:
+            return "Há sinais de recuperação abaixo do seu padrão. Reduza intensidade e observe sono, HRV e frequência de repouso em conjunto."
+        case .rundown:
+            return "Múltiplos sinais estão desfavoráveis ao mesmo tempo. Trate hoje como recuperação e acompanhe a tendência, não um número isolado."
+        case .insufficient:
+            return "Ainda faltam noites suficientes para uma leitura individual confiável. O app preserva a ausência em vez de inventar uma conclusão."
+        }
+    }
+
+    private var sleepComparisonText: String {
+        guard let current = displayDay?.totalSleepMin else { return "–" }
+        let total = Int(current.rounded())
+        guard let baseline = sleepBaseline, baseline > 0 else { return "\(total / 60)h \(total % 60)m" }
+        let delta = ((current - baseline) / baseline) * 100
+        return "\(total / 60)h \(total % 60)m · \(signedPercent(delta))"
+    }
+
+    private func comparisonText(current: Double?, baseline: Double?, unit: String) -> String {
+        guard let current else { return "–" }
+        let measured = "\(Int(current.rounded())) \(unit)"
+        guard let baseline, baseline > 0 else { return measured }
+        return measured + " · " + signedPercent(((current - baseline) / baseline) * 100)
+    }
+
+    private func baselineDetail(current: Double?, baseline: Double?, lowerIsBetter: Bool) -> String {
+        guard let current, let baseline, baseline > 0 else { return "Aguardando baseline pessoal" }
+        let delta = ((current - baseline) / baseline) * 100
+        if abs(delta) < 2 { return "Próximo do seu baseline" }
+        let favorable = lowerIsBetter ? delta < 0 : delta > 0
+        return favorable ? "Favorável versus seu padrão" : "Abaixo do padrão pessoal"
+    }
+
+    private func average(_ values: [Double]) -> Double? {
+        guard !values.isEmpty else { return nil }
+        return values.reduce(0, +) / Double(values.count)
+    }
+
+    private func signedPercent(_ value: Double) -> String {
+        String(format: "%+.0f%%", value)
+    }
+
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
         return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"
@@ -1003,11 +1275,50 @@ struct LiquidTodayView: View {
     }
 
     private var dateLine: String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "EEEE, d MMMM"
-        return f.string(from: selectedLogicalDay)
+        Self.fullDateFormatter.string(from: selectedLogicalDay)
     }
+
+    private static let clockFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+
+    private static let fullDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "EEEE, d 'de' MMMM 'de' yyyy"
+        return formatter
+    }()
+
+    private static let monthYearFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter
+    }()
+
+    private static let weekdayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "EEEEE"
+        return formatter
+    }()
+
+    private static let dayNumberFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "d"
+        return formatter
+    }()
+
+    private static let accessibleDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateStyle = .full
+        return formatter
+    }()
 
     /// Provenance caption for the recovery-vitals card, keyed on the row a vital actually came from — NOT a
     /// hardcoded "yesterday". If ANY shown vital fell back to `vitalsDay` (today's own value is nil and the
@@ -1032,9 +1343,9 @@ private struct PullOffsetKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
-// MARK: - NOOP wordmark (centred, with a tap easter egg)
+// MARK: - VWAR Loop Life wordmark (centred, with a tap easter egg)
 
-/// The subtle NOOP wordmark. Built as a row of letters (not `Text(...).tracking()`, which adds a
+/// The subtle VWAR Loop Life wordmark. Built as a row of letters (not `Text(...).tracking()`, which adds a
 /// trailing gap after the last glyph and pushes the word off-centre), so it sits DEAD centre. Tap it
 /// for a little easter egg: it plays one of several random one-shot animations — wiggle, shake, flip,
 /// spin, bounce, or a jelly squash — with a light haptic.
@@ -1048,7 +1359,7 @@ private struct LiquidWordmark: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            ForEach(Array("NOOP".enumerated()), id: \.offset) { _, ch in
+            ForEach(Array("VWAR Loop Life".enumerated()), id: \.offset) { _, ch in
                 Text(String(ch))
                     .font(StrandFont.rounded(16, weight: .bold))
                     .foregroundStyle(.white.opacity(0.5))

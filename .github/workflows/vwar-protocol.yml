@@ -1,4 +1,4 @@
-name: VWAR protocol
+name: VWAR Loop Life protocol validation
 
 on:
   pull_request:

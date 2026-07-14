@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Pins the offline file-import of a user's OWN Oura / Fitbit / Garmin data export onto NOOP's daily
+ * Pins the offline file-import of a user's OWN Oura / Fitbit / Garmin data export onto VWAR Loop Life's daily
  * metrics + sleep sessions. Kotlin twin of the macOS WearableExportImporterTests — same arithmetic,
  * same brand detection, same honesty rules (a brand's own score is reference-only, never Charge).
  *
@@ -55,14 +55,14 @@ class WearableExportImporterTest {
         assertEquals(8421, d.steps)
         assertEquals(520.0, d.activeKcal!!, 1e-6)
         assertEquals(420.0, d.totalSleepMin!!, 1e-6)
-        // Oura's OWN readiness score is kept as REFERENCE only — never a NOOP score.
+        // Oura's OWN readiness score is kept as REFERENCE only — never a VWAR Loop Life score.
         assertEquals(81, d.readinessScore)
     }
 
     @Test
     fun importedNightRespReachesDailyRow() {
         // #17: the night's resp rate (Oura `average_breath`) lives on the SESSION; it must also fold onto
-        // the day's rollup so the imported day carries respRateBpm (which feeds NOOP's Charge), not null.
+        // the day's rollup so the imported day carries respRateBpm (which feeds VWAR Loop Life's Charge), not null.
         val json = """
             {
               "sleep": [
