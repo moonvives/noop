@@ -67,7 +67,7 @@ struct NOOPWidgetView: View {
 
     private var inlineText: String {
         var parts: [String] = []
-        if let r = snap.recovery { parts.append("Charge \(r)%") }
+        if let r = snap.recovery { parts.append("Recuperação \(r)%") }
         if let b = snap.bpm { parts.append("\(b) bpm") }
         return parts.isEmpty ? "VWAR Loop Life" : parts.joined(separator: " · ")
     }
@@ -88,9 +88,9 @@ struct NOOPWidgetView: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
                 Image(systemName: "heart.fill").foregroundStyle(recoveryColor)
-                Text("Charge \(snap.recovery.map(String.init) ?? "–")%").font(.headline)
+                Text("Recuperação \(snap.recovery.map(String.init) ?? "–")%").font(.headline)
             }
-            Text("HR \(snap.bpm.map(String.init) ?? "–") · Effort \(snap.effort.map(String.init) ?? "–")")
+            Text("FC \(snap.bpm.map(String.init) ?? "–") · Carga \(snap.effort.map(String.init) ?? "–")")
                 .font(.caption)
         }
     }
@@ -111,7 +111,7 @@ struct NOOPWidgetView: View {
                     .foregroundStyle(recoveryColor)
                 Text("%").font(.headline).foregroundStyle(StrandPalette.textTertiary)
             }
-            Text("Charge").font(.caption).foregroundStyle(StrandPalette.textTertiary)
+            Text("Recuperação").font(.caption).foregroundStyle(StrandPalette.textTertiary)
             Spacer(minLength: 0)
             HStack {
                 Label("\(snap.bpm.map(String.init) ?? "–")", systemImage: "waveform.path.ecg")
@@ -144,21 +144,21 @@ struct NOOPWidgetView: View {
                     .font(.system(size: 48, weight: .bold, design: .rounded))
                     .foregroundStyle(recoveryColor)
                 Text("%").font(.title3).foregroundStyle(StrandPalette.textTertiary)
-                Text("Charge").font(.subheadline).foregroundStyle(StrandPalette.textTertiary)
+                Text("Recuperação").font(.subheadline).foregroundStyle(StrandPalette.textTertiary)
                     .padding(.leading, 2)
             }
             Divider()
             // Two-by-three stat grid of the richer scores. Each cell is a value + label pairing, tinted to
             // match its Today tile where a token exists (Effort, Rest); raw vitals stay neutral.
             HStack(alignment: .top, spacing: 0) {
-                statCell("Effort", value: snap.effort.map(String.init), tint: effortColor)
-                statCell("Rest", value: snap.rest.map { "\($0)%" }, tint: restColor)
-                statCell("HRV", value: snap.hrv.map { "\($0)" }, unit: "ms")
+                statCell("Carga", value: snap.effort.map(String.init), tint: effortColor)
+                statCell("Descanso", value: snap.rest.map { "\($0)%" }, tint: restColor)
+                statCell("VFC", value: snap.hrv.map { "\($0)" }, unit: "ms")
             }
             HStack(alignment: .top, spacing: 0) {
-                statCell("Rest HR", value: snap.restingHr.map { "\($0)" }, unit: "bpm")
-                statCell("HR", value: snap.bpm.map { "\($0)" }, unit: "bpm")
-                statCell("Battery", value: snap.batteryPct.map { "\($0)%" })
+                statCell("FC repouso", value: snap.restingHr.map { "\($0)" }, unit: "bpm")
+                statCell("FC", value: snap.bpm.map { "\($0)" }, unit: "bpm")
+                statCell("Bateria", value: snap.batteryPct.map { "\($0)%" })
             }
             Spacer(minLength: 0)
         }
@@ -197,8 +197,8 @@ struct NOOPWidget: Widget {
                     .background(StrandPalette.surfaceBase)
             }
         }
-        .configurationDisplayName("VWAR Loop Life Charge")
-        .description("Charge, Effort, Rest, HRV, resting and live heart rate, and strap battery at a glance.")
+        .configurationDisplayName("VWAR Loop Life — visão diária")
+        .description("Recuperação, carga, descanso, VFC, frequência cardíaca e bateria da pulseira em uma visão rápida.")
         .supportedFamilies([
             .systemSmall, .systemMedium, .systemLarge,
             .accessoryCircular, .accessoryInline, .accessoryRectangular

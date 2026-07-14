@@ -1,20 +1,19 @@
 # Garmin no VWAR Loop Life
 
-O VWAR Loop Life oferece três caminhos independentes para dados Garmin. Nenhum deles exige uma
+O VWAR Loop Life oferece dois caminhos independentes para dados Garmin. Nenhum deles exige uma
 assinatura Garmin adicional, e o aplicativo nunca preenche uma métrica que não tenha recebido.
 
-## 1. Garmin Connect > Apple Health > VWAR Loop Life
+## 1. Garmin Connect > Saúde da Apple > VWAR Loop Life
 
 Este é o caminho recomendado no iPhone quando a compilação do VWAR Loop Life possui o direito
 HealthKit:
 
-1. No **Garmin Connect**, abra **Mais > Configurações > Apps conectados > Apple Health**.
-2. Toque em **Conectar ao Apple Health** e autorize as categorias desejadas.
+1. No **Garmin Connect**, abra **Mais > Configurações > Apps conectados > Saúde**.
+2. Autorize as categorias desejadas no app Saúde.
 3. Mantenha o Garmin Connect aberto enquanto sincroniza o relógio.
-4. No **VWAR Loop Life**, abra **Fontes de dados > Apple Health**, autorize a leitura e toque em
-   **Verificar Garmin agora**.
+4. No **VWAR Loop Life**, abra **Fontes**, autorize a leitura e toque em **Sincronizar 90 dias**.
 
-O estado **Detectado** aparece somente depois que o app encontra uma amostra autorizada cuja origem
+O estado **Verificado** aparece somente depois que o app encontra uma amostra autorizada cuja origem
 real é o Garmin Connect. Ter o Garmin Connect instalado não basta. A verificação retém apenas o nome
 técnico da origem e as categorias encontradas; ela não guarda valores de saúde, conta Garmin, serial
 do relógio ou outro identificador pessoal.
@@ -39,23 +38,11 @@ Referência oficial: [Compartilhar dados do Garmin Connect com o Apple Health](h
 
 Relógios Garmin compatíveis podem transmitir frequência cardíaca usando o serviço Bluetooth padrão
 `0x180D`. Ative **Transmitir frequência cardíaca** no relógio e, no VWAR Loop Life, abra
-**Dispositivos > Adicionar dispositivo > Relógio Garmin**.
+**Hoje > VWAR direto** para procurar características Bluetooth anunciadas.
 
-Esta rota é local e serve para batimentos ao vivo. HRV ao vivo só pode ser derivada quando o dispositivo
+Esta rota é local e serve para batimentos ao vivo. VFC ao vivo só pode ser derivada quando o dispositivo
 também transmite intervalos RR válidos. Ela não baixa sono, passos, Body Battery, histórico de treinos ou
 outros dados da conta Garmin. A disponibilidade e o nome do menu variam por modelo.
-
-## 3. Importação offline
-
-Em **Fontes de dados > Garmin / Oura / Fitbit data export**, selecione o arquivo obtido em
-**Garmin Connect > Exportar seus dados**. O importador processa localmente os registros presentes no
-arquivo, incluindo sono, frequência cardíaca de repouso, HRV e passos quando disponíveis. Arquivos de
-atividade `.fit`, `.tcx` e `.gpx` também podem ser importados separadamente.
-
-Esta é a alternativa mais completa quando uma instalação por AltStore ou SideStore não preserva o
-direito HealthKit. A prontidão, o sono ou outros escores calculados pela Garmin ficam apenas como
-referência; os escores VWAR Loop Life continuam sendo calculados localmente a partir dos sinais que
-existem no arquivo.
 
 ## Garmin Connect IQ e Garmin Health API
 
@@ -65,11 +52,11 @@ histórico da nuvem Garmin. Consulte a [visão geral oficial do Connect IQ](http
 
 A integração comercial direta com a nuvem usa o Garmin Connect Developer Program e a Garmin Health
 API. Ela exige aprovação, consentimento do usuário, servidor credenciado e, para uso comercial, pode
-exigir licença. O VWAR Loop Life 9.1.0 não inclui credenciais, servidor oculto ou uma integração cloud
+exigir licença. O VWAR Loop Life 10.0.0 não inclui credenciais, servidor oculto ou uma integração em nuvem
 que finja esse acesso. Referências: [visão geral do programa](https://developer.garmin.com/gc-developer-program/overview/)
 e [Garmin Health API](https://developer.garmin.com/gc-developer-program/health-api/).
 
 ## Privacidade e saúde
 
-O processamento dessas três rotas permanece no dispositivo. Métricas de wearable são informações de
+O processamento dessas duas rotas permanece no dispositivo. Métricas de pulseiras são informações de
 bem-estar e desempenho; não substituem equipamento médico, diagnóstico ou orientação profissional.

@@ -1,7 +1,7 @@
 {
   "name": "VWAR Loop Life",
   "subtitle": "Saúde, recuperação e sono em um só lugar.",
-  "description": "Fonte AltStore e SideStore do VWAR Loop Life. O app reúne dados da pulseira VWAR Loop Life recebidos pelo G Band e Apple Health, além de fontes Bluetooth compatíveis, com análise local, calendário e histórico privado.\n\nProjeto independente e experimental. Não é afiliado à VWAR, G Band ou WHOOP e não substitui avaliação médica.",
+  "description": "Fonte AltStore e SideStore do VWAR Loop Life. O app reúne dados da pulseira VWAR Loop Life recebidos pelo G Band e pelo app Saúde, além de fontes Bluetooth compatíveis, com análise local, calendário e histórico privado.\n\nProjeto independente e experimental. Não é afiliado à VWAR, G Band, Garmin, WHOOP ou Oura e não substitui avaliação médica.",
   "iconURL": "https://github.com/moonvives/noop/raw/main/Strand/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
   "website": "https://github.com/moonvives/noop",
   "tintColor": "44E2B0",
@@ -11,12 +11,21 @@
       "bundleIdentifier": "com.noopapp.noop",
       "developerName": "VWAR Loop Life Project",
       "subtitle": "Seu painel privado de saúde e desempenho.",
-      "localizedDescription": "VWAR Loop Life organiza frequência cardíaca, HRV, sono, oxigenação, passos, temperatura e treinos em uma experiência premium. A integração recomendada para a pulseira VWAR Loop Life é G Band → Apple Health → VWAR Loop Life. Calendário, histórico e análises são processados no dispositivo.\n\nEstimativas de pressão, glicose e ECG da pulseira não entram nos escores nem substituem equipamentos médicos. Projeto independente: https://github.com/moonvives/noop",
+      "localizedDescription": "VWAR Loop Life organiza frequência cardíaca, VFC, sono, oxigenação, passos, temperatura e treinos em uma experiência premium integralmente em português do Brasil. A integração recomendada é G Band → Saúde da Apple → VWAR Loop Life. Calendário, histórico e análises são processados no dispositivo.\n\nEstimativas de pressão, glicose e ECG da pulseira não entram nas pontuações nem substituem equipamentos médicos. Projeto independente: https://github.com/moonvives/noop",
       "iconURL": "https://github.com/moonvives/noop/raw/main/Strand/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
       "tintColor": "44E2B0",
       "category": "healthcare-fitness",
       "screenshotURLs": [],
       "versions": [
+        {
+          "version": "10.0.0",
+          "buildVersion": "173",
+          "date": "2026-07-13",
+          "localizedDescription": "VWAR Loop Life 10: nova experiência pt-BR para iOS e iPadOS 26, gráficos interativos, inteligência diária local, sono avançado e fontes G Band/Garmin verificáveis.",
+          "downloadURL": "https://github.com/moonvives/noop/releases/download/v10.0.0/VWAR-Loop-Life-v10.0.0-ios.ipa",
+          "size": 9047946,
+          "minOSVersion": "26.0"
+        },
         {
           "version": "9.0.0",
           "buildVersion": "171",
@@ -32,18 +41,18 @@
           "com.apple.developer.healthkit"
         ],
         "privacy": {
-          "NSBluetoothAlwaysUsageDescription": "VWAR Loop Life usa Bluetooth para receber dados de sensores compatíveis quando você autoriza.",
-          "NSHealthShareUsageDescription": "VWAR Loop Life lê os dados de saúde que você autorizar para mostrar tendências, recuperação, esforço e sono no dispositivo.",
-          "NSHealthUpdateUsageDescription": "VWAR Loop Life grava no Apple Health apenas as métricas que você autorizar."
+          "NSBluetoothAlwaysUsageDescription": "O VWAR Loop Life usa Bluetooth para receber dados de sensores compatíveis quando você autoriza.",
+          "NSHealthShareUsageDescription": "O VWAR Loop Life lê os dados de saúde que você autorizar para mostrar tendências, recuperação, carga e sono no dispositivo.",
+          "NSHealthUpdateUsageDescription": "O VWAR Loop Life grava no app Saúde apenas as métricas que você autorizar."
         }
       },
-      "version": "9.0.0",
-      "buildVersion": "171",
+      "version": "10.0.0",
+      "buildVersion": "173",
       "versionDate": "2026-07-13",
-      "versionDescription": "VWAR Loop Life 9.0: nova identidade, relógio ao vivo, calendário semanal e análise avançada de 28 dias.",
-      "downloadURL": "https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa",
-      "size": 14442488,
-      "minOSVersion": "17.0"
+      "versionDescription": "VWAR Loop Life 10: nova experiência pt-BR para iOS e iPadOS 26, gráficos interativos, inteligência diária local, sono avançado e fontes G Band/Garmin verificáveis.",
+      "downloadURL": "https://github.com/moonvives/noop/releases/download/v10.0.0/VWAR-Loop-Life-v10.0.0-ios.ipa",
+      "size": 9047946,
+      "minOSVersion": "26.0"
     }
   ],
   "news": []

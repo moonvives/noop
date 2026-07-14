@@ -22,6 +22,8 @@ jobs:
   apple:
     name: Build Apple artifacts
     runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +42,9 @@ jobs:
 
       - name: Install XcodeGen
         run: brew install xcodegen
+
+      - name: Verify Portuguese iOS 26 surface
+        run: python3 Tools/verify-ios-ptbr.py
 
       - name: Generate Xcode project
         run: xcodegen generate
@@ -93,6 +98,8 @@ jobs:
           ditto "$app" "$stage/Payload/VWARLoopLife.app"
           rm -rf "$stage/Payload/VWARLoopLife.app/Watch"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$stage/Payload" "$GITHUB_WORKSPACE/dist/VWAR-Loop-Life-v${VERSION}-ios.ipa"
+          python3 Tools/verify-ios-ipa.py "$GITHUB_WORKSPACE/dist/VWAR-Loop-Life-v${VERSION}-ios.ipa"
+          lipo -archs "$app/NOOP" | grep -qw arm64
           ls -lh "$GITHUB_WORKSPACE/dist/VWAR-Loop-Life-v${VERSION}-ios.ipa"
 
       - name: Upload Apple artifacts
@@ -187,7 +194,7 @@ jobs:
         run: |
           set -euo pipefail
           ls -lh dist
-          notes="VWAR Loop Life ${TAG}: integração Garmin verificada para iPhone e iPad arm64, Bluetooth ao vivo, importação offline e pacotes prontos para assinatura."
+          notes="VWAR Loop Life ${TAG}: iOS e iPadOS 26, centro de comando interativo, contexto pessoal auditável, Garmin verificado, Bluetooth ao vivo e pacote universal arm64 pronto para assinatura."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" --title "VWAR Loop Life ${TAG}" --notes "$notes" --latest

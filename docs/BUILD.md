@@ -253,8 +253,9 @@ open Strand.xcodeproj
 
 Notes:
 
-- The `NOOPiOS` and `NOOPiOSWidgets` targets deploy to **iOS 17.0**. (The shared packages still
-  declare a floor of iOS 16 — `.iOS(.v16)` — but the app targets require iOS 17.)
+- The `NOOPiOS` and `NOOPiOSWidgets` targets deploy to **iOS/iPadOS 26.0** and must be built with
+  **Xcode 26.3 or newer**. The shared packages keep lower platform declarations because they are also
+  reused by macOS and headless tests; the distributed app itself will not install below 26.0.
 - Running on a physical iPhone needs a signing identity selected in Xcode (a free personal Apple ID
   works for on-device builds). **BLE requires a real device** — the iOS simulator can't reach a
   physical strap.

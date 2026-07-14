@@ -25,7 +25,7 @@ object AppChangelog {
      * Bump this when you add a release below. The "What's New" sheet shows automatically when the
      * stored last-seen version is behind this. (Decoupled from the bundle version on purpose.)
      */
-    const val CURRENT_VERSION = "9.1.0"
+    const val CURRENT_VERSION = "10.0.0"
 
     data class Release(
         val version: String,
@@ -36,6 +36,19 @@ object AppChangelog {
 
     /** Newest first. */
     val releases: List<Release> = listOf(
+        Release(
+            version = "10.0.0",
+            title = "Centro de comando para iOS e iPadOS 26",
+            date = "13 de julho de 2026",
+            items = listOf(
+                "**iOS e iPadOS 26 como base real.** App, widget, CI e pacote agora usam o deployment target 26.0 e Xcode 26, com Liquid Glass nativo e um único IPA arm64 para iPhone e iPad.",
+                "**A mesma experiência avançada nos dois aparelhos.** O centro de comando antes exclusivo do iPad agora se adapta ao iPhone 16 Pro Max e ao iPad Pro, com grids responsivos e navegação somente por texto.",
+                "**Calendário que controla os dados.** Tocar em um dia recarrega frequência cardíaca, atividade, sono, scores e comparações daquele dia; semanas anteriores e retorno para hoje funcionam no próprio painel.",
+                "**VWAR Intelligence local e auditável.** Recuperação, sono e carga são comparados com até 28 dias anteriores por uma camada determinística e testada, exibindo valor atual, mediana, cobertura e ausência sem completar lacunas.",
+                "**Interação em profundidade.** Gráficos continuam selecionáveis por toque e arraste, a matriz de vitais permanece navegável e a leitura diária separa claramente observação, associação e diagnóstico.",
+                "**Integrações com limites claros.** VWAR/G Band, Apple Health, Garmin, Bluetooth e arquivos locais continuam como rotas verificáveis; ECG, pressão e glicose estimada não entram em recomendações.",
+            ),
+        ),
         Release(
             version = "9.1.0",
             title = "Garmin conectado, com origem verificável",

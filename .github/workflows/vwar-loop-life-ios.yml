@@ -9,6 +9,7 @@ on:
       - 'StrandiOSShared/**'
       - 'StrandiOSWidgets/**'
       - 'Packages/**'
+      - 'Tools/verify-ios-*.py'
       - 'project.yml'
       - 'docs/VWAR_LOOP_LIFE_INSTALL.md'
       - '.github/workflows/vwar-loop-life-ios.yml'
@@ -20,6 +21,7 @@ on:
       - 'StrandiOSShared/**'
       - 'StrandiOSWidgets/**'
       - 'Packages/**'
+      - 'Tools/verify-ios-*.py'
       - 'project.yml'
       - 'docs/VWAR_LOOP_LIFE_INSTALL.md'
       - '.github/workflows/vwar-loop-life-ios.yml'
@@ -32,6 +34,8 @@ concurrency:
 jobs:
   package:
     runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +43,7 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Prepare iPhone-only package
+      - name: Prepare iPhone and iPad package
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -52,10 +56,13 @@ jobs:
           path.write_text(text.replace(needle, "\n", 1))
           PY
 
+      - name: Verify Portuguese iOS 26 surface
+        run: python3 Tools/verify-ios-ptbr.py
+
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build unsigned iPhone app
+      - name: Build unsigned iPhone and iPad app
         run: >-
           xcodebuild -scheme NOOPiOS -configuration Release
           -destination 'generic/platform=iOS'
@@ -65,22 +72,28 @@ jobs:
 
       - name: Create unsigned IPA
         run: |
+          set -euo pipefail
           APP_PATH="$(find build/Build/Products/Release-iphoneos -maxdepth 1 -type d -name '*.app' | head -n 1)"
           test -n "$APP_PATH"
+          lipo -archs "$APP_PATH/NOOP" | grep -qw arm64
+          Tools/anonymize-ios-app.sh "$APP_PATH"
           mkdir -p artifact/Payload
           ditto "$APP_PATH" artifact/Payload/VWARLoopLife.app
           (
             cd artifact
-            ditto -c -k --sequesterRsrc --keepParent Payload VWAR-Loop-Life-unsigned.ipa
+            ditto -c -k --sequesterRsrc --keepParent Payload VWAR-Loop-Life-v10.0.0-ios.ipa
           )
           cp docs/VWAR_LOOP_LIFE_INSTALL.md artifact/README.md
+
+      - name: Verify ready-to-sign IPA
+        run: python3 Tools/verify-ios-ipa.py artifact/VWAR-Loop-Life-v10.0.0-ios.ipa
 
       - name: Upload ready-to-sign package
         uses: actions/upload-artifact@v4
         with:
-          name: VWAR-Loop-Life-iOS-ready-to-sign
+          name: VWAR-Loop-Life-v10.0.0-iOS-ready-to-sign
           path: |
-            artifact/VWAR-Loop-Life-unsigned.ipa
+            artifact/VWAR-Loop-Life-v10.0.0-ios.ipa
             artifact/README.md
           if-no-files-found: error
           retention-days: 30

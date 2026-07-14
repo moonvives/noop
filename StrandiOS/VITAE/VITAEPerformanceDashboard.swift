@@ -13,9 +13,12 @@ import WhoopStore
 /// data in the runtime path. Missing input renders as an explicit empty state.
 struct VITAEPerformanceDashboard: View {
     @EnvironmentObject private var repo: Repository
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @StateObject private var vwar = VWARCaptureManager()
     @State private var range: RangeWindow = .days30
+    @State private var selectedDay = Calendar.current.startOfDay(for: Date())
+    @State private var intelligenceFocus: VWARDailyFocus = .recovery
     @State private var sleepPerformanceByDay: [String: Double] = [:]
     @State private var hrPoints: [IntradayPoint] = []
     @State private var sleepSessions: [CachedSleepSession] = []
@@ -30,7 +33,8 @@ struct VITAEPerformanceDashboard: View {
     @State private var selectedVitalDate: Date?
     @State private var showVWARResearch = false
 
-    private let pagePadding: CGFloat = 24
+    private var isCompact: Bool { horizontalSizeClass == .compact }
+    private var pagePadding: CGFloat { isCompact ? 16 : 24 }
 
     var body: some View {
         ScrollView {
@@ -39,6 +43,7 @@ struct VITAEPerformanceDashboard: View {
                 calendarStrip
                 rangeSelector
                 scoreGrid
+                intelligencePanel
                 chartGrid
                 methodology
                 Color.clear.frame(height: 84)
@@ -50,7 +55,7 @@ struct VITAEPerformanceDashboard: View {
         }
         .background(VITAELuxury.base.ignoresSafeArea())
         .preferredColorScheme(.dark)
-        .task(id: "\(repo.refreshSeq)-\(range.rawValue)") { await load() }
+        .task(id: "\(repo.refreshSeq)-\(range.rawValue)-\(selectedDayKey)") { await load() }
         .refreshable {
             await repo.refresh()
             await load()
@@ -60,93 +65,168 @@ struct VITAEPerformanceDashboard: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
         }
+        .sensoryFeedback(.selection, trigger: selectedDay)
     }
 
     // MARK: - Header
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 24) {
-            VStack(alignment: .leading, spacing: 7) {
+        Group {
+            if isCompact {
+                VStack(alignment: .leading, spacing: 16) {
+                    identity
+                    HStack(alignment: .center, spacing: 12) {
+                        liveClock
+                        Spacer(minLength: 8)
+                        directCaptureControls
+                    }
+                }
+            } else {
+                HStack(alignment: .top, spacing: 24) {
+                    identity
+                    Spacer(minLength: 18)
+                    VStack(alignment: .trailing, spacing: 10) {
+                        liveClock
+                        directCaptureControls
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var identity: some View {
+        VStack(alignment: .leading, spacing: 7) {
                 Text("VWAR LOOP LIFE")
                     .font(StrandFont.overline)
                     .tracking(2.5)
                     .foregroundStyle(VITAELuxury.teal)
                 Text("Seu corpo, em contexto")
-                    .font(StrandFont.rounded(38, weight: .semibold))
+                    .font(StrandFont.rounded(isCompact ? 31 : 38, weight: .semibold))
                     .tracking(-0.8)
                     .foregroundStyle(StrandPalette.textPrimary)
-                TimelineView(.periodic(from: .now, by: 60)) { context in
-                    Text(Self.longDateFormatter.string(from: context.date))
-                        .font(StrandFont.subhead)
-                        .foregroundStyle(StrandPalette.textSecondary)
-                }
+                Text(Self.longDateFormatter.string(from: selectedDay))
+                    .font(StrandFont.subhead)
+                    .foregroundStyle(StrandPalette.textSecondary)
             }
-            Spacer(minLength: 18)
-            VStack(alignment: .trailing, spacing: 10) {
-                TimelineView(.periodic(from: .now, by: 60)) { context in
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("AGORA")
-                            .font(StrandFont.overlineScaled(9))
-                            .tracking(1.1)
-                            .foregroundStyle(StrandPalette.textTertiary)
-                        Text(Self.timeFormatter.string(from: context.date))
-                            .font(StrandFont.number(22))
-                            .monospacedDigit()
-                            .foregroundStyle(StrandPalette.textPrimary)
-                    }
-                }
-                Button("VWAR DIRETO") { showVWARResearch = true }
-                    .buttonStyle(VITAETextButtonStyle(active: vwar.phase.isActive))
-                HStack(spacing: 9) {
-                    Circle()
-                        .fill(vwar.phase.isActive ? VITAELuxury.teal : StrandPalette.textTertiary)
-                        .frame(width: 7, height: 7)
-                    Text(vwar.phase.title)
-                        .font(StrandFont.overlineScaled(9))
-                        .tracking(1.2)
-                        .foregroundStyle(StrandPalette.textSecondary)
-                    if vwar.eventCount > 0 {
-                        Text("\(vwar.eventCount) PACOTES")
-                            .font(StrandFont.overlineScaled(9))
-                            .tracking(1.2)
-                            .foregroundStyle(StrandPalette.textTertiary)
-                    }
+    }
+
+    private var liveClock: some View {
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            VStack(alignment: isCompact ? .leading : .trailing, spacing: 2) {
+                Text("AGORA")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.1)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                Text(Self.timeFormatter.string(from: context.date))
+                    .font(StrandFont.number(22))
+                    .monospacedDigit()
+                    .foregroundStyle(StrandPalette.textPrimary)
+            }
+        }
+    }
+
+    private var directCaptureControls: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            Button("VWAR DIRETO") { showVWARResearch = true }
+                .buttonStyle(VITAETextButtonStyle(active: vwar.phase.isActive))
+            HStack(spacing: 7) {
+                Text(vwar.phase.title)
+                    .font(StrandFont.overlineScaled(8))
+                    .tracking(1.0)
+                    .foregroundStyle(StrandPalette.textSecondary)
+                if vwar.eventCount > 0 {
+                    Text("\(vwar.eventCount) PACOTES")
+                        .font(StrandFont.overlineScaled(8))
+                        .tracking(1.0)
+                        .foregroundStyle(StrandPalette.textTertiary)
                 }
             }
         }
-        .accessibilityElement(children: .contain)
     }
 
     private var calendarStrip: some View {
-        HStack(spacing: 8) {
-            ForEach(Self.currentWeek, id: \.self) { date in
-                let today = Calendar.current.isDateInToday(date)
-                VStack(spacing: 7) {
-                    Text(Self.weekdayFormatter.string(from: date).uppercased())
-                        .font(StrandFont.overlineScaled(9))
-                        .tracking(0.7)
-                    Text(Self.dayNumberFormatter.string(from: date))
-                        .font(StrandFont.number(17))
-                        .monospacedDigit()
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Button(isCompact ? "ANTERIOR" : "SEMANA ANTERIOR") { moveWeek(-1) }
+                    .buttonStyle(VITAECalendarNavigationButtonStyle())
+                Spacer(minLength: 6)
+                Button("HOJE") { selectToday() }
+                    .buttonStyle(VITAECalendarNavigationButtonStyle(active: Calendar.current.isDateInToday(selectedDay)))
+                Spacer(minLength: 6)
+                Button(isCompact ? "PRÓXIMA" : "PRÓXIMA SEMANA") { moveWeek(1) }
+                    .buttonStyle(VITAECalendarNavigationButtonStyle())
+                    .disabled(!canMoveToNextWeek)
+                    .opacity(canMoveToNextWeek ? 1 : 0.34)
+            }
+            HStack(spacing: isCompact ? 5 : 8) {
+                ForEach(weekDates, id: \.self) { date in
+                    let selected = Calendar.current.isDate(date, inSameDayAs: selectedDay)
+                    let today = Calendar.current.isDateInToday(date)
+                    Button {
+                        guard date <= Calendar.current.startOfDay(for: Date()) else { return }
+                        withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
+                            selectedDay = Calendar.current.startOfDay(for: date)
+                        }
+                    } label: {
+                        VStack(spacing: 7) {
+                            Text(Self.weekdayFormatter.string(from: date).uppercased())
+                                .font(StrandFont.overlineScaled(isCompact ? 8 : 9))
+                                .tracking(0.7)
+                            Text(Self.dayNumberFormatter.string(from: date))
+                                .font(StrandFont.number(isCompact ? 15 : 17))
+                                .monospacedDigit()
+                            if today && !selected {
+                                Text("HOJE")
+                                    .font(StrandFont.overlineScaled(6))
+                                    .tracking(0.7)
+                            }
+                        }
+                        .foregroundStyle(selected ? VITAELuxury.base : StrandPalette.textSecondary)
+                        .frame(maxWidth: .infinity, minHeight: isCompact ? 68 : 74)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(selected ? VITAELuxury.teal : VITAELuxury.panel)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(today && !selected ? VITAELuxury.teal.opacity(0.65) : VITAELuxury.border, lineWidth: 1)
+                        )
+                        .opacity(date > Calendar.current.startOfDay(for: Date()) ? 0.28 : 1)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(date > Calendar.current.startOfDay(for: Date()))
                 }
-                .foregroundStyle(today ? VITAELuxury.base : StrandPalette.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(today ? VITAELuxury.teal : VITAELuxury.panel)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(today ? VITAELuxury.teal : VITAELuxury.border, lineWidth: 1)
-                )
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Calendário da semana atual")
+        .accessibilityLabel("Calendário semanal interativo")
     }
 
     private var rangeSelector: some View {
+        Group {
+            if isCompact {
+                VStack(alignment: .leading, spacing: 10) {
+                    rangeButtons
+                    Text("TOQUE OU ARRASTE OS GRÁFICOS PARA INSPECIONAR")
+                        .font(StrandFont.overlineScaled(8))
+                        .tracking(0.9)
+                        .foregroundStyle(StrandPalette.textTertiary)
+                }
+            } else {
+                HStack(spacing: 6) {
+                    rangeButtons
+                    Spacer()
+                    Text("ARRASTE OS GRÁFICOS PARA INSPECIONAR")
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(1.1)
+                        .foregroundStyle(StrandPalette.textTertiary)
+                }
+            }
+        }
+    }
+
+    private var rangeButtons: some View {
         HStack(spacing: 6) {
             ForEach(RangeWindow.allCases) { item in
                 Button(item.label) {
@@ -154,25 +234,20 @@ struct VITAEPerformanceDashboard: View {
                 }
                 .buttonStyle(VITAERangeButtonStyle(active: range == item))
             }
-            Spacer()
-            Text("ARRASTE OS GRÁFICOS PARA INSPECIONAR")
-                .font(StrandFont.overlineScaled(9))
-                .tracking(1.1)
-                .foregroundStyle(StrandPalette.textTertiary)
         }
     }
 
     // MARK: - Scores
 
     private var scoreGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 285), spacing: 16)], spacing: 16) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 280 : 285), spacing: 16)], spacing: 16) {
             PremiumScoreCard(
                 title: "RECUPERAÇÃO",
                 value: currentDay?.recovery,
                 scale: 100,
                 accent: recoveryAccent(currentDay?.recovery),
                 confidence: coverage(for: .recovery),
-                description: "Baseline pessoal de HRV, FC de repouso, sono e temperatura."
+                description: "Referência pessoal de VFC, FC de repouso, sono e temperatura."
             )
             PremiumScoreCard(
                 title: "CARGA",
@@ -193,10 +268,113 @@ struct VITAEPerformanceDashboard: View {
         }
     }
 
+    // MARK: - Daily intelligence
+
+    private var intelligencePanel: some View {
+        VITAEPanel(
+            eyebrow: "INTELIGÊNCIA VWAR",
+            title: "O que mudou neste dia",
+            value: dailyInsight.score.map { String(Int($0.rounded())) },
+            detail: "Comparação determinística com até 28 dias anteriores do seu próprio histórico"
+        ) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 7) {
+                    ForEach(VWARDailyFocus.allCases) { focus in
+                        Button(focusLabel(focus)) {
+                            withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
+                                intelligenceFocus = focus
+                            }
+                        }
+                        .buttonStyle(VITAERangeButtonStyle(active: intelligenceFocus == focus))
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(intelligenceHeadline)
+                        .font(StrandFont.headline)
+                        .foregroundStyle(StrandPalette.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(intelligenceSummary)
+                        .font(StrandFont.subhead)
+                        .foregroundStyle(StrandPalette.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if dailyInsight.comparisons.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("REFERÊNCIA EM FORMAÇÃO")
+                            .font(StrandFont.overlineScaled(9))
+                            .tracking(1.1)
+                            .foregroundStyle(VITAELuxury.amber)
+                        Text("São necessários pelo menos cinco dias anteriores com a mesma medição para comparar sem fabricar contexto.")
+                            .font(StrandFont.subhead)
+                            .foregroundStyle(StrandPalette.textSecondary)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(Array(dailyInsight.comparisons.prefix(4))) { comparison in
+                            intelligenceComparisonRow(comparison)
+                            if comparison.id != dailyInsight.comparisons.prefix(4).last?.id {
+                                Rectangle().fill(VITAELuxury.border).frame(height: 1)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 94 : 150), spacing: 12)], spacing: 12) {
+                    MetricReadout(label: "REFERÊNCIA", value: intelligenceReferenceLabel)
+                    MetricReadout(label: "PROCESSAMENTO", value: "NO APARELHO")
+                    MetricReadout(label: "MODELO", value: "PESSOAL")
+                }
+
+                Text("Esta leitura descreve diferenças observadas; não prova causa, não diagnostica e não usa ECG, pressão arterial ou glicose estimada para orientar decisões.")
+                    .font(StrandFont.footnote)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func intelligenceComparisonRow(_ comparison: VWARSignalComparison) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(signalLabel(comparison.metric))
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.0)
+                    .foregroundStyle(StrandPalette.textSecondary)
+                Text("mediana de \(comparison.referenceDays) dias")
+                    .font(StrandFont.footnote)
+                    .foregroundStyle(StrandPalette.textTertiary)
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(signalValue(comparison.current, metric: comparison.metric))
+                    .font(StrandFont.bodyNumber)
+                    .foregroundStyle(StrandPalette.textPrimary)
+                Text("BASE \(signalValue(comparison.baselineMedian, metric: comparison.metric))")
+                    .font(StrandFont.overlineScaled(7))
+                    .tracking(0.8)
+                    .foregroundStyle(StrandPalette.textTertiary)
+            }
+            Text(positionLabel(comparison.position))
+                .font(StrandFont.overlineScaled(8))
+                .tracking(0.9)
+                .foregroundStyle(comparisonColor(comparison))
+                .frame(width: 52, alignment: .trailing)
+        }
+        .padding(.vertical, 12)
+        .accessibilityElement(children: .combine)
+    }
+
     // MARK: - Charts
 
     private var chartGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 430), spacing: 16, alignment: .top)], spacing: 16) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 300 : 430), spacing: 16, alignment: .top)], spacing: 16) {
             heartRatePanel
             recoveryLoadPanel
             hrvBaselinePanel
@@ -210,14 +388,14 @@ struct VITAEPerformanceDashboard: View {
 
     private var heartRatePanel: some View {
         VITAEPanel(
-            eyebrow: "HOJE",
+            eyebrow: Calendar.current.isDateInToday(selectedDay) ? "HOJE" : Self.shortDateFormatter.string(from: selectedDay).uppercased(),
             title: "Frequência cardíaca",
             value: selectedHRPoint.map { "\(Int($0.bpm.rounded())) bpm" } ??
                 hrPoints.last.map { "\(Int($0.bpm.rounded())) bpm" },
             detail: selectedHRPoint.map { Self.timeFormatter.string(from: $0.date) } ?? "Médias de cinco minutos"
         ) {
             if hrPoints.isEmpty {
-                VITAEEmptyState("Sem frequência cardíaca registrada hoje.")
+                VITAEEmptyState("Sem frequência cardíaca registrada no dia selecionado.")
             } else {
                 Chart(hrPoints) { point in
                     AreaMark(x: .value("Hora", point.date), y: .value("BPM", point.bpm))
@@ -301,14 +479,14 @@ struct VITAEPerformanceDashboard: View {
     private var hrvBaselinePanel: some View {
         let selection = selectedHrvPoint
         return VITAEPanel(
-            eyebrow: "BASELINE PESSOAL",
-            title: "HRV noturna",
+            eyebrow: "REFERÊNCIA PESSOAL",
+            title: "VFC noturna",
             value: selection.map { "\(Int($0.value.rounded())) ms" },
             detail: selection.map { Self.shortDateFormatter.string(from: $0.date) } ??
                 "Faixa interquartil móvel; valores ausentes permanecem ausentes"
         ) {
             if hrvPoints.isEmpty {
-                VITAEEmptyState("São necessárias noites com intervalos R-R válidos para calcular HRV.")
+                VITAEEmptyState("São necessárias noites com intervalos R-R válidos para calcular VFC.")
             } else {
                 Chart(hrvPoints) { point in
                     if let low = point.low, let high = point.high {
@@ -320,11 +498,11 @@ struct VITAEPerformanceDashboard: View {
                         .interpolationMethod(.catmullRom)
                         .foregroundStyle(VITAELuxury.teal.opacity(0.12))
                     }
-                    LineMark(x: .value("Dia", point.date), y: .value("HRV", point.value))
+                    LineMark(x: .value("Dia", point.date), y: .value("VFC", point.value))
                         .interpolationMethod(.catmullRom)
                         .lineStyle(.init(lineWidth: 2.3, lineCap: .round, lineJoin: .round))
                         .foregroundStyle(VITAELuxury.teal)
-                    PointMark(x: .value("Dia", point.date), y: .value("HRV", point.value))
+                    PointMark(x: .value("Dia", point.date), y: .value("VFC", point.value))
                         .symbolSize(point.id == selectedHrvPoint?.id ? 54 : 10)
                         .foregroundStyle(point.id == selectedHrvPoint?.id ? .white : VITAELuxury.teal.opacity(0.72))
                     if let selectedHrvDate, point.id == selectedHrvPoint?.id {
@@ -337,7 +515,7 @@ struct VITAEPerformanceDashboard: View {
                 .chartYAxis { VITAEChartAxis.numeric(suffix: " ms") }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
                 .frame(height: 250)
-                .accessibilityLabel("HRV noturna e faixa de baseline pessoal")
+                .accessibilityLabel("VFC noturna e faixa de referência pessoal")
             }
         }
     }
@@ -433,7 +611,7 @@ struct VITAEPerformanceDashboard: View {
             title: "Balanço de treinamento",
             value: selection.map { "\(Int($0.strain.rounded())) carga" },
             detail: selection.map { "\(Int($0.recovery.rounded())) recuperação • \(Self.shortDateFormatter.string(from: $0.date))" }
-                ?? "Cada ponto é um dia com os dois scores presentes"
+                ?? "Cada ponto é um dia com as duas pontuações presentes"
         ) {
             if balancePoints.isEmpty {
                 VITAEEmptyState("São necessários dias com recuperação e carga.")
@@ -485,7 +663,7 @@ struct VITAEPerformanceDashboard: View {
             detail: "Passos e energia vêm da fonte registrada; valores estimados são identificados"
         ) {
             VStack(spacing: 16) {
-                HStack(spacing: 14) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 94 : 130), spacing: 12)], spacing: 12) {
                     MetricReadout(label: "PASSOS", value: currentSteps.map(Self.compactNumber) ?? "—")
                     MetricReadout(label: "ENERGIA ATIVA", value: currentActiveEnergy.map { "\(Int($0.rounded())) kcal" } ?? "—")
                     MetricReadout(label: "DISTÂNCIA", value: currentDistance.map { String(format: "%.1f km", $0) } ?? "—")
@@ -514,7 +692,7 @@ struct VITAEPerformanceDashboard: View {
                 .font(StrandFont.overline)
                 .tracking(1.6)
                 .foregroundStyle(StrandPalette.textTertiary)
-            Text("VWAR Loop Life calcula HRV por RMSSD após filtragem de intervalos inválidos e ectópicos. A carga usa TRIMP e transformação logarítmica. A recuperação compara seus próprios baselines, não uma tabela genérica. Toda pontuação exige dados mínimos; quando faltam sinais, o app mostra ausência em vez de inventar um resultado.")
+            Text("VWAR Loop Life calcula VFC por RMSSD após filtragem de intervalos inválidos e ectópicos. A carga usa TRIMP e transformação logarítmica. A recuperação compara suas próprias referências, não uma tabela genérica. Toda pontuação exige dados mínimos; quando faltam sinais, o app mostra ausência em vez de inventar um resultado.")
                 .font(StrandFont.body)
                 .foregroundStyle(StrandPalette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -529,20 +707,22 @@ struct VITAEPerformanceDashboard: View {
 
     private func load() async {
         let calendar = Calendar.current
-        let start = calendar.startOfDay(for: Date())
+        let start = calendar.startOfDay(for: selectedDay)
+        let nextDay = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86_400)
+        let end = min(Date(), nextDay.addingTimeInterval(-1))
         async let restSeries = repo.exploreSeries(key: "sleep_performance", source: "my-whoop")
         async let stepsSeries = repo.series(key: "steps", source: "apple-health")
         async let activeEnergySeries = repo.series(key: "active_kcal", source: "apple-health")
         async let distanceSeries = repo.series(key: "walking_running_km", source: "apple-health")
         async let buckets = repo.hrBuckets(
             from: Int(start.timeIntervalSince1970),
-            to: Int(Date().timeIntervalSince1970),
+            to: Int(max(start, end).timeIntervalSince1970),
             bucketSeconds: 300
         )
         async let sessions = repo.allSleepSessions(days: max(90, range.rawValue + 7))
         let rest = await restSeries
         sleepPerformanceByDay = Dictionary(rest.map { ($0.day, $0.value) }, uniquingKeysWith: { _, newer in newer })
-        let currentKey = currentDay?.day ?? Repository.localDayKey(Date())
+        let currentKey = selectedDayKey
         appleSteps = Self.value(for: currentKey, in: await stepsSeries)
         appleActiveEnergy = Self.value(for: currentKey, in: await activeEnergySeries)
         appleDistanceKm = Self.value(for: currentKey, in: await distanceSeries)
@@ -550,7 +730,13 @@ struct VITAEPerformanceDashboard: View {
         sleepSessions = await sessions
     }
 
-    private var currentDay: DailyMetric? { repo.today ?? repo.days.last }
+    private var selectedDayKey: String { Repository.localDayKey(selectedDay) }
+
+    private var currentDay: DailyMetric? {
+        if let exact = repo.days.last(where: { $0.day == selectedDayKey }) { return exact }
+        if Calendar.current.isDateInToday(selectedDay), repo.today?.day == selectedDayKey { return repo.today }
+        return nil
+    }
 
     private var currentSleepScore: Double? {
         guard let day = currentDay else { return nil }
@@ -560,9 +746,12 @@ struct VITAEPerformanceDashboard: View {
     }
 
     private var trendDays: [DashboardDay] {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -(range.rawValue - 1), to: Date()) ?? .distantPast
+        let calendar = Calendar.current
+        let cutoff = calendar.date(byAdding: .day, value: -(range.rawValue - 1), to: selectedDay) ?? .distantPast
+        let selectedEnd = calendar.date(byAdding: .day, value: 1, to: selectedDay) ?? selectedDay.addingTimeInterval(86_400)
         return repo.days.compactMap { day in
-            guard let date = Self.dayFormatter.date(from: day.day), date >= Calendar.current.startOfDay(for: cutoff) else { return nil }
+            guard let date = Self.dayFormatter.date(from: day.day),
+                  date >= calendar.startOfDay(for: cutoff), date < selectedEnd else { return nil }
             let sleep = sleepPerformanceByDay[day.day] ?? day.efficiency.map { $0 <= 1.5 ? $0 * 100 : $0 }
             return DashboardDay(
                 key: day.day,
@@ -599,7 +788,11 @@ struct VITAEPerformanceDashboard: View {
     private var selectedHrvPoint: BaselinePoint? { Self.nearest(hrvPoints, to: selectedHrvDate) }
 
     private var sleepWindows: [SleepWindowPoint] {
-        let recent = sleepSessions.filter { $0.endTs > Int(Date().addingTimeInterval(-16 * 86_400).timeIntervalSince1970) }
+        let lower = selectedDay.addingTimeInterval(-16 * 86_400)
+        let upper = selectedDay.addingTimeInterval(2 * 86_400)
+        let recent = sleepSessions.filter {
+            $0.endTs > Int(lower.timeIntervalSince1970) && $0.endTs < Int(upper.timeIntervalSince1970)
+        }
         var longestByDay: [String: CachedSleepSession] = [:]
         for session in recent {
             let date = Date(timeIntervalSince1970: TimeInterval(session.endTs))
@@ -619,7 +812,12 @@ struct VITAEPerformanceDashboard: View {
     private var selectedSleepWindow: SleepWindowPoint? { Self.nearest(sleepWindows, to: selectedSleepDate) }
 
     private var latestSleepSession: CachedSleepSession? {
-        sleepSessions.max { $0.endTs < $1.endTs }
+        sleepSessions
+            .filter {
+                let end = Date(timeIntervalSince1970: TimeInterval($0.endTs))
+                return Repository.localDayKey(end) == selectedDayKey
+            }
+            .max { $0.endTs < $1.endTs }
     }
 
     private var sleepSegments: [SleepStagePoint] {
@@ -686,6 +884,43 @@ struct VITAEPerformanceDashboard: View {
     private var currentActiveEnergy: Double? { appleActiveEnergy ?? currentDay?.activeKcalEst }
     private var currentDistance: Double? { appleDistanceKm }
 
+    private var currentSignalSnapshot: VWARDailySignals? {
+        guard let day = currentDay else { return nil }
+        return VWARDailySignals(
+            day: day.day,
+            recovery: day.recovery,
+            load: day.strain,
+            sleep: currentSleepScore,
+            hrvMilliseconds: day.avgHrv,
+            restingHeartRate: day.restingHr.map(Double.init),
+            steps: currentSteps
+        )
+    }
+
+    private var signalHistory: [VWARDailySignals] {
+        repo.days.compactMap { day in
+            guard let date = Self.dayFormatter.date(from: day.day), date <= selectedDay else { return nil }
+            let sleep = sleepPerformanceByDay[day.day] ?? day.efficiency.map { $0 <= 1.5 ? $0 * 100 : $0 }
+            return VWARDailySignals(
+                day: day.day,
+                recovery: day.recovery,
+                load: day.strain,
+                sleep: sleep,
+                hrvMilliseconds: day.avgHrv,
+                restingHeartRate: day.restingHr.map(Double.init),
+                steps: day.steps.map(Double.init)
+            )
+        }
+    }
+
+    private var dailyInsight: VWARDailyInsight {
+        VWARDailyIntelligence.analyze(
+            current: currentSignalSnapshot,
+            history: signalHistory,
+            focus: intelligenceFocus
+        )
+    }
+
     private enum CoverageMetric { case recovery, strain, sleep }
 
     private func coverage(for metric: CoverageMetric) -> CoverageLevel {
@@ -715,6 +950,116 @@ struct VITAEPerformanceDashboard: View {
         if point.recovery >= balanceRecoveryMedian && point.strain <= balanceStrainMedian { return VITAELuxury.teal }
         if point.recovery < balanceRecoveryMedian && point.strain > balanceStrainMedian { return VITAELuxury.rose }
         return VITAELuxury.violet
+    }
+
+    private var weekDates: [Date] { Self.week(containing: selectedDay) }
+
+    private var canMoveToNextWeek: Bool {
+        guard let candidate = Calendar.current.date(byAdding: .day, value: 7, to: selectedDay) else { return false }
+        return Calendar.current.startOfDay(for: candidate) <= Calendar.current.startOfDay(for: Date())
+    }
+
+    private func moveWeek(_ direction: Int) {
+        guard let candidate = Calendar.current.date(byAdding: .day, value: direction * 7, to: selectedDay) else { return }
+        let today = Calendar.current.startOfDay(for: Date())
+        withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
+            selectedDay = min(today, Calendar.current.startOfDay(for: candidate))
+        }
+    }
+
+    private func selectToday() {
+        withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
+            selectedDay = Calendar.current.startOfDay(for: Date())
+        }
+    }
+
+    private func focusLabel(_ focus: VWARDailyFocus) -> String {
+        switch focus {
+        case .recovery: return "RECUPERAÇÃO"
+        case .sleep: return "SONO"
+        case .load: return "CARGA"
+        }
+    }
+
+    private var intelligenceHeadline: String {
+        guard dailyInsight.score != nil else {
+            return "Sem leitura de \(focusLabel(intelligenceFocus).lowercased()) neste dia"
+        }
+        guard let position = dailyInsight.primaryPosition else {
+            return "Referência de \(focusLabel(intelligenceFocus).lowercased()) em formação"
+        }
+        switch position {
+        case .aboveBaseline: return "\(focusLabel(intelligenceFocus).capitalized) acima do seu padrão"
+        case .nearBaseline: return "\(focusLabel(intelligenceFocus).capitalized) dentro do seu padrão"
+        case .belowBaseline: return "\(focusLabel(intelligenceFocus).capitalized) abaixo do seu padrão"
+        }
+    }
+
+    private var intelligenceSummary: String {
+        guard dailyInsight.score != nil else {
+            return "Nenhum valor foi estimado para preencher a ausência. Selecione outro dia ou sincronize uma fonte compatível."
+        }
+        guard let primary = dailyInsight.comparisons.first(where: { $0.metric == primaryMetric }) else {
+            return "O valor do dia existe, mas ainda faltam dias comparáveis para formar uma referência pessoal estável."
+        }
+        let percent = Int((abs(primary.relativeDifference) * 100).rounded())
+        let direction: String
+        switch primary.position {
+        case .aboveBaseline: direction = "acima"
+        case .nearBaseline: direction = "próximo"
+        case .belowBaseline: direction = "abaixo"
+        }
+        return "O valor está \(percent)% \(direction) da mediana de \(primary.referenceDays) dias comparáveis. Os sinais abaixo são contexto, não uma explicação causal."
+    }
+
+    private var intelligenceReferenceLabel: String {
+        let days = dailyInsight.confidence.dayCount
+        return days == 0 ? "SEM BASE" : "\(days) DIAS"
+    }
+
+    private var primaryMetric: VWARSignalMetric {
+        switch intelligenceFocus {
+        case .recovery: return .recovery
+        case .sleep: return .sleep
+        case .load: return .load
+        }
+    }
+
+    private func signalLabel(_ metric: VWARSignalMetric) -> String {
+        switch metric {
+        case .recovery: return "RECUPERAÇÃO"
+        case .load: return "CARGA"
+        case .sleep: return "SONO"
+        case .hrv: return "VFC"
+        case .restingHeartRate: return "FC DE REPOUSO"
+        case .steps: return "PASSOS"
+        }
+    }
+
+    private func signalValue(_ value: Double, metric: VWARSignalMetric) -> String {
+        switch metric {
+        case .recovery, .load, .sleep: return "\(Int(value.rounded()))/100"
+        case .hrv: return "\(Int(value.rounded())) ms"
+        case .restingHeartRate: return "\(Int(value.rounded())) bpm"
+        case .steps: return Self.compactNumber(value)
+        }
+    }
+
+    private func positionLabel(_ position: VWARSignalPosition) -> String {
+        switch position {
+        case .aboveBaseline: return "ACIMA"
+        case .nearBaseline: return "PADRÃO"
+        case .belowBaseline: return "ABAIXO"
+        }
+    }
+
+    private func comparisonColor(_ comparison: VWARSignalComparison) -> Color {
+        if comparison.position == .nearBaseline { return VITAELuxury.blue }
+        if comparison.metric == .load || comparison.metric == .steps { return VITAELuxury.violet }
+        if comparison.metric == .restingHeartRate {
+            return comparison.position == .belowBaseline ? VITAELuxury.teal : VITAELuxury.rose
+        }
+        return comparison.position == .aboveBaseline ? VITAELuxury.teal : VITAELuxury.rose
     }
 
     // MARK: - Pure helpers
@@ -784,12 +1129,12 @@ struct VITAEPerformanceDashboard: View {
         return value
     }()
 
-    private static var currentWeek: [Date] {
+    private static func week(containing selectedDay: Date) -> [Date] {
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = Locale(identifier: "pt_BR")
         calendar.firstWeekday = 2
-        let start = calendar.dateInterval(of: .weekOfYear, for: Date())?.start
-            ?? calendar.startOfDay(for: Date())
+        let start = calendar.dateInterval(of: .weekOfYear, for: selectedDay)?.start
+            ?? calendar.startOfDay(for: selectedDay)
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
     }
 
@@ -885,7 +1230,7 @@ private struct VWARResearchView: View {
 
     private var safety: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("CAPTURA CLEAN-ROOM")
+            Text("CAPTURA INDEPENDENTE")
                 .font(StrandFont.overlineScaled(9))
                 .tracking(1.2)
                 .foregroundStyle(VITAELuxury.amber)
@@ -1308,6 +1653,22 @@ private struct VITAETextButtonStyle: ButtonStyle {
     }
 }
 
+private struct VITAECalendarNavigationButtonStyle: ButtonStyle {
+    var active = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(StrandFont.overlineScaled(8))
+            .tracking(0.9)
+            .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textSecondary)
+            .padding(.horizontal, 11)
+            .padding(.vertical, 8)
+            .background(active ? VITAELuxury.teal : VITAELuxury.panel, in: Capsule())
+            .overlay(Capsule().stroke(active ? VITAELuxury.teal : VITAELuxury.border, lineWidth: 1))
+            .opacity(configuration.isPressed ? 0.62 : 1)
+    }
+}
+
 private struct VITAERangeButtonStyle: ButtonStyle {
     let active: Bool
     func makeBody(configuration: Configuration) -> some View {
@@ -1464,7 +1825,7 @@ private enum VitalMetric: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .hrv: return "HRV"
+        case .hrv: return "VFC"
         case .rhr: return "FC REPOUSO"
         case .spo2: return "SpO₂"
         case .temperature: return "TEMP"

@@ -67,6 +67,10 @@ struct StrandiOSApp: App {
                 .environmentObject(health)
                 .environmentObject(router)
                 .environmentObject(UpdateStore.shared)
+                // A edição iOS/iPadOS 10 é uma experiência pt-BR dedicada. Isto também localiza
+                // elementos fornecidos pelo sistema (calendário, seletores e autorizações) sem depender
+                // do idioma global do aparelho.
+                .environment(\.locale, Locale(identifier: "pt_BR"))
                 // v5 L3: the shared stress check-in nudge surface, so the Breathe screen's passive
                 // card observes the SAME instance the central detector (AppModel.evaluateStress) posts to.
                 .environment(\.stressNudgeCenter, model.stressNudgeCenter)
@@ -180,9 +184,9 @@ struct StrandiOSApp: App {
 /// excluded `RootView()` sidebar for `RootTabView()`. The shared `OnboardingWizard`, `TermsGateView`,
 /// `WhatsNewView`, `AppChangelog`, and `Terms` symbols all compile into the iOS target unchanged.
 private struct iOSRootView: View {
-    @AppStorage("noop.onboarded") private var onboarded = false
-    @AppStorage("noop.lastSeenChangelogVersion") private var lastSeenChangelog = ""
-    @AppStorage("noop.acceptedTermsVersion") private var acceptedTerms = ""
+    @AppStorage("vwar.looplife.ptbr.onboarded.v10") private var onboarded = false
+    @AppStorage("vwar.looplife.ptbr.lastSeenChangelogVersion") private var lastSeenChangelog = ""
+    @AppStorage("vwar.looplife.ptbr.acceptedTermsVersion") private var acceptedTerms = ""
     @State private var showWhatsNew = false
 
     var body: some View {
@@ -209,7 +213,7 @@ private struct iOSRootView: View {
         ZStack {
             RootTabView()
             if !onboarded && !demoBypass {
-                OnboardingWizard(onFinished: {
+                VWARPortugueseOnboarding(onFinished: {
                     onboarded = true
                     // A brand-new user just saw the expectations in onboarding — don't also pop the
                     // changelog at them; mark them current.
@@ -221,7 +225,7 @@ private struct iOSRootView: View {
             // Terms acknowledgment gate — over EVERYTHING (before onboarding/pairing/Bluetooth) until
             // the current terms version is accepted; re-appears if the terms materially change.
             if acceptedTerms != Terms.currentVersion && !demoBypass {
-                TermsGateView(onAccept: { acceptedTerms = Terms.currentVersion })
+                VWARPortugueseTermsGate(onAccept: { acceptedTerms = Terms.currentVersion })
                     .transition(.opacity)
                     .zIndex(2)
             }
@@ -229,7 +233,7 @@ private struct iOSRootView: View {
         .animation(.easeInOut(duration: 0.35), value: onboarded)
         .animation(.easeInOut(duration: 0.35), value: acceptedTerms)
         .sheet(isPresented: $showWhatsNew) {
-            WhatsNewView(onClose: {
+            VWARPortugueseWhatsNew(onClose: {
                 lastSeenChangelog = AppChangelog.currentVersion
                 showWhatsNew = false
             })

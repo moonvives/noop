@@ -9,7 +9,7 @@
 		<string>com.noopapp.noop.debugexport</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<string>pt-BR</string>
 	<key>CFBundleDisplayName</key>
 	<string>VWAR Loop Life</string>
 	<key>CFBundleExecutable</key>
@@ -29,6 +29,10 @@
 	</dict>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>pt-BR</string>
+	</array>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -49,13 +53,13 @@
 		<true/>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>VWAR Loop Life connects to supported wearables over Bluetooth to read authorized fitness data locally on your iPhone. Nothing leaves your device without your permission.</string>
+	<string>O VWAR Loop Life usa Bluetooth para ler localmente dados de condicionamento físico autorizados de pulseiras compatíveis. Nada sai do aparelho sem sua permissão.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>VWAR Loop Life reads Apple Health data you authorize to calculate personal wellness trends on-device. Nothing leaves your device without your permission.</string>
+	<string>O VWAR Loop Life lê somente os dados que você autorizar no app Saúde para calcular tendências pessoais no aparelho. Nada sai do dispositivo sem sua permissão.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>VWAR Loop Life writes supported wellness metrics to Apple Health only when you explicitly allow it.</string>
+	<string>O VWAR Loop Life grava métricas de bem-estar compatíveis no app Saúde somente quando você permitir explicitamente.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>VWAR Loop Life records your route during an outdoor workout to show distance, pace, and a map, including while the screen is off. The route stays on your device.</string>
+	<string>O VWAR Loop Life registra a rota de exercícios ao ar livre para mostrar distância, ritmo e mapa, inclusive com a tela apagada. A rota permanece no aparelho.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>
