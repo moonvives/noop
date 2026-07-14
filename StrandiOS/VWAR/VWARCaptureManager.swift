@@ -178,7 +178,7 @@ final class VWARCaptureManager: NSObject, ObservableObject {
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "en_US_POSIX")
             formatter.dateFormat = "yyyyMMdd-HHmmss"
-            let url = root.appendingPathComponent("VITAE-VWAR-\(formatter.string(from: Date())).json")
+            let url = root.appendingPathComponent("VWAR-Loop-Life-\(formatter.string(from: Date())).json")
             try redacted.canonicalJSON().write(to: url, options: [.atomic, .completeFileProtection])
             exportURL = url
             lastExportError = nil
@@ -199,7 +199,7 @@ final class VWARCaptureManager: NSObject, ObservableObject {
         let id = peripheral.identifier
         transcript = CaptureTranscript(
             deviceModel: "VWAR Loop Life",
-            collectorVersion: "VITAE One iOS read-only 1",
+            collectorVersion: "VWAR Loop Life iOS read-only 1",
             startedAt: Date(),
             peripheral: PeripheralSnapshot(
                 capturedAt: Date(),
@@ -306,7 +306,7 @@ final class VWARCaptureManager: NSObject, ObservableObject {
         switch state {
         case .poweredOn: return "Bluetooth ativo"
         case .poweredOff: return "Ative o Bluetooth nos Ajustes."
-        case .unauthorized: return "Autorize o Bluetooth para o VITAE One nos Ajustes."
+        case .unauthorized: return "Autorize o Bluetooth para o VWAR Loop Life nos Ajustes."
         case .unsupported: return "Este dispositivo não oferece Bluetooth Low Energy."
         case .resetting: return "O Bluetooth está reiniciando."
         case .unknown: return "O estado do Bluetooth ainda não está disponível."
@@ -331,7 +331,7 @@ final class VWARCaptureManager: NSObject, ObservableObject {
 
     private static func captureDirectory() throws -> URL {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let url = documents.appendingPathComponent("VITAE Capturas", isDirectory: true)
+        let url = documents.appendingPathComponent("VWAR Loop Life Capturas", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

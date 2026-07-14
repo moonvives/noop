@@ -22,8 +22,8 @@ android {
         applicationId = "com.noop.whoop"
         minSdk = 26
         targetSdk = 34
-        versionCode = 259
-        versionName = "8.2.0"
+        versionCode = 260
+        versionName = "9.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,8 +69,8 @@ android {
     }
 
     // Two clearly-distinct apps that install side-by-side:
-    //   • full → "NOOP"      (com.noop.whoop)     — the real app, starts empty, pair a strap / import.
-    //   • demo → "NOOP Demo"  (com.noop.whoop.demo) — preloaded with 120 days of synthetic data and
+    //   • full → "VWAR Loop Life"      (com.noop.whoop)     — the real app, starts empty, pair a strap / import.
+    //   • demo → "VWAR Loop Life Demo" (com.noop.whoop.demo) — preloaded with 120 days of synthetic data and
     //                          a visible DEMO badge, so anyone can explore every screen with no strap.
     // Build e.g. ./gradlew assembleFullRelease assembleDemoRelease.
     flavorDimensions += "tier"

@@ -2,10 +2,10 @@
 
 > **Status:** the original Homebrew tap belonged to the discontinued upstream project and may no
 > longer be available. This mirror currently hosts macOS builds as `.zip` assets on
-> [GitHub Releases](https://github.com/ParthJadhav/noop/releases). Treat the notes below as
+> [GitHub Releases](https://github.com/moonvives/noop/releases). Treat the notes below as
 > historical release-process documentation until a new tap is created for this repository.
 
-macOS users install + auto-update NOOP with:
+macOS users install + auto-update VWAR Loop Life with:
 
 ```bash
 brew tap noopapp/noop
@@ -26,11 +26,11 @@ attached to each release. (The tap is also mirrored at `noop.fans/NoopApp/homebr
 > right-click-Open below: you're vouching for code you can read — the cask is one short file in the
 > public tap, and the app's full source is in this repo.
 
-> **Unsigned-app note.** NOOP ships anonymously with no Apple Developer ID, so it isn't notarized.
+> **Unsigned-app note.** VWAR Loop Life ships anonymously with no Apple Developer ID, so it isn't notarized.
 > Homebrew can't strip the quarantine flag for an un-notarized app, so on **first launch** Gatekeeper
-> blocks it. On **macOS 15 Sequoia and later**: try to open NOOP once, then **System Settings →
-> Privacy & Security**, scroll down, and click **"Open Anyway"** next to NOOP. (On macOS 14 and
-> earlier you can right-click NOOP in `/Applications` → **Open** → **Open**.) The cask's `caveats`
+> blocks it. On **macOS 15 Sequoia and later**: try to open VWAR Loop Life once, then **System Settings →
+> Privacy & Security**, scroll down, and click **"Open Anyway"** next to VWAR Loop Life. (On macOS 14 and
+> earlier you can right-click VWAR Loop Life in `/Applications` → **Open** → **Open**.) The cask's `caveats`
 > says this. Updates after that are just `brew upgrade`.
 
 ## How it stays current

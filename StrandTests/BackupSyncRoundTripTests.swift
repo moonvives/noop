@@ -28,7 +28,7 @@ final class BackupSyncRoundTripTests: XCTestCase {
     }
 
     /// A suite-scoped UserDefaults for the settings half of a restore, so these tests NEVER write into
-    /// the test runner's `.standard` domain (which on a dev Mac is the developer's real NOOP profile).
+    /// the test runner's `.standard` domain (which on a dev Mac is the developer's real VWAR Loop Life profile).
     private func freshDefaults() throws -> UserDefaults {
         let name = "backupsync-test-\(UUID().uuidString)"
         guard let d = UserDefaults(suiteName: name) else { throw TestError("no suite defaults") }
@@ -53,7 +53,7 @@ final class BackupSyncRoundTripTests: XCTestCase {
         let result = DataBackup.restore(from: backup, toDatabaseAt: liveDB.path)
 
         guard case .imported = result else {
-            return XCTFail("Restore should succeed for a valid NOOP backup, got \(result)")
+            return XCTFail("Restore should succeed for a valid VWAR Loop Life backup, got \(result)")
         }
         XCTAssertEqual(try deviceRows(in: liveDB), ["my-whoop", "watch"],
                        "Restored DB should hold exactly the backed-up rows")
@@ -205,7 +205,7 @@ final class BackupSyncRoundTripTests: XCTestCase {
     }
 
     func testTruncatedNoopBackupIsRejectedAndLiveDbIntact() throws {
-        // A REAL NOOP database grown past one page, then truncated to its first page (the #1014
+        // A REAL VWAR Loop Life database grown past one page, then truncated to its first page (the #1014
         // shape: a backup clipped mid-upload/mid-copy). Page 1 still reads perfectly — magic bytes
         // intact, `grdb_migrations` visible in sqlite_master — so the header and origin gates both
         // PASS. Only quick_check notices the file no longer holds the pages its header promises.
@@ -268,7 +268,7 @@ final class BackupSyncRoundTripTests: XCTestCase {
 
     // MARK: - SQLite fixtures (system SQLite3)
 
-    /// Build a minimal valid GRDB-origin NOOP DB: a `grdb_migrations` bookkeeping table (so the origin
+    /// Build a minimal valid GRDB-origin VWAR Loop Life DB: a `grdb_migrations` bookkeeping table (so the origin
     /// gate accepts it as this app's backup) plus a `device` table holding the given identifiers.
     private func makeNoopDatabase(at url: URL, deviceRows: [String]) throws {
         var db: OpaquePointer?
@@ -284,7 +284,7 @@ final class BackupSyncRoundTripTests: XCTestCase {
         }
     }
 
-    /// Build a valid GRDB-origin NOOP DB that spans MULTIPLE pages, so a truncation fixture can cut
+    /// Build a valid GRDB-origin VWAR Loop Life DB that spans MULTIPLE pages, so a truncation fixture can cut
     /// real pages off while page 1 (magic + sqlite_master) stays perfectly readable (#1014).
     private func makeMultiPageNoopDatabase(at url: URL) throws {
         var db: OpaquePointer?
@@ -301,7 +301,7 @@ final class BackupSyncRoundTripTests: XCTestCase {
         }
     }
 
-    /// Build a valid SQLite file that is NOT a NOOP/GRDB backup: it carries the Room marker and a
+    /// Build a valid SQLite file that is NOT a VWAR Loop Life/GRDB backup: it carries the Room marker and a
     /// `device` table but no `grdb_migrations`, so the origin gate must reject it.
     private func makeForeignDatabase(at url: URL) throws {
         var db: OpaquePointer?

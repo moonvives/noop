@@ -1,6 +1,6 @@
-# NOOP — Android Port Guide
+# VWAR Loop Life — Android Port Guide
 
-NOOP is a standalone, fully **offline** companion app for WHOOP straps (4.0 and 5.0). It pairs
+VWAR Loop Life is a standalone, fully **offline** companion app for WHOOP straps (4.0 and 5.0). It pairs
 directly with the strap over Bluetooth Low Energy, stores everything on-device in SQLite, imports
 WHOOP CSV exports and Apple Health exports, and computes recovery / strain / HRV / sleep locally.
 There is no cloud, no account — the app talks only to **your own device** and
@@ -13,7 +13,7 @@ into the main project as a **build-from-source-only** client — see the macOS/i
 the same analytics so results match macOS.)
 
 > **Not affiliated with WHOOP, and not a medical device.** "WHOOP" is used nominatively only to
-> identify the hardware this software interoperates with. NOOP contains no WHOOP code, firmware, or
+> identify the hardware this software interoperates with. VWAR Loop Life contains no WHOOP code, firmware, or
 > assets, and performs no DRM circumvention — it talks only to the user's own device and the data it
 > has already recorded. All outputs (HR, HRV, recovery, strain, sleep, SpO₂, temperature) are
 > approximations and are **not** clinically validated. See [`../DISCLAIMER.md`](../DISCLAIMER.md)
@@ -21,7 +21,7 @@ the same analytics so results match macOS.)
 
 > ### Status: shipping platform — builds, releases, and validated on WHOOP 4.0
 >
-> The Android client is a **fully shipping** part of NOOP. It builds and releases as two APK
+> The Android client is a **fully shipping** part of VWAR Loop Life. It builds and releases as two APK
 > flavours — **full** (`./gradlew assembleFullRelease`) and **demo** (`./gradlew
 > assembleDemoRelease`) — and is sideloaded by users (with features such as a **Sync-now** button).
 > The BLE pipeline, Compose UI, Room database, and importers are all present and working. It is
@@ -63,7 +63,7 @@ re-implements the same observable behavior in idiomatic Kotlin:
 | `WhoopStore` — GRDB/SQLite persistence | `com.noop.data` (Room) | shipped — entities, DAOs, database |
 | `StrandAnalytics` — HRV / recovery / strain / sleep math | `com.noop.analytics` | shipped — RMSSD / zones / illness-watch + scorers |
 | `StrandImport` — WHOOP CSV + Apple Health importers | `com.noop.data` / `com.noop.ingest` importers | shipped — WHOOP CSV, Apple Health, Health Connect, raw `capture.json` (see [Raw capture import](#raw-capture-import-capturejson)) |
-| `StrandDesign` — SwiftUI design system | Jetpack Compose theme | shipped — `Theme.NOOP` tokens + components |
+| `StrandDesign` — SwiftUI design system | Jetpack Compose theme | shipped — `Theme.VWAR Loop Life` tokens + components |
 | `Strand/` macOS app (CoreBluetooth + UI) | `com.noop.ui` + `com.noop.ble` (Compose + `BluetoothGatt`) | shipped — Compose screens + BLE pipeline |
 
 The single source of truth that **both** platforms must agree on is the protocol schema resource
@@ -81,7 +81,7 @@ memory.
 
 ```
 android/
-├── settings.gradle.kts          # rootProject.name = "NOOP"; include(":app")
+├── settings.gradle.kts          # rootProject.name = "VWAR Loop Life"; include(":app")
 ├── build.gradle.kts             # root: declares AGP / Kotlin / KSP plugin versions (apply false)
 ├── gradle.properties            # JVM args, AndroidX on, R8 full mode, parallel/caching
 ├── gradlew / gradlew.bat        # committed wrapper scripts
@@ -210,8 +210,8 @@ cd android
 adb shell am start -n com.noop.whoop.debug/com.noop.ui.MainActivity
 
 # Release builds — the two shipped flavours (R8 full mode + resource shrink are enabled).
-./gradlew assembleFullRelease    # → NOOP-full.apk
-./gradlew assembleDemoRelease    # → NOOP-demo.apk
+./gradlew assembleFullRelease    # → VWAR Loop Life-full.apk
+./gradlew assembleDemoRelease    # → VWAR Loop Life-demo.apk
 ```
 
 Open `android/` directly in Android Studio (**File ▸ Open ▸ android/**) and let Gradle sync; run
@@ -221,9 +221,9 @@ the `app` configuration on a physical device.
 
 ## Installing the APK (sideload & Play Protect)
 
-The released `NOOP-full.apk` is an **unsigned, source-available APK** — there
+The released `VWAR Loop Life-full.apk` is an **unsigned, source-available APK** — there
 is no Play Store listing, because the project is anonymous and has no paid Play identity to publish
-or sign under. That's deliberate, but it means Android treats NOOP as an "unknown app" and **Google
+or sign under. That's deliberate, but it means Android treats VWAR Loop Life as an "unknown app" and **Google
 Play Protect** may warn or block on install — most stubbornly on stock Pixel / recent Android.
 Nothing is wrong with the file; it's just missing a Play signature. To get it on:
 
@@ -232,7 +232,7 @@ Nothing is wrong with the file; it's just missing a Play signature. To get it on
    directly: **Settings → Apps → Special app access → Install unknown apps → [the browser or file
    manager you're installing from] → Allow from this source**, then reopen the APK.
 3. **If Play Protect still refuses**, it's your call for an unsigned app you trust: **Play Store →
-   profile icon → Play Protect → ⚙ Settings → "Scan apps with Play Protect" off**, install NOOP,
+   profile icon → Play Protect → ⚙ Settings → "Scan apps with Play Protect" off**, install VWAR Loop Life,
    then switch it **back on**.
 4. **Reinstalling is safe.** The app sets `android:allowBackup="false"` and keeps everything in
    private on-device storage, so uninstalling and reinstalling simply starts fresh — there's no cloud
@@ -508,7 +508,7 @@ storage; nothing is uploaded.
 **Settings → Data Sources → "Raw capture (.json)"** imports a strap offload that was captured on
 *another* device — most usefully the Linux `tools/linux-capture/whoop_sync.py` tool, whose `export`
 subcommand writes exactly this format. It lets you pull a strap's history on a laptop (no phone, no
-WHOOP app) and then fold it into NOOP on the phone. Fully offline; nothing leaves the device.
+WHOOP app) and then fold it into VWAR Loop Life on the phone. Fully offline; nothing leaves the device.
 
 **File format.** A JSON array of frame objects, one per stored BLE notify frame:
 
@@ -588,7 +588,7 @@ there's no hard 5.0/MG gate — but because 5.0/MG HR is currently sparse, those
 ## Compose UI
 
 The UI is Jetpack Compose (Material 3). The theme resources (`res/values/colors.xml`, `themes.xml`
-with `Theme.NOOP`, `strings.xml` with `app_name = "NOOP"`), `MainActivity`, and the screens are all
+with `Theme.VWAR Loop Life`, `strings.xml` with `app_name = "VWAR Loop Life"`), `MainActivity`, and the screens are all
 in place. The dependency set in `app/build.gradle.kts` is wired for Compose (BOM `2024.06.00`,
 Material 3, Material icons extended, `activity-compose`, `navigation-compose`,
 `lifecycle-viewmodel-compose`) and Coroutines.
@@ -596,7 +596,7 @@ Material 3, Material icons extended, `activity-compose`, `navigation-compose`,
 The screens follow the reference app's information architecture (`Strand/Screens/`): Today, Live,
 Sleep, Trends, Stress, Workouts, Compare, Insights, Metric Explorer, Data Sources, Settings,
 Support. `StrandDesign` (palette / components / charts) is the spec for tokens and chart styles,
-re-expressed as a Compose theme — colors come from `Theme.NOOP`, never hardcoded. When extending the
+re-expressed as a Compose theme — colors come from `Theme.VWAR Loop Life`, never hardcoded. When extending the
 UI, keep that parity.
 
 ---
@@ -693,6 +693,6 @@ reverse-engineering and interoperability work:
 - **`b-nnett/goose`** — WHOOP 5.0 / MG BLE protocol (service family `fd4b0001-…`, CRC16-Modbus
   header, CLIENT_HELLO, "puffin" packet types) that the WHOOP-5 path is ported from.
 
-See [`../ATTRIBUTION.md`](../ATTRIBUTION.md) for full detail. NOOP contains no WHOOP proprietary
+See [`../ATTRIBUTION.md`](../ATTRIBUTION.md) for full detail. VWAR Loop Life contains no WHOOP proprietary
 code, firmware, logos, or assets, operates only with the user's own device and data, and is **not a
 medical device**.

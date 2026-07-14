@@ -1,6 +1,6 @@
 # VWAR / G Band clean-room capture plan
 
-This document defines the evidence needed before VITAE One implements any proprietary G Band command.
+This document defines the evidence needed before VWAR Loop Life implements any proprietary G Band command.
 It is limited to interoperability with hardware you own. It does not bypass authentication, extract
 firmware, impersonate cloud services, or reuse credentials from another person or account.
 
@@ -54,11 +54,11 @@ Use a stable, private session folder:
 YYYYMMDD-HHMM-session-code/
   packetlogger.pklg
   gatt-snapshot.json
-  vitae-transcript.json
+  vwar-transcript.json
   operator-notes.md
 ```
 
-`vitae-transcript.json` uses the versioned `CaptureTranscript` model in `Packages/VWARProtocol`. Share
+`vwar-transcript.json` uses the versioned `CaptureTranscript` model in `Packages/VWARProtocol`. Share
 only a redacted export. Peripheral identifiers and free-form notes are removed by the protocol-research
 policy; use the metadata-only policy when raw BLE payloads are unnecessary.
 
@@ -69,7 +69,7 @@ policy; use the metadata-only policy when raw BLE payloads are unnecessary.
 3. Group traffic by service, characteristic, operation, payload length, and changing byte offsets.
 4. Identify framing, counters, lengths, and checksums before attempting semantic fields.
 5. Write fixture-based tests for every hypothesis.
-6. Permit a write in VITAE One only after it is known-safe, narrowly scoped, and user initiated.
+6. Permit a write in VWAR Loop Life only after it is known-safe, narrowly scoped, and user initiated.
 
 Health values decoded from an undocumented protocol remain **experimental** until independently
 validated. They must not be presented as diagnoses, laboratory results, or medical-device readings.

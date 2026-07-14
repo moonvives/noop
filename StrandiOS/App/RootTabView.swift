@@ -35,7 +35,7 @@ struct RootTabView: View {
 
     /// The Today tab root, honouring the liquid/classic preference.
     @ViewBuilder private var todayTabRoot: some View {
-        // The 12.9-inch iPad gets the dense VITAE performance command centre: text-led navigation,
+        // The 12.9-inch iPad gets the dense VWAR Loop Life performance command centre: text-led navigation,
         // interactive Charts, honest baseline bands, and the read-only VWAR research console. iPhone keeps
         // the existing daily flow byte-for-byte. The dashboard itself uses adaptive grids, so portrait and
         // landscape both remain readable on every iPad size.

@@ -1,29 +1,29 @@
 {
-  "name": "NOOP",
-  "subtitle": "A standalone WHOOP app — your strap, your device, fully offline.",
-  "description": "An AltStore / SideStore source for NOOP, the independent open-source WHOOP companion. Add this source to get one-tap updates for the sideloaded iOS build.\n\nNOOP is not affiliated with WHOOP. It reads a strap you own, directly over Bluetooth, on your own device — no WHOOP app, no subscription, no cloud.",
-  "iconURL": "https://github.com/ParthJadhav/noop/raw/main/Strand/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
-  "website": "https://github.com/ParthJadhav/noop",
+  "name": "VWAR Loop Life",
+  "subtitle": "Saúde, recuperação e sono em um só lugar.",
+  "description": "Fonte AltStore e SideStore do VWAR Loop Life. O app reúne dados da pulseira VWAR Loop Life recebidos pelo G Band e Apple Health, além de fontes Bluetooth compatíveis, com análise local, calendário e histórico privado.\n\nProjeto independente e experimental. Não é afiliado à VWAR, G Band ou WHOOP e não substitui avaliação médica.",
+  "iconURL": "https://github.com/moonvives/noop/raw/main/Strand/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
+  "website": "https://github.com/moonvives/noop",
   "tintColor": "44E2B0",
   "apps": [
     {
-      "name": "NOOP",
+      "name": "VWAR Loop Life",
       "bundleIdentifier": "com.noopapp.noop",
-      "developerName": "NoopApp",
-      "subtitle": "Read your own WHOOP strap, fully offline.",
-      "localizedDescription": "NOOP talks to a WHOOP 4.0 / 5.0 / MG strap you own directly over Bluetooth — no WHOOP app, no subscription, no cloud. Live heart rate, history sync, and NOOP's own Charge / Effort / Rest scores, all computed on-device and stored only on your iPhone.\n\nIndependent and experimental; not affiliated with WHOOP. Source: https://github.com/ParthJadhav/noop",
-      "iconURL": "https://github.com/ParthJadhav/noop/raw/main/Strand/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
+      "developerName": "VWAR Loop Life Project",
+      "subtitle": "Seu painel privado de saúde e desempenho.",
+      "localizedDescription": "VWAR Loop Life organiza frequência cardíaca, HRV, sono, oxigenação, passos, temperatura e treinos em uma experiência premium. A integração recomendada para a pulseira VWAR Loop Life é G Band → Apple Health → VWAR Loop Life. Calendário, histórico e análises são processados no dispositivo.\n\nEstimativas de pressão, glicose e ECG da pulseira não entram nos escores nem substituem equipamentos médicos. Projeto independente: https://github.com/moonvives/noop",
+      "iconURL": "https://github.com/moonvives/noop/raw/main/Strand/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
       "tintColor": "44E2B0",
       "category": "healthcare-fitness",
       "screenshotURLs": [],
       "versions": [
         {
-          "version": "8.2.0",
-          "buildVersion": "170",
-          "date": "2026-07-05",
-          "localizedDescription": "NOOP 8.2.0. See the release notes for what changed.",
-          "downloadURL": "https://github.com/ParthJadhav/noop/releases/download/v8.2.0/NOOP-v8.2.0-ios.ipa",
-          "size": 14027253,
+          "version": "9.0.0",
+          "buildVersion": "171",
+          "date": "2026-07-13",
+          "localizedDescription": "VWAR Loop Life 9.0: nova identidade, relógio ao vivo, calendário semanal e análise avançada de 28 dias.",
+          "downloadURL": "https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa",
+          "size": 14442281,
           "minOSVersion": "17.0"
         }
       ],
@@ -32,17 +32,17 @@
           "com.apple.developer.healthkit"
         ],
         "privacy": {
-          "NSBluetoothAlwaysUsageDescription": "NOOP connects directly to your WHOOP strap over Bluetooth to read heart rate, R-R intervals, battery, and sensor data locally on your iPhone. Nothing leaves your device.",
-          "NSHealthShareUsageDescription": "NOOP reads your own Apple Health data on-device to compute recovery, strain, and sleep. Nothing leaves your device.",
-          "NSHealthUpdateUsageDescription": "NOOP writes the metrics it computes from your strap back into Apple Health, on-device and only when you allow it."
+          "NSBluetoothAlwaysUsageDescription": "VWAR Loop Life usa Bluetooth para receber dados de sensores compatíveis quando você autoriza.",
+          "NSHealthShareUsageDescription": "VWAR Loop Life lê os dados de saúde que você autorizar para mostrar tendências, recuperação, esforço e sono no dispositivo.",
+          "NSHealthUpdateUsageDescription": "VWAR Loop Life grava no Apple Health apenas as métricas que você autorizar."
         }
       },
-      "version": "8.2.0",
-      "buildVersion": "170",
-      "versionDate": "2026-07-05",
-      "versionDescription": "NOOP 8.2.0. See the release notes for what changed.",
-      "downloadURL": "https://github.com/ParthJadhav/noop/releases/download/v8.2.0/NOOP-v8.2.0-ios.ipa",
-      "size": 14027253,
+      "version": "9.0.0",
+      "buildVersion": "171",
+      "versionDate": "2026-07-13",
+      "versionDescription": "VWAR Loop Life 9.0: nova identidade, relógio ao vivo, calendário semanal e análise avançada de 28 dias.",
+      "downloadURL": "https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa",
+      "size": 14442281,
       "minOSVersion": "17.0"
     }
   ],

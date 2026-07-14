@@ -11,7 +11,7 @@ private struct CollectorOptions {
     var identifier: UUID?
     var scanTimeout: TimeInterval = 45
     var captureDuration: TimeInterval = 300
-    var outputDirectory = "VITAE-VWAR-Capture"
+    var outputDirectory = "VWAR-Loop-Life-Capture"
 
     static func parse(_ arguments: [String]) throws -> CollectorOptions {
         var options = CollectorOptions()
@@ -354,20 +354,20 @@ private final class VWARCollector: NSObject, CBCentralManagerDelegate, CBPeriphe
         )
         let transcript = CaptureTranscript(
             deviceModel: advertisedName ?? target?.name ?? "VWAR Loop Life",
-            collectorVersion: "vitae-vwar-capture/1",
+            collectorVersion: "vwar-loop-life-capture/2",
             startedAt: startedAt,
             endedAt: endedAt,
             peripheral: snapshot,
             events: events
         )
-        try transcript.canonicalJSON().write(to: directory.appendingPathComponent("vitae-transcript-private.json"), options: .atomic)
+        try transcript.canonicalJSON().write(to: directory.appendingPathComponent("vwar-transcript-private.json"), options: .atomic)
         try transcript.redacted(using: .protocolResearch).canonicalJSON()
-            .write(to: directory.appendingPathComponent("vitae-transcript-redacted.json"), options: .atomic)
+            .write(to: directory.appendingPathComponent("vwar-transcript-redacted.json"), options: .atomic)
         try writeJSON(snapshot, to: directory.appendingPathComponent("gatt-snapshot-private.json"))
         try writeJSON(ProtocolEvidenceBuilder.build(from: events), to: directory.appendingPathComponent("protocol-evidence.json"))
         try writeJSON(standardMetrics, to: directory.appendingPathComponent("standard-metrics.json"))
         let notes = """
-        # VITAE VWAR capture
+        # VWAR Loop Life capture
 
         Result: \(reason)
         Started: \(Self.isoFormatter.string(from: startedAt))
@@ -376,8 +376,8 @@ private final class VWARCollector: NSObject, CBCentralManagerDelegate, CBPeriphe
         Events: \(events.count)
         Bluetooth SIG metric samples: \(standardMetrics.count)
 
-        `vitae-transcript-private.json` and `gatt-snapshot-private.json` contain the device identifier.
-        Do not publish them. Share only `vitae-transcript-redacted.json` and `protocol-evidence.json`.
+        `vwar-transcript-private.json` and `gatt-snapshot-private.json` contain the device identifier.
+        Do not publish them. Share only `vwar-transcript-redacted.json` and `protocol-evidence.json`.
 
         This collector never writes to an unknown characteristic. Proprietary payloads remain undecoded.
         """
@@ -470,11 +470,11 @@ private final class VWARCollector: NSObject, CBCentralManagerDelegate, CBPeriphe
 
 private func printUsage() {
     print("""
-    VITAE VWAR Loop Life desktop collector
+    VWAR Loop Life desktop collector
 
-      vitae-vwar-capture --list [--scan-timeout 30]
-      vitae-vwar-capture --name "Loop" [--duration 300] [--output ~/Documents/VITAE-VWAR-Capture]
-      vitae-vwar-capture --identifier UUID [--duration 300]
+      vwar-loop-life-capture --list [--scan-timeout 30]
+      vwar-loop-life-capture --name "Loop" [--duration 300] [--output ~/Documents/VWAR-Loop-Life-Capture]
+      vwar-loop-life-capture --identifier UUID [--duration 300]
 
     The collector performs discovery, permitted reads, and notification subscriptions only.
     It never writes to proprietary characteristics.
@@ -502,7 +502,7 @@ private struct VWARCaptureCLI {
 @main
 private struct UnsupportedPlatformCLI {
     static func main() {
-        fputs("vitae-vwar-capture requires macOS with CoreBluetooth.\n", stderr)
+        fputs("vwar-loop-life-capture requires macOS with CoreBluetooth.\n", stderr)
     }
 }
 

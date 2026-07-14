@@ -1,18 +1,35 @@
 # Changelog
 
-All notable changes to NOOP. NOOP is an independent, experimental project — not the WHOOP app, and
-not affiliated with WHOOP. It reads a strap you own, on your own device, fully offline. Dates are
-approximate; downloads are on the [Releases](https://github.com/ParthJadhav/noop/releases) page.
+All notable changes to VWAR Loop Life. It is an independent, experimental project, not affiliated
+with VWAR, G Band, Apple, or WHOOP. Health data stays on the user's device unless an optional
+integration is explicitly enabled. Downloads are on the
+[Releases](https://github.com/moonvives/noop/releases) page.
+
+## 9.0.0: VWAR Loop Life
+
+Released 2026-07-13.
+
+- Complete visible rebrand across iPhone, iPad, Apple Watch, widgets, macOS, Android, documentation,
+  GitHub workflows, release artifacts, and installation metadata.
+- Premium daily header with live hour and minute, weekday, complete date, year, and an interactive
+  weekly calendar linked to the existing monthly date picker.
+- Advanced 28-day analysis for HRV, resting heart rate, and sleep, with personal-baseline deltas,
+  confidence levels, and non-clinical guidance computed locally.
+- First-class VWAR Loop Life path through G Band and Apple Health, with explicit separation of
+  experimental ECG, blood-pressure, and glucose estimates from readiness scores.
+- Unsigned iOS package renamed to `VWAR-Loop-Life-v9.0.0-ios.ipa`, ready for AltStore, SideStore, or
+  signing from source in Xcode.
+- macOS protocol collector and GitHub artifacts now use the VWAR Loop Life identity.
 
 ## What to expect
 
-- **Independent, and experimental.** Treat NOOP as a capable work-in-progress rather than a finished
+- **Independent, and experimental.** Treat VWAR Loop Life as a capable work-in-progress rather than a finished
   product.
 - **WHOOP 4.0 is the supported path.** It is tested and works end to end. WHOOP 5.0/MG is newer: live
   heart rate works today, but deeper metrics (recovery, strain, sleep) for 5/MG are still being
   figured out. NOOP always tells you what's live versus still building.
 - **Your scores build over a few nights.** Live heart rate is instant; recovery, strain and sleep
-  sharpen as NOOP learns your baseline. Import your WHOOP export to backfill your history instantly.
+  sharpen as VWAR Loop Life learns your baseline. Import your WHOOP export to backfill your history instantly.
 - **Everything stays on your device.** No account, no cloud, no sync.
 
 ---

@@ -1,10 +1,15 @@
-name: Release artifacts
+name: VWAR Loop Life release
 
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - "v*"
+    paths:
+      - "project.yml"
+      - ".github/workflows/release.yml"
 
 permissions:
   contents: write
@@ -53,8 +58,11 @@ jobs:
           lipo -info "$app/Contents/MacOS/NOOP"
           lipo -info "$app/Contents/MacOS/NOOP" | grep -E 'x86_64.*arm64|arm64.*x86_64'
           Tools/anonymize-macos-app.sh "$app"
+          staged="build/VWAR Loop Life.app"
+          rm -rf "$staged"
+          ditto "$app" "$staged"
           mkdir -p dist
-          ditto -c -k --sequesterRsrc --keepParent "$app" "dist/NOOP-v${VERSION}-macos.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$staged" "dist/VWAR-Loop-Life-v${VERSION}-macos.zip"
 
       - name: Build unsigned iOS IPA
         run: |
@@ -82,18 +90,18 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/dist"
           rm -rf "$stage"
           mkdir -p "$stage/Payload"
-          ditto "$app" "$stage/Payload/NOOP.app"
-          rm -rf "$stage/Payload/NOOP.app/Watch"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$stage/Payload" "$GITHUB_WORKSPACE/dist/NOOP-v${VERSION}-ios.ipa"
-          ls -lh "$GITHUB_WORKSPACE/dist/NOOP-v${VERSION}-ios.ipa"
+          ditto "$app" "$stage/Payload/VWARLoopLife.app"
+          rm -rf "$stage/Payload/VWARLoopLife.app/Watch"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$stage/Payload" "$GITHUB_WORKSPACE/dist/VWAR-Loop-Life-v${VERSION}-ios.ipa"
+          ls -lh "$GITHUB_WORKSPACE/dist/VWAR-Loop-Life-v${VERSION}-ios.ipa"
 
       - name: Upload Apple artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: noop-apple-artifacts
+          name: vwar-loop-life-apple-artifacts
           path: |
-            dist/NOOP-v*-macos.zip
-            dist/NOOP-v*-ios.ipa
+            dist/VWAR-Loop-Life-v*-macos.zip
+            dist/VWAR-Loop-Life-v*-ios.ipa
           if-no-files-found: error
 
   android:
@@ -135,13 +143,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp android/app/build/outputs/apk/full/release/app-full-release.apk "dist/NOOP-v${VERSION}.apk"
+          cp android/app/build/outputs/apk/full/release/app-full-release.apk "dist/VWAR-Loop-Life-v${VERSION}.apk"
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noop-android-artifact
-          path: dist/NOOP-v*.apk
+          name: vwar-loop-life-android-artifact
+          path: dist/VWAR-Loop-Life-v*.apk
           if-no-files-found: error
 
   publish:
@@ -169,7 +177,7 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: noop-*
+          pattern: vwar-loop-life-*
           path: dist
           merge-multiple: true
 
@@ -179,12 +187,12 @@ jobs:
         run: |
           set -euo pipefail
           ls -lh dist
-          notes="Recovered NOOP ${TAG} artifacts from this continuity mirror."
+          notes="VWAR Loop Life ${TAG}: aplicativo local-first, análise pessoal e pacotes prontos para assinatura."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
-              --target "$GITHUB_SHA" --title "NOOP ${TAG}" --notes "$notes" --latest
+              --target "$GITHUB_SHA" --title "VWAR Loop Life ${TAG}" --notes "$notes" --latest
             gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
           else
             gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
-              --target "$GITHUB_SHA" --title "NOOP ${TAG}" --notes "$notes" --latest
+              --target "$GITHUB_SHA" --title "VWAR Loop Life ${TAG}" --notes "$notes" --latest
           fi

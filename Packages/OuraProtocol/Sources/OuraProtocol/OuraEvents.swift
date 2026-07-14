@@ -31,7 +31,7 @@ public struct OuraHR: Equatable, Sendable, Codable {
 }
 
 /// One decoded HRV (RMSSD-derived) sample from the ring's own 0x5D tag (OURA_PROTOCOL.md s6.9).
-/// NOOP also reconstructs RMSSD itself from the IBI streams for its own scoring; this is the ring's
+/// VWAR Loop Life also reconstructs RMSSD itself from the IBI streams for its own scoring; this is the ring's
 /// open HRV tag, NOT Oura's encrypted readiness score.
 public struct OuraHRV: Equatable, Sendable, Codable {
     public let ringTimestamp: UInt32

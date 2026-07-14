@@ -3,7 +3,7 @@ import XCTest
 import WhoopProtocol
 import WhoopStore
 
-/// Pins the success-side observability the log forensics flagged as the blind spot (#150): NOOP logged
+/// Pins the success-side observability the log forensics flagged as the blind spot (#150): VWAR Loop Life logged
 /// FAILURES (decoded-to-0) but never SUCCESSES, so a strap log couldn't tell a banking strap from a
 /// broken one. These cover the pure tally + summary helpers that drive the new
 /// "Backfill: session persisted N rows (M with motion) across K night(s)" line.
