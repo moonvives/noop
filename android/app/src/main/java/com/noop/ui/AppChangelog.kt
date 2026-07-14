@@ -25,7 +25,7 @@ object AppChangelog {
      * Bump this when you add a release below. The "What's New" sheet shows automatically when the
      * stored last-seen version is behind this. (Decoupled from the bundle version on purpose.)
      */
-    const val CURRENT_VERSION = "10.0.0"
+    const val CURRENT_VERSION = "11.0.0"
 
     data class Release(
         val version: String,
@@ -36,6 +36,17 @@ object AppChangelog {
 
     /** Newest first. */
     val releases: List<Release> = listOf(
+        Release(
+            version = "11.0.0",
+            title = "Edições dedicadas do sistema 26",
+            date = "14 de julho de 2026",
+            items = listOf(
+                "**Dois IPAs reais.** A distribuição Apple agora separa iPhone e iPad, com família, perfil visual, identificador e widget validados por aparelho.",
+                "**Interface específica.** O iPhone mantém comandos ao alcance na parte inferior; o iPad ganha uma central lateral persistente para o painel de 12,9 polegadas.",
+                "**Malha de sinais.** Recuperação, carga, sono, VFC, frequência de repouso e SpO₂ formam um campo interativo movido somente por dados presentes.",
+                "**Limites preservados.** A animação não é qualidade clínica, conexões não implicam causa e métricas ausentes continuam ausentes.",
+            ),
+        ),
         Release(
             version = "10.0.0",
             title = "Centro de comando para iOS e iPadOS 26",

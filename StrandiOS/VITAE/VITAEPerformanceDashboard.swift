@@ -43,6 +43,7 @@ struct VITAEPerformanceDashboard: View {
                 calendarStrip
                 rangeSelector
                 scoreGrid
+                signalFieldPanel
                 intelligencePanel
                 chartGrid
                 methodology
@@ -108,6 +109,14 @@ struct VITAEPerformanceDashboard: View {
                 Text(Self.longDateFormatter.string(from: selectedDay))
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
+                HStack(spacing: 8) {
+                    Text(VWARDeviceEdition.current.shortLabel)
+                    Rectangle().fill(VITAELuxury.border).frame(width: 18, height: 1)
+                    Text("IOS 26 EXCLUSIVO")
+                }
+                .font(StrandFont.overlineScaled(8))
+                .tracking(1.0)
+                .foregroundStyle(StrandPalette.textTertiary)
             }
     }
 
@@ -266,6 +275,77 @@ struct VITAEPerformanceDashboard: View {
                 description: "Duração, eficiência e arquitetura disponíveis para a noite mais recente."
             )
         }
+    }
+
+    // MARK: - Interactive signal field
+
+    private var signalFieldPanel: some View {
+        VITAEPanel(
+            eyebrow: "MALHA DE SINAIS",
+            title: "Cobertura fisiológica do dia",
+            value: "\(signalNodes.compactMap(\.value).count)/6",
+            detail: "A animação representa presença e magnitude registradas; as linhas não indicam causalidade"
+        ) {
+            VITAESignalField(signals: signalNodes, compact: isCompact)
+        }
+    }
+
+    private var signalNodes: [VITAESignalNode] {
+        [
+            VITAESignalNode(
+                id: "recuperacao",
+                label: "RECUPERAÇÃO",
+                value: currentDay?.recovery,
+                valueText: currentDay?.recovery.map { "\(Int($0.rounded()))%" } ?? "Sem dados",
+                normalized: normalized(currentDay?.recovery, minimum: 0, maximum: 100),
+                accent: VITAELuxury.teal
+            ),
+            VITAESignalNode(
+                id: "carga",
+                label: "CARGA",
+                value: currentDay?.strain,
+                valueText: currentDay?.strain.map { String(format: "%.1f", $0) } ?? "Sem dados",
+                normalized: normalized(currentDay?.strain, minimum: 0, maximum: 100),
+                accent: VITAELuxury.violet
+            ),
+            VITAESignalNode(
+                id: "sono",
+                label: "SONO",
+                value: currentSleepScore,
+                valueText: currentSleepScore.map { "\(Int($0.rounded()))%" } ?? "Sem dados",
+                normalized: normalized(currentSleepScore, minimum: 0, maximum: 100),
+                accent: VITAELuxury.blue
+            ),
+            VITAESignalNode(
+                id: "vfc",
+                label: "VFC",
+                value: currentDay?.avgHrv,
+                valueText: currentDay?.avgHrv.map { "\(Int($0.rounded())) ms" } ?? "Sem dados",
+                normalized: normalized(currentDay?.avgHrv, minimum: 10, maximum: 140),
+                accent: VITAELuxury.teal
+            ),
+            VITAESignalNode(
+                id: "repouso",
+                label: "FC DE REPOUSO",
+                value: currentDay?.restingHr.map(Double.init),
+                valueText: currentDay?.restingHr.map { "\($0) bpm" } ?? "Sem dados",
+                normalized: normalized(currentDay?.restingHr.map(Double.init), minimum: 35, maximum: 110),
+                accent: VITAELuxury.rose
+            ),
+            VITAESignalNode(
+                id: "oxigenacao",
+                label: "OXIGENAÇÃO",
+                value: currentDay?.spo2Pct,
+                valueText: currentDay?.spo2Pct.map { String(format: "%.1f%%", $0) } ?? "Sem dados",
+                normalized: normalized(currentDay?.spo2Pct, minimum: 80, maximum: 100),
+                accent: VITAELuxury.amber
+            ),
+        ]
+    }
+
+    private func normalized(_ value: Double?, minimum: Double, maximum: Double) -> Double? {
+        guard let value, maximum > minimum else { return nil }
+        return min(1, max(0, (value - minimum) / (maximum - minimum)))
     }
 
     // MARK: - Daily intelligence
@@ -1380,6 +1460,132 @@ private struct VWARResearchView: View {
 }
 
 // MARK: - Visual components
+
+private struct VITAESignalNode: Identifiable {
+    let id: String
+    let label: String
+    let value: Double?
+    let valueText: String
+    let normalized: Double?
+    let accent: Color
+}
+
+private struct VITAESignalField: View {
+    let signals: [VITAESignalNode]
+    let compact: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var selectedID: String?
+
+    private var selected: VITAESignalNode? {
+        signals.first(where: { $0.id == selectedID }) ?? signals.first
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            TimelineView(.animation(minimumInterval: 1.0 / 24.0, paused: reduceMotion)) { timeline in
+                Canvas { context, size in
+                    let positions = positions(in: size)
+                    let phase = timeline.date.timeIntervalSinceReferenceDate
+
+                    for index in signals.indices {
+                        let next = (index + 1) % signals.count
+                        guard signals[index].value != nil, signals[next].value != nil else { continue }
+                        var path = Path()
+                        path.move(to: positions[index])
+                        path.addLine(to: positions[next])
+                        context.stroke(path, with: .color(.white.opacity(0.075)), lineWidth: 1)
+                    }
+
+                    for (index, signal) in signals.enumerated() {
+                        let point = positions[index]
+                        let level = signal.normalized ?? 0
+                        let pulse = reduceMotion ? 0 : sin(phase * 1.4 + Double(index)) * 2.2
+                        let selectedBoost: CGFloat = selectedID == signal.id ? 7 : 0
+                        let radius = CGFloat(13 + level * 15) + selectedBoost + CGFloat(pulse)
+                        let outer = CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2)
+                        let coreRadius = max(5, radius * 0.42)
+                        let core = CGRect(x: point.x - coreRadius, y: point.y - coreRadius, width: coreRadius * 2, height: coreRadius * 2)
+
+                        context.fill(Path(ellipseIn: outer), with: .color(signal.accent.opacity(signal.value == nil ? 0.025 : 0.08 + level * 0.14)))
+                        context.stroke(Path(ellipseIn: outer), with: .color(signal.value == nil ? .white.opacity(0.10) : signal.accent.opacity(0.48)), lineWidth: selectedID == signal.id ? 2.2 : 1.2)
+                        context.fill(Path(ellipseIn: core), with: .color(signal.value == nil ? .white.opacity(0.08) : signal.accent.opacity(0.72)))
+                    }
+                }
+            }
+            .frame(height: compact ? 205 : 245)
+            .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(VITAELuxury.border))
+            .accessibilityHidden(true)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(signals) { signal in
+                        let active = selected?.id == signal.id
+                        Button {
+                            withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
+                                selectedID = signal.id
+                            }
+                        } label: {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(signal.label)
+                                    .font(StrandFont.overlineScaled(8))
+                                    .tracking(0.8)
+                                Text(signal.valueText)
+                                    .font(StrandFont.bodyNumber)
+                            }
+                            .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textSecondary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .frame(minWidth: compact ? 116 : 138, alignment: .leading)
+                            .background(active ? signal.accent : VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(active ? signal.accent : VITAELuxury.border))
+                        }
+                        .buttonStyle(.plain)
+                        .hoverEffect(.highlight)
+                    }
+                }
+            }
+
+            if let selected {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text(selected.label)
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(1.0)
+                        .foregroundStyle(selected.accent)
+                    Text(selected.valueText)
+                        .font(StrandFont.number(20, weight: .semibold))
+                        .foregroundStyle(StrandPalette.textPrimary)
+                    Spacer(minLength: 8)
+                    Text(selected.value == nil ? "AGUARDANDO FONTE" : "MEDIÇÃO PRESENTE")
+                        .font(StrandFont.overlineScaled(8))
+                        .tracking(0.8)
+                        .foregroundStyle(StrandPalette.textTertiary)
+                }
+                .accessibilityElement(children: .combine)
+            }
+
+            Text("A intensidade mostra magnitude dentro de uma faixa visual fixa, não qualidade clínica. Ausências permanecem vazias e nenhuma relação causal é inferida.")
+                .font(StrandFont.footnote)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .onAppear {
+            if selectedID == nil { selectedID = signals.first(where: { $0.value != nil })?.id ?? signals.first?.id }
+        }
+        .sensoryFeedback(.selection, trigger: selectedID)
+    }
+
+    private func positions(in size: CGSize) -> [CGPoint] {
+        let coordinates: [(CGFloat, CGFloat)]
+        if compact {
+            coordinates = [(0.16, 0.30), (0.50, 0.18), (0.84, 0.30), (0.18, 0.76), (0.50, 0.86), (0.82, 0.76)]
+        } else {
+            coordinates = [(0.17, 0.50), (0.33, 0.20), (0.67, 0.20), (0.83, 0.50), (0.67, 0.80), (0.33, 0.80)]
+        }
+        return coordinates.map { CGPoint(x: size.width * $0.0, y: size.height * $0.1) }
+    }
+}
 
 private struct PremiumScoreCard: View {
     let title: String

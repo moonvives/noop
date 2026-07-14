@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ACTIVE_SURFACES = [
     ROOT / "StrandiOS/App/RootTabView.swift",
+    ROOT / "StrandiOS/App/VWARDeviceEdition.swift",
     ROOT / "StrandiOS/VITAE/VITAEPerformanceDashboard.swift",
     ROOT / "StrandiOS/VITAE/VWARLoopLife26Experience.swift",
     ROOT / "StrandiOS/VITAE/VWARPortugueseGates.swift",
@@ -73,11 +74,12 @@ project = (ROOT / "project.yml").read_text(encoding="utf-8")
 required_project_fragments = [
     'NOOPiOS:',
     'deploymentTarget: "26.0"',
-    'MARKETING_VERSION: "10.0.0"',
-    'CURRENT_PROJECT_VERSION: "173"',
+    'MARKETING_VERSION: "11.0.0"',
+    'CURRENT_PROJECT_VERSION: "174"',
     'CFBundleDevelopmentRegion: pt-BR',
     '- pt-BR',
     'TARGETED_DEVICE_FAMILY: "1,2"',
+    'VWARDeviceEdition: "$(VWAR_DEVICE_EDITION)"',
 ]
 for fragment in required_project_fragments:
     if fragment not in project:
@@ -108,6 +110,10 @@ for required in (
     "VWARTrendsView",
     "VWARSleepIntelligenceView",
     "VWARSourcesView",
+    "VWARiPadCommandRail",
+    "VITAESignalField",
+    "iphone-16-pro-max",
+    "ipad-pro-m2-12-9",
     "Garmin Connect",
     "G Band",
 ):

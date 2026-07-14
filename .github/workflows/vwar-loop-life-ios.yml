@@ -1,4 +1,4 @@
-name: VWAR Loop Life iOS package
+name: VWAR Loop Life device editions
 
 on:
   pull_request:
@@ -34,6 +34,22 @@ concurrency:
 jobs:
   package:
     runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: iphone
+            profile: iphone-16-pro-max
+            family: '1'
+            label: iPhone-16-Pro-Max
+            app_bundle: com.noopapp.noop.iphone
+            widget_bundle: com.noopapp.noop.iphone.widgets
+          - key: ipad
+            profile: ipad-pro-m2-12-9
+            family: '2'
+            label: iPad-Pro-M2-12.9
+            app_bundle: com.noopapp.noop.ipad
+            widget_bundle: com.noopapp.noop.ipad.widgets
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
@@ -43,7 +59,7 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Prepare iPhone and iPad package
+      - name: Prepare dedicated package
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -62,38 +78,45 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build unsigned iPhone and iPad app
+      - name: Build ${{ matrix.label }} app
         run: >-
           xcodebuild -scheme NOOPiOS -configuration Release
           -destination 'generic/platform=iOS'
-          -derivedDataPath "$PWD/build"
+          -derivedDataPath "$PWD/build-${{ matrix.key }}"
+          TARGETED_DEVICE_FAMILY='${{ matrix.family }}'
+          VWAR_DEVICE_EDITION='${{ matrix.profile }}'
+          VWAR_APP_BUNDLE_ID='${{ matrix.app_bundle }}'
+          VWAR_WIDGET_BUNDLE_ID='${{ matrix.widget_bundle }}'
           CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           build
 
-      - name: Create unsigned IPA
+      - name: Create ${{ matrix.label }} IPA
         run: |
           set -euo pipefail
-          APP_PATH="$(find build/Build/Products/Release-iphoneos -maxdepth 1 -type d -name '*.app' | head -n 1)"
+          APP_PATH="$(find 'build-${{ matrix.key }}/Build/Products/Release-iphoneos' -maxdepth 1 -type d -name '*.app' | head -n 1)"
           test -n "$APP_PATH"
           lipo -archs "$APP_PATH/NOOP" | grep -qw arm64
           Tools/anonymize-ios-app.sh "$APP_PATH"
-          mkdir -p artifact/Payload
-          ditto "$APP_PATH" artifact/Payload/VWARLoopLife.app
+          mkdir -p 'artifact-${{ matrix.key }}/Payload'
+          ditto "$APP_PATH" 'artifact-${{ matrix.key }}/Payload/VWARLoopLife.app'
           (
-            cd artifact
-            ditto -c -k --sequesterRsrc --keepParent Payload VWAR-Loop-Life-v10.0.0-ios.ipa
+            cd 'artifact-${{ matrix.key }}'
+            ditto -c -k --sequesterRsrc --keepParent Payload 'VWAR-Loop-Life-v11.0.0-${{ matrix.label }}.ipa'
           )
-          cp docs/VWAR_LOOP_LIFE_INSTALL.md artifact/README.md
+          cp docs/VWAR_LOOP_LIFE_INSTALL.md 'artifact-${{ matrix.key }}/README.md'
 
       - name: Verify ready-to-sign IPA
-        run: python3 Tools/verify-ios-ipa.py artifact/VWAR-Loop-Life-v10.0.0-ios.ipa
+        run: >-
+          python3 Tools/verify-ios-ipa.py
+          'artifact-${{ matrix.key }}/VWAR-Loop-Life-v11.0.0-${{ matrix.label }}.ipa'
+          '${{ matrix.key }}'
 
       - name: Upload ready-to-sign package
         uses: actions/upload-artifact@v4
         with:
-          name: VWAR-Loop-Life-v10.0.0-iOS-ready-to-sign
+          name: VWAR-Loop-Life-v11.0.0-${{ matrix.label }}-ready-to-sign
           path: |
-            artifact/VWAR-Loop-Life-v10.0.0-ios.ipa
-            artifact/README.md
+            artifact-${{ matrix.key }}/VWAR-Loop-Life-v11.0.0-${{ matrix.label }}.ipa
+            artifact-${{ matrix.key }}/README.md
           if-no-files-found: error
           retention-days: 30

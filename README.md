@@ -4,10 +4,10 @@ Uma experiência local e privada para acompanhar a pulseira VWAR Loop Life com c
 controle sobre os próprios dados. Sem assinatura obrigatória, sem conta do projeto e sem transformar
 estimativas de pulso em alegações médicas.
 
-Versão atual: **10.0.0**
+Versão atual: **11.0.0**
 
-Requisito Apple: **iOS 26.0 ou iPadOS 26.0**, arm64. O pacote é universal para iPhone e iPad e foi
-dimensionado especificamente para iPhone 16 Pro Max e iPad Pro M2 de 12,9 polegadas.
+Requisito Apple: **iOS 26.0 ou iPadOS 26.0**, arm64. Há um IPA restrito à família iPhone e calibrado
+para o iPhone 16 Pro Max, e outro restrito à família iPad e calibrado para o iPad Pro M2 de 12,9 polegadas.
 
 [Abrir a apresentação do produto](docs/index.html) ·
 [Instalar no iPhone ou iPad](docs/VWAR_LOOP_LIFE_INSTALL.md) ·
@@ -31,8 +31,9 @@ mostrada ao usuário.
 - análise avançada local comparada à própria referência de até 28 dias;
 - confiança explícita: alta, em construção ou calibrando;
 - ausência preservada quando faltam dados, sem preencher métricas inventadas;
-- o mesmo centro de comando responsivo no iPhone e no iPad, com tendências, regularidade e arquitetura
-  do sono, balanço de treino e matriz de vitais;
+- dock de comando inferior no iPhone e central lateral persistente no iPad, com tendências,
+  regularidade e arquitetura do sono, balanço de treino e matriz de vitais;
+- malha de sinais animada e selecionável, alimentada somente por medições presentes;
 - seleção real do dia: calendário, HR, atividade, sono e análise mudam juntos;
 - VWAR Intelligence determinística, testada e local, com mediana pessoal e cobertura explícita.
 
@@ -74,14 +75,18 @@ Saúde. Connect IQ não é tratado como acesso ao histórico da nuvem. Veja o
 
 ## Download do iOS
 
-[Baixar diretamente o VWAR Loop Life 10 para iOS/iPadOS](https://github.com/moonvives/noop/releases/download/v10.0.0/VWAR-Loop-Life-v10.0.0-ios.ipa)
+[Baixar VWAR Loop Life 11 para iPhone 16 Pro Max](https://github.com/moonvives/noop/releases/download/v11.0.0/VWAR-Loop-Life-v11.0.0-iPhone-16-Pro-Max.ipa)
 
-O workflow **VWAR Loop Life iOS package** publica o artefato:
+[Baixar VWAR Loop Life 11 para iPad Pro M2 12,9](https://github.com/moonvives/noop/releases/download/v11.0.0/VWAR-Loop-Life-v11.0.0-iPad-Pro-M2-12.9.ipa)
+
+O workflow **VWAR Loop Life device editions** publica dois artefatos:
 
 ```text
-VWAR-Loop-Life-v10.0.0-iOS-ready-to-sign
-  VWAR-Loop-Life-v10.0.0-ios.ipa
-  README.md
+VWAR-Loop-Life-v11.0.0-iPhone-16-Pro-Max-ready-to-sign
+  VWAR-Loop-Life-v11.0.0-iPhone-16-Pro-Max.ipa
+
+VWAR-Loop-Life-v11.0.0-iPad-Pro-M2-12.9-ready-to-sign
+  VWAR-Loop-Life-v11.0.0-iPad-Pro-M2-12.9.ipa
 ```
 
 O IPA é deliberadamente não assinado. AltStore e SideStore podem assiná-lo com o Apple ID do usuário;

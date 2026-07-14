@@ -338,17 +338,18 @@ struct VWARPortugueseWhatsNew: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("VERSÃO 10.0.0")
+                    Text("VERSÃO 11.0.0")
                         .font(StrandFont.overlineScaled(9))
                         .tracking(1.4)
                         .foregroundStyle(VWAR26Palette.teal)
-                    Text("Uma nova experiência")
+                    Text("Duas experiências dedicadas")
                         .font(StrandFont.rounded(36, weight: .semibold))
                         .foregroundStyle(VWAR26Palette.text)
-                    Text("Reconstruída para iOS e iPadOS 26, com interface integralmente em português do Brasil.")
+                    Text("Reconstruída para iOS e iPadOS 26, com edições separadas e interface integralmente em português do Brasil.")
                         .font(StrandFont.body)
                         .foregroundStyle(VWAR26Palette.secondary)
-                    change("Painel adaptativo", "Calendário navegável, relógio ao vivo e inteligência diária em iPhone e iPad.")
+                    change("Composição por aparelho", "Dock de alcance no iPhone e central lateral persistente no iPad Pro.")
+                    change("Malha de sinais", "Seis sinais reais em um campo animado, selecionável e sem preencher ausências.")
                     change("Gráficos avançados", "Recuperação, carga, sono, VFC, frequência de repouso, SpO₂ e respiração em séries interativas.")
                     change("Sono aprofundado", "Duração, eficiência, composição e regularidade sem completar lacunas artificialmente.")
                     change("G Band e Garmin", "Proveniência verificada pelo app Saúde e instruções claras de sincronização.")
