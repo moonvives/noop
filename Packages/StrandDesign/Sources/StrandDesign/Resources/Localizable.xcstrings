@@ -8,6 +8,12 @@
             "state": "translated",
             "value": "%lld days ago"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "há %lld dias"
+          }
         }
       }
     },
@@ -42,6 +48,12 @@
             "state": "translated",
             "value": "%lld 小時"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld horas"
+          }
         }
       }
     },
@@ -51,6 +63,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld minutes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld minutos"
           }
         }
       }
@@ -62,6 +80,12 @@
             "state": "translated",
             "value": "%lld points, mean %@, range %@ to %@"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld pontos, média %@, intervalo de %@ a %@"
+          }
         }
       }
     },
@@ -71,6 +95,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld readings"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld leituras"
           }
         }
       }
@@ -82,6 +112,12 @@
             "state": "translated",
             "value": "%lld workouts"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld treinos"
+          }
         }
       }
     },
@@ -91,6 +127,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lldd ago"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "há %lld d"
           }
         }
       }
@@ -126,6 +168,12 @@
             "state": "translated",
             "value": "%lld 小時前"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "há %lld h"
+          }
         }
       }
     },
@@ -135,6 +183,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lldm ago"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "há %lld min"
           }
         }
       }
@@ -170,6 +224,12 @@
             "state": "translated",
             "value": "1 小時"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hora"
+          }
         }
       }
     },
@@ -179,6 +239,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 minute"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 minuto"
           }
         }
       }
@@ -190,6 +256,12 @@
             "state": "translated",
             "value": "1 workout"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 treino"
+          }
         }
       }
     },
@@ -199,6 +271,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ALL-OUT"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MÁXIMO"
           }
         }
       }
@@ -252,6 +330,12 @@
             "state": "translated",
             "value": "清醒"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acordado"
+          }
         }
       }
     },
@@ -261,6 +345,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Classic"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clássico"
           }
         }
       }
@@ -272,6 +362,12 @@
             "state": "translated",
             "value": "DEPLETED"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ESGOTADO"
+          }
         }
       }
     },
@@ -281,6 +377,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dark"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
           }
         }
       }
@@ -334,6 +436,12 @@
             "state": "translated",
             "value": "深睡"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profundo"
+          }
         }
       }
     },
@@ -367,6 +475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "預設"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Padrão"
           }
         }
       }
@@ -402,6 +516,12 @@
             "state": "translated",
             "value": "高"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ALTO"
+          }
         }
       }
     },
@@ -411,6 +531,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "LIGHT"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LEVE"
           }
         }
       }
@@ -445,6 +571,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "低"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BAIXO"
           }
         }
       }
@@ -498,6 +630,12 @@
             "state": "translated",
             "value": "淺睡"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leve"
+          }
         }
       }
     },
@@ -507,6 +645,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "MODERATE"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MODERADO"
           }
         }
       }
@@ -560,6 +704,12 @@
             "state": "translated",
             "value": "無資料"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem dados"
+          }
         }
       }
     },
@@ -569,6 +719,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "No heart-rate data"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem dados de frequência cardíaca"
           }
         }
       }
@@ -604,6 +760,12 @@
             "state": "translated",
             "value": "巔峰"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PICO"
+          }
         }
       }
     },
@@ -613,6 +775,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "PRIMED"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PREPARADO"
           }
         }
       }
@@ -624,6 +792,12 @@
             "state": "translated",
             "value": "Recovery calendar, %lld days, average %lld, low %lld, high %lld"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendário de recuperação, %lld dias, média %lld, mínimo %lld, máximo %lld"
+          }
         }
       }
     },
@@ -633,6 +807,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recovery calendar, no data"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendário de recuperação, sem dados"
           }
         }
       }
@@ -644,6 +824,12 @@
             "state": "translated",
             "value": "STRENUOUS"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "INTENSO"
+          }
         }
       }
     },
@@ -653,6 +839,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sleep stages, %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estágios do sono, %@"
           }
         }
       }
@@ -664,6 +856,12 @@
             "state": "translated",
             "value": "Sleep stages, no data"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estágios do sono, sem dados"
+          }
         }
       }
     },
@@ -673,6 +871,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "System"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
           }
         }
       }
@@ -726,6 +930,12 @@
             "state": "translated",
             "value": "今天"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoje"
+          }
         }
       }
     },
@@ -735,6 +945,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trend, %lld points, latest %@, low %@, high %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendência, %lld pontos, mais recente %@, mínimo %@, máximo %@"
           }
         }
       }
@@ -770,6 +986,12 @@
             "state": "translated",
             "value": "昨天"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ontem"
+          }
         }
       }
     },
@@ -780,6 +1002,12 @@
             "state": "translated",
             "value": "asleep %@"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dormindo %@"
+          }
         }
       }
     },
@@ -789,6 +1017,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "average %@ bpm"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "média de %@ bpm"
           }
         }
       }
@@ -824,6 +1058,12 @@
             "state": "translated",
             "value": "剛剛"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "agora"
+          }
         }
       }
     },
@@ -833,6 +1073,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "range %@ to %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "intervalo de %@ a %@"
           }
         }
       }

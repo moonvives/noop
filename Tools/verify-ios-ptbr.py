@@ -7,6 +7,7 @@ O verificador é intencionalmente local: não envia catálogo, código ou texto 
 from __future__ import annotations
 
 import plistlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -115,5 +116,14 @@ for required in (
 
 if "VITAE One" in all_active_text or "VITAE One" in project:
     fail("o nome legado VITAE One ainda aparece na edição iOS")
+
+design_catalog_path = ROOT / "Packages/StrandDesign/Sources/StrandDesign/Resources/Localizable.xcstrings"
+design_catalog = json.loads(design_catalog_path.read_text(encoding="utf-8"))
+missing_design_translations = [
+    key for key, item in design_catalog.get("strings", {}).items()
+    if not item.get("localizations", {}).get("pt-BR", {}).get("stringUnit", {}).get("value")
+]
+if missing_design_translations:
+    fail(f"catálogo visual sem pt-BR: {', '.join(missing_design_translations)}")
 
 print("pt-BR verificado: interface ativa, permissões, versão, dispositivo e sistema mínimo.")

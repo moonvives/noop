@@ -25,9 +25,16 @@ if not ipa.is_file() or ipa.suffix.lower() != ".ipa":
 with tempfile.TemporaryDirectory(prefix="vwar-ipa-") as temporary:
     root = Path(temporary)
     with zipfile.ZipFile(ipa) as archive:
-        bad = [name for name in archive.namelist() if Path(name).is_absolute() or ".." in Path(name).parts]
+        names = archive.namelist()
+        bad = [name for name in names if Path(name).is_absolute() or ".." in Path(name).parts]
         if bad:
             fail("o ZIP contém caminhos inseguros")
+        ptbr_design_resources = [
+            name for name in names
+            if "StrandDesign_StrandDesign.bundle/pt-BR.lproj/Localizable.strings" in name
+        ]
+        if len(ptbr_design_resources) < 2:
+            fail("recursos pt-BR do sistema visual ausentes no aplicativo ou no widget")
         archive.extractall(root)
 
     apps = list((root / "Payload").glob("*.app"))
