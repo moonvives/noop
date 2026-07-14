@@ -52,7 +52,7 @@ histórico da nuvem Garmin. Consulte a [visão geral oficial do Connect IQ](http
 
 A integração comercial direta com a nuvem usa o Garmin Connect Developer Program e a Garmin Health
 API. Ela exige aprovação, consentimento do usuário, servidor credenciado e, para uso comercial, pode
-exigir licença. O VWAR Loop Life 10.0.0 não inclui credenciais, servidor oculto ou uma integração em nuvem
+exigir licença. O VWAR Loop Life 11.0.0 não inclui credenciais, servidor oculto ou uma integração em nuvem
 que finja esse acesso. Referências: [visão geral do programa](https://developer.garmin.com/gc-developer-program/overview/)
 e [Garmin Health API](https://developer.garmin.com/gc-developer-program/health-api/).
 

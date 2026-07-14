@@ -4,12 +4,20 @@ O pacote do GitHub contém `VWAR-Loop-Life-unsigned.ipa`, uma compilação sem c
 provisionamento e sem dados pessoais. O arquivo precisa ser assinado no seu próprio ambiente antes de
 abrir no iPhone.
 
-Esta versão exige **iOS 26.0 ou iPadOS 26.0**. O mesmo IPA arm64 contém as famílias de dispositivo
-iPhone e iPad e é compatível com iPhone 16 Pro Max e iPad Pro M2 de 12,9 polegadas atualizados.
+Esta versão exige **iOS 26.0 ou iPadOS 26.0** e oferece dois pacotes arm64 independentes:
+
+- `VWAR-Loop-Life-v11.0.0-iPhone-16-Pro-Max.ipa`, restrito à família iPhone e calibrado para o
+  painel de 6,9 polegadas;
+- `VWAR-Loop-Life-v11.0.0-iPad-Pro-M2-12.9.ipa`, restrito à família iPad e calibrado para a central
+  de comando de 12,9 polegadas.
+
+O iOS não possui uma chave pública para restringir um IPA a um único modelo comercial. Portanto,
+cada arquivo bloqueia a família incorreta e otimiza sua composição para o aparelho solicitado, mas
+pode funcionar em outros iPhones ou iPads arm64 compatíveis com o sistema 26.
 
 ## Instalação rápida com AltStore ou SideStore
 
-1. Baixe `VWAR-Loop-Life-v10.0.0-ios.ipa` na [versão 10 do GitHub](https://github.com/moonvives/noop/releases/tag/v10.0.0).
+1. Baixe o arquivo do seu aparelho na [versão 11 do GitHub](https://github.com/moonvives/noop/releases/tag/v11.0.0).
 2. Abra o arquivo `.ipa` no AltStore ou SideStore.
 3. Assine com o seu Apple ID e conclua a instalação no iPhone.
 4. Se o iOS solicitar, autorize o perfil em Ajustes > Geral > VPN e Gerenciamento de Dispositivo.
@@ -60,13 +68,15 @@ Sem HealthKit, ative a transmissão de frequência cardíaca em um relógio Garm
 **Hoje > VWAR direto** para a captura local de características Bluetooth anunciadas. Consulte o
 [guia Garmin](GARMIN_CONNECT.md) para capacidades e limites dessa rota.
 
-## O que há na versão 10
+## O que há na versão 11
 
 - marca visível VWAR Loop Life em iPhone, iPad, Mac, Apple Watch e widgets;
 - dia da semana, data completa, ano e relógio atualizado por minuto;
 - calendário semanal permanente e seletor mensal completo;
 - análise avançada local comparada à própria referência de até 28 dias;
-- centro de comando único e responsivo no iPhone e no iPad;
+- dock inferior próprio do iPhone 16 Pro Max e central lateral persistente própria do iPad Pro;
+- malha gráfica animada e interativa para inspecionar cobertura e magnitude de seis sinais reais;
+- metadado de edição embutido e família de dispositivo auditada dentro de cada IPA;
 - calendário semanal que recarrega as métricas do dia realmente selecionado;
 - VWAR Intelligence local com comparação de recuperação, sono e carga contra até 28 dias anteriores;
 - VFC, carga, sono, matriz de sinais e cobertura dos dados em ambos os formatos;

@@ -699,10 +699,11 @@ struct VWARSourcesView: View {
                     .font(StrandFont.overlineScaled(9))
                     .tracking(1.2)
                     .foregroundStyle(VWAR26Palette.teal)
-                VWARKeyValue(label: "Aplicativo", value: "VWAR Loop Life 10.0.0")
+                VWARKeyValue(label: "Aplicativo", value: "VWAR Loop Life 11.0.0")
                 VWARKeyValue(label: "Sistema mínimo", value: "iOS ou iPadOS 26")
                 VWARKeyValue(label: "Idioma", value: "Português do Brasil")
-                VWARKeyValue(label: "Dispositivos-alvo", value: "iPhone 16 Pro Max e iPad Pro M2 12,9 pol.")
+                VWARKeyValue(label: "Edição", value: VWARDeviceEdition.current.shortLabel)
+                VWARKeyValue(label: "Composição", value: VWARDeviceEdition.current.interfaceDescription)
                 VWARKeyValue(label: "Processamento", value: "Local e privado")
             }
         }

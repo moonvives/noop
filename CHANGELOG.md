@@ -5,6 +5,21 @@ with VWAR, G Band, Apple, Garmin, or WHOOP. Health data stays on the user's devi
 integration is explicitly enabled. Downloads are on the
 [Releases](https://github.com/moonvives/noop/releases) page.
 
+## 11.0.0: Device-specific iOS/iPadOS 26 editions
+
+Released 2026-07-14.
+
+- Split the ready-to-sign Apple package into a phone-only IPA calibrated for iPhone 16 Pro Max and
+  a tablet-only IPA calibrated for the 12.9-inch iPad Pro M2.
+- Added a build-stamped device profile and validators that reject the wrong device family, missing
+  arm64 requirement, non-pt-BR resources, an OS target below 26, or a mismatched widget.
+- Added a text-only iPad command rail with persistent navigation, live date and time, pointer hover,
+  and direct synchronization; the iPhone retains a reach-friendly bottom command dock.
+- Added an animated, touch-selectable signal field driven only by present recovery, load, sleep, HRV,
+  resting-heart-rate and SpO2 values. Missing measurements remain visibly missing.
+- Preserved the clinical boundary: animation intensity is not a diagnosis or quality score and graph
+  connections do not claim causation.
+
 ## 10.0.0: Centro de comando iOS/iPadOS 26
 
 Released 2026-07-13.

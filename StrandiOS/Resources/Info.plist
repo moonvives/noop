@@ -43,6 +43,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>VWARDeviceEdition</key>
+	<string>$(VWAR_DEVICE_EDITION)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.healthcare-fitness</string>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
@@ -62,6 +64,8 @@
 	<string>O VWAR Loop Life registra a rota de exercícios ao ar livre para mostrar distância, ritmo e mapa, inclusive com a tela apagada. A rota permanece no aparelho.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
@@ -70,6 +74,10 @@
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
