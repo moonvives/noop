@@ -1,9 +1,28 @@
 # Changelog
 
 All notable changes to VWAR Loop Life. It is an independent, experimental project, not affiliated
-with VWAR, G Band, Apple, or WHOOP. Health data stays on the user's device unless an optional
+with VWAR, G Band, Apple, Garmin, or WHOOP. Health data stays on the user's device unless an optional
 integration is explicitly enabled. Downloads are on the
 [Releases](https://github.com/moonvives/noop/releases) page.
+
+## 9.1.0: Garmin com origem verificável
+
+Released 2026-07-13.
+
+- Garmin Connect is now a first-class iPhone data source through Apple Health. Connection state is
+  based on real sample provenance, not on whether Garmin Connect happens to be installed.
+- Added a source classifier shared with headless tests so the generic Health display name `Connect`
+  is recognized only when its bundle identity is actually Garmin.
+- Added an explicit Garmin setup and verification card with the documented sync steps and current
+  Apple Health limitations.
+- Preserved two independent fallbacks: standard Bluetooth Heart Rate broadcast for live HR, and the
+  fully offline Garmin Export Your Data / FIT / TCX / GPX import route.
+- Sideload builds without the HealthKit entitlement now direct Garmin users to working alternatives
+  instead of offering an impossible authorization flow.
+- Connect IQ is described accurately as the watch-app platform, not a substitute for Garmin cloud
+  history access. Missing GPS routes or sensor samples are never reconstructed.
+- Updated iOS, macOS, watchOS and Android version metadata, documentation, install links and product
+  site for VWAR Loop Life 9.1.0.
 
 ## 9.0.0: VWAR Loop Life
 

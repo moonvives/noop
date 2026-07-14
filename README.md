@@ -4,10 +4,11 @@ Uma experiência local-first para acompanhar a pulseira VWAR Loop Life com conte
 controle sobre os próprios dados. Sem assinatura obrigatória, sem conta do projeto e sem transformar
 estimativas de pulso em alegações médicas.
 
-Versão atual: **9.0.0**
+Versão atual: **9.1.0**
 
 [Abrir a apresentação do produto](docs/index.html) ·
 [Instalar no iPhone ou iPad](docs/VWAR_LOOP_LIFE_INSTALL.md) ·
+[Integrar com Garmin](docs/GARMIN_CONNECT.md) ·
 [Usar o coletor no Mac](docs/VWAR_DESKTOP_COLLECTOR.md) ·
 [Revisar o protocolo](docs/VWAR_BLE_CAPTURE.md)
 
@@ -46,9 +47,22 @@ características anunciadas como legíveis, assina notificações e decodifica s
 Bluetooth SIG. Ele não envia comandos proprietários desconhecidos, não altera firmware e não atribui
 significado médico a bytes não validados.
 
+## Garmin Connect
+
+O suporte Garmin usa rotas documentadas e independentes:
+
+- Garmin Connect > Apple Health > VWAR Loop Life para histórico automático em uma compilação com
+  HealthKit;
+- Broadcast Heart Rate do relógio > Bluetooth padrão para frequência cardíaca ao vivo;
+- Export Your Data e arquivos FIT, TCX ou GPX para importação local, inclusive em sideload sem HealthKit.
+
+O app confirma a origem Garmin somente quando encontra amostras reais do Garmin Connect no Apple
+Health. Connect IQ não é tratado como acesso ao histórico da nuvem. Veja o
+[guia Garmin completo](docs/GARMIN_CONNECT.md), com limitações e instruções.
+
 ## Download do iOS
 
-[Baixar diretamente o VWAR Loop Life 9.0 para iOS](https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa)
+[Baixar diretamente o VWAR Loop Life 9.1 para iOS](https://github.com/moonvives/noop/releases/download/v9.1.0/VWAR-Loop-Life-v9.1.0-ios.ipa)
 
 O workflow **VWAR Loop Life iOS package** publica o artefato:
 
@@ -116,8 +130,9 @@ O código-base recuperado veio do projeto NOOP e mantém sua licença e atribui�
 interoperabilidade também reconhece `johnmiddleton12/my-whoop` e `b-nnett/goose`; o coletor VWAR é uma
 implementação original e não incorpora código do Goose.
 
-VWAR Loop Life é independente e não é afiliado, patrocinado ou endossado pela VWAR, G Band, Apple ou
-WHOOP. Marcas de terceiros são citadas somente para identificar hardware e serviços compatíveis.
+VWAR Loop Life é independente e não é afiliado, patrocinado ou endossado pela VWAR, G Band, Apple,
+Garmin ou WHOOP. Marcas de terceiros são citadas somente para identificar hardware e serviços
+compatíveis.
 
 ## Licença
 

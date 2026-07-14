@@ -93,12 +93,12 @@
     .section-head { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; align-items: start; margin-bottom: 48px; }
     h2 { margin: 0; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -.05em; }
     .section-copy { margin: 0; color: #a9b0ac; font-size: 18px; line-height: 1.65; }
-    .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
     .card { min-height: 230px; padding: 25px; border: 1px solid var(--line); border-radius: 22px; background: rgba(255,255,255,.025); }
     .card .index { color: var(--signal); font-size: 11px; font-weight: 800; letter-spacing: .16em; }
     .card h3 { margin: 54px 0 12px; font-size: 24px; letter-spacing: -.035em; }
     .card p { margin: 0; color: var(--muted); line-height: 1.55; }
-    .method { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .method { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
     .method .card { min-height: 270px; }
     .signal-line { height: 1px; margin: 34px 0; background: linear-gradient(90deg, var(--signal), transparent); }
     .download { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 38px; border-radius: 26px; background: var(--signal); color: #11160b; }
@@ -148,10 +148,10 @@
         <h1>Seu dia em contexto.</h1>
         <p class="lead">Recuperação, carga, sono e vitais da VWAR Loop Life em uma leitura diária precisa, discreta e construída sobre o seu próprio baseline.</p>
         <div class="actions">
-          <a class="button primary" href="https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa">BAIXAR IPA</a>
+          <a class="button primary" href="https://github.com/moonvives/noop/releases/download/v9.1.0/VWAR-Loop-Life-v9.1.0-ios.ipa">BAIXAR IPA</a>
           <a class="button" href="https://github.com/moonvives/noop">ABRIR GITHUB</a>
         </div>
-        <div class="status">VERSÃO 9.0.0 · IPHONE · IPAD · MAC · APPLE WATCH</div>
+        <div class="status">VERSÃO 9.1.0 · IPHONE · IPAD · MAC · APPLE WATCH</div>
       </div>
 
       <div class="dashboard" aria-label="Prévia do painel diário">
@@ -181,6 +181,7 @@
           <article class="card"><div class="index">01 · TEMPO</div><h3>Calendário vivo</h3><p>Dia da semana, data, ano, hora e minuto, com navegação semanal e mês completo dentro do app.</p></article>
           <article class="card"><div class="index">02 · CONTEXTO</div><h3>Baseline pessoal</h3><p>HRV, frequência de repouso e sono comparados a até 28 dias do seu próprio histórico.</p></article>
           <article class="card"><div class="index">03 · CONFIANÇA</div><h3>Ausência honesta</h3><p>O app mostra quando está calibrando e mantém em branco o que os sensores não sustentam.</p></article>
+          <article class="card"><div class="index">04 · GARMIN</div><h3>Três rotas reais</h3><p>Garmin Connect pelo Apple Health, batimentos ao vivo por Bluetooth ou importação local do seu arquivo.</p></article>
         </div>
       </div>
     </section>
@@ -194,6 +195,7 @@
         <div class="method">
           <article class="card"><div class="index">SINAIS</div><div class="signal-line"></div><h3>Recuperação e carga</h3><p>HRV filtrada, frequência de repouso, sono e tendências pessoais alimentam uma leitura de bem-estar, não um diagnóstico.</p></article>
           <article class="card"><div class="index">PRIVACIDADE</div><div class="signal-line"></div><h3>Seus dados, no seu dispositivo</h3><p>Sem conta obrigatória. O Coach opcional exige chave própria e consentimento antes de enviar um resumo compacto.</p></article>
+          <article class="card"><div class="index">PROCEDÊNCIA</div><div class="signal-line"></div><h3>Garmin verificado</h3><p>O app confirma amostras reais do Garmin Connect, explica os limites do Connect IQ e nunca recria o que não chegou.</p></article>
         </div>
       </div>
     </section>
@@ -201,14 +203,14 @@
     <section>
       <div class="shell download">
         <h2>Instale a versão pronta para assinar.</h2>
-        <a class="button" href="https://github.com/moonvives/noop/releases/download/v9.0.0/VWAR-Loop-Life-v9.0.0-ios.ipa">ABRIR DOWNLOAD</a>
+        <a class="button" href="https://github.com/moonvives/noop/releases/download/v9.1.0/VWAR-Loop-Life-v9.1.0-ios.ipa">ABRIR DOWNLOAD</a>
       </div>
     </section>
   </main>
 
   <footer class="shell">
     <div class="footer-row">
-      <div>VWAR LOOP LIFE · PROJETO INDEPENDENTE</div>
+      <div>VWAR LOOP LIFE · PROJETO INDEPENDENTE · NÃO AFILIADO À GARMIN</div>
       <div>Bem-estar e desempenho. Não substitui equipamento ou orientação médica.</div>
     </div>
   </footer>

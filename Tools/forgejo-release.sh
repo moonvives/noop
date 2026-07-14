@@ -5,7 +5,7 @@
 #
 #   release/forgejo-release.sh <version> <asset> [<asset> ...] [-- "release notes"]
 #   e.g. release/forgejo-release.sh 4.7.0 \
-#          dist/VWAR-Loop-Life-v9.0.0-macos.zip dist/VWAR-Loop-Life-v9.0.0-ios.ipa dist/VWAR-Loop-Life-v9.0.0.apk
+#          dist/VWAR-Loop-Life-v9.1.0-macos.zip dist/VWAR-Loop-Life-v9.1.0-ios.ipa dist/VWAR-Loop-Life-v9.1.0.apk
 #
 # Creates tag v<version> (server-side, from the current default branch) + the release,
 # then uploads every asset. Token from ~/.config/noop/forge_token. Idempotent on assets.

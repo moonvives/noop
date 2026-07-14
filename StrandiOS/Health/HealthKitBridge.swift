@@ -13,6 +13,19 @@ import StrandImport
 @MainActor
 final class HealthKitBridge: ObservableObject {
 
+    /// One brand-level view of the HealthKit apps that actually contributed samples during the
+    /// discovery window. This is provenance only: no health value or account/device identifier is
+    /// retained. Several app sources from the same brand collapse into one row.
+    struct HealthSourceSummary: Identifiable, Equatable {
+        let brand: HealthSourceBrand
+        let sourceNames: [String]
+        let bundleIdentifiers: [String]
+        let metricTypeCount: Int
+
+        var id: HealthSourceBrand { brand }
+        var displayName: String { brand.displayName }
+    }
+
     enum AuthState: Equatable {
         case unknown, unavailable, denied, authorized
         /// The build can't talk to HealthKit at all: it was re-signed (free Apple ID / AltStore /
@@ -30,6 +43,19 @@ final class HealthKitBridge: ObservableObject {
     /// The most recent failure surfaced by `sync` / `writeBack`. Cleared on a successful run. UI binds
     /// here so an Apple Health auth revoke, quota hit, or invalid sample is visible instead of silent.
     @Published private(set) var lastError: String?
+    /// Apps discovered as real HealthKit sample sources during the most recent sync. Used to show an
+    /// honest Garmin Connect / G Band connection state instead of assuming that installing an app
+    /// means it is sharing data.
+    @Published private(set) var sourceSummaries: [HealthSourceSummary] = []
+    @Published private(set) var sourceInventoryLastChecked: Date?
+
+    var garminConnectSource: HealthSourceSummary? {
+        sourceSummaries.first { $0.brand == .garminConnect }
+    }
+
+    var gBandSource: HealthSourceSummary? {
+        sourceSummaries.first { $0.brand == .gBand }
+    }
 
     private let store = HKHealthStore()
     private let repo: Repository
@@ -283,6 +309,11 @@ final class HealthKitBridge: ObservableObject {
         let end = Date()
         guard let start = cal.date(byAdding: .day, value: -days, to: cal.startOfDay(for: end)) else { return }
 
+        // Inventory the apps that really wrote samples into HealthKit before aggregating them. Garmin
+        // Connect is shown as just "Connect" on some iPhones, so classification uses both the display
+        // name and bundle id. This scan is read-only and retains only app-level provenance.
+        await refreshSourceInventory(start: start, end: end)
+
         var byDay: [String: DayAgg] = [:]
         func agg(_ day: String) -> DayAgg { byDay[day] ?? DayAgg() }
 
@@ -532,6 +563,82 @@ final class HealthKitBridge: ObservableObject {
     /// watch. `HKSource.default()` is this app's own source. (Reimplemented from @vulnix0x4's PR #375.)
     private static var notNoopAuthored: NSPredicate {
         NSCompoundPredicate(notPredicateWithSubpredicate: HKQuery.predicateForObjects(from: [HKSource.default()]))
+    }
+
+    // MARK: - Health source provenance
+
+    private struct SourceAccumulator {
+        var identity: HealthSourceIdentity
+        var metricTypeIdentifiers: Set<String>
+    }
+
+    /// Refresh just the app/source inventory without importing or writing any health values. The UI
+    /// uses this after setup so a user can verify that Garmin Connect has actually shared at least one
+    /// sample. A missing Garmin row means "not detected", never "Garmin has no data".
+    func verifyConnectedSources(days: Int = 30) async {
+        guard auth == .authorized, HKHealthStore.isHealthDataAvailable() else { return }
+        let end = Date()
+        guard let start = Calendar.current.date(byAdding: .day, value: -max(1, days), to: end) else { return }
+        await refreshSourceInventory(start: start, end: end)
+    }
+
+    private func refreshSourceInventory(start: Date, end: Date) async {
+        var byApp: [String: SourceAccumulator] = [:]
+        let sampleTypes = readTypes.compactMap { $0 as? HKSampleType }
+
+        for type in sampleTypes {
+            let sources = await discoverSources(for: type, start: start, end: end)
+            for source in sources {
+                let identity = HealthSourceIdentity(name: source.name,
+                                                    bundleIdentifier: source.bundleIdentifier)
+                let fallback = identity.name.lowercased().replacingOccurrences(of: " ", with: "-")
+                let key = identity.bundleIdentifier.isEmpty ? "name:\(fallback)" : identity.bundleIdentifier
+                var item = byApp[key] ?? SourceAccumulator(identity: identity, metricTypeIdentifiers: [])
+                item.metricTypeIdentifiers.insert(type.identifier)
+                byApp[key] = item
+            }
+        }
+
+        struct BrandAccumulator {
+            var names = Set<String>()
+            var bundles = Set<String>()
+            var metricTypes = Set<String>()
+        }
+        var byBrand: [HealthSourceBrand: BrandAccumulator] = [:]
+        for item in byApp.values {
+            var brand = byBrand[item.identity.brand] ?? BrandAccumulator()
+            if !item.identity.name.isEmpty { brand.names.insert(item.identity.name) }
+            if !item.identity.bundleIdentifier.isEmpty { brand.bundles.insert(item.identity.bundleIdentifier) }
+            brand.metricTypes.formUnion(item.metricTypeIdentifiers)
+            byBrand[item.identity.brand] = brand
+        }
+
+        sourceSummaries = byBrand.map { brand, item in
+            HealthSourceSummary(
+                brand: brand,
+                sourceNames: item.names.sorted(),
+                bundleIdentifiers: item.bundles.sorted(),
+                metricTypeCount: item.metricTypes.count
+            )
+        }.sorted { lhs, rhs in
+            let order: [HealthSourceBrand] = [.garminConnect, .gBand, .apple, .other]
+            return (order.firstIndex(of: lhs.brand) ?? order.count)
+                < (order.firstIndex(of: rhs.brand) ?? order.count)
+        }
+        sourceInventoryLastChecked = Date()
+    }
+
+    private func discoverSources(for type: HKSampleType, start: Date, end: Date) async -> [HKSource] {
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            HKQuery.predicateForSamples(withStart: start, end: end, options: []),
+            Self.notNoopAuthored,
+        ])
+        return await withCheckedContinuation { (cont: CheckedContinuation<[HKSource], Never>) in
+            let query = HKSourceQuery(sampleType: type, samplePredicate: predicate) { _, sources, _ in
+                cont.resume(returning: Array(sources ?? []))
+            }
+            store.execute(query)
+        }
     }
 
     private func collect(_ id: HKQuantityTypeIdentifier, unit: HKUnit, start: Date, end: Date,

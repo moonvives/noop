@@ -11,11 +11,11 @@ options:
   developmentLanguage: en
 settings:
   base:
-    MARKETING_VERSION: "9.0.0"
+    MARKETING_VERSION: "9.1.0"
     # iOS build number (CFBundleVersion). GLOBAL so the iOS app AND its widget extension inherit the
     # SAME value — they must match or iOS warns "extension version must match parent app" (#416).
     # macOS sets its own CFBundleVersion on the Strand target and is unaffected by this.
-    CURRENT_PROJECT_VERSION: "171"
+    CURRENT_PROJECT_VERSION: "172"
     SWIFT_VERSION: "5.0"
     # Emit localizable strings so Xcode auto-extracts every LocalizedStringKey into the
     # String Catalog on build (the English (US) base entries).
@@ -86,7 +86,7 @@ targets:
         CFBundleName: VWAR Loop Life
         CFBundleDisplayName: VWAR Loop Life
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        CFBundleVersion: "199"
+        CFBundleVersion: "200"
         LSMinimumSystemVersion: "13.0"
         LSApplicationCategoryType: public.app-category.healthcare-fitness
         NSBluetoothAlwaysUsageDescription: "VWAR Loop Life connects to supported wearables over Bluetooth to read authorized fitness data locally on your Mac. Nothing leaves your device without your action."
