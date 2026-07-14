@@ -540,7 +540,7 @@ struct AppleHealthView: View {
                     .disabled(health.syncing)
                 }
 
-                Divider().overlay(StrandPalette.borderSubtle)
+                Divider().overlay(StrandPalette.hairline)
 
                 Text("CONNECT IQ")
                     .font(StrandFont.overline)
