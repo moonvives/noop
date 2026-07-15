@@ -741,6 +741,10 @@ public final class BLEManager: NSObject, ObservableObject {
     /// Seeded from the init argument, then refined once in bootstrapStore() to the device registry's
     /// active id (still "my-whoop" today) before any store writes use it — see bootstrapStore().
     private(set) var deviceId: String
+    /// False in the VWAR iOS 26 editions. The legacy protocol remains linked only because shared
+    /// storage and analytics still depend on its types; it must never scan, restore or reconnect there.
+    private let protocolConnectionEnabled: Bool
+    private let persistedDeviceName: String
     /// Captured (device↔wall) correlation from GET_CLOCK; nil until the response lands.
     private(set) var clockRef: ClockRef?
 
@@ -754,9 +758,16 @@ public final class BLEManager: NSObject, ObservableObject {
         return ref.device + (wallNow - ref.wall)
     }
 
-    public init(state: LiveState, deviceId: String = "my-whoop") {
+    public init(
+        state: LiveState,
+        deviceId: String = "my-whoop",
+        protocolConnectionEnabled: Bool = true,
+        persistedDeviceName: String = "WHOOP 4.0"
+    ) {
         self.state = state
         self.deviceId = deviceId
+        self.protocolConnectionEnabled = protocolConnectionEnabled
+        self.persistedDeviceName = persistedDeviceName
         self.router = FrameRouter(state: state)
         // WhoopStore.init is now async, so it can't run here.
         // bootstrapStore() is called once the CBCentralManager reaches poweredOn
@@ -766,20 +777,22 @@ public final class BLEManager: NSObject, ObservableObject {
         super.init()
         state.lastSyncedAt = UserDefaults.standard.object(forKey: "lastSyncedAt") as? Double
         // Restore identifier + background-capable central (foundation for M3 state restoration).
-        #if os(iOS)
-        // iOS background state preservation/restoration: the restore identifier is what makes
-        // CoreBluetooth relaunch the app into the background and deliver willRestoreState after
-        // a suspend-then-jettison. Without it, willRestoreState is never called.
-        central = CBCentralManager(delegate: self, queue: .main,
-                                   options: [CBCentralManagerOptionRestoreIdentifierKey: BLEManager.restoreID])
-        #else
-        // Strand (macOS desktop): no state-restoration identifier (iOS background feature).
-        central = CBCentralManager(delegate: self, queue: .main)
-        #endif
+        if protocolConnectionEnabled {
+            #if os(iOS)
+            // iOS background state preservation/restoration: the restore identifier is what makes
+            // CoreBluetooth relaunch the app into the background and deliver willRestoreState after
+            // a suspend-then-jettison. Without it, willRestoreState is never called.
+            central = CBCentralManager(delegate: self, queue: .main,
+                                       options: [CBCentralManagerOptionRestoreIdentifierKey: BLEManager.restoreID])
+            #else
+            // Strand (macOS desktop): no state-restoration identifier (iOS background feature).
+            central = CBCentralManager(delegate: self, queue: .main)
+            #endif
+        }
         // Strap-as-clock: an incoming EVENT packet kicks a rate-limited catch-up sync.
         router.onSyncTrigger = { [weak self] in self?.requestSync(.strap) }
         // #78 hole-4: a paused-for-bond-loop strap gets one bounded salvage attempt per app-foreground.
-        installForegroundSalvageProbe()
+        if protocolConnectionEnabled { installForegroundSalvageProbe() }
     }
 
     /// Build the WhoopStore + Collector + Backfiller asynchronously. Safe to call multiple
@@ -815,7 +828,7 @@ public final class BLEManager: NSObject, ObservableObject {
            !activeId.isEmpty {
             self.deviceId = activeId
         }
-        try? await store.upsertDevice(id: deviceId, mac: nil, name: "WHOOP 4.0")
+        try? await store.upsertDevice(id: deviceId, mac: nil, name: persistedDeviceName)
         // Research toggle — OFF by default. When disabled the app is decoded-only and never
         // persists raw frames. Flip "enableRawCapture" in UserDefaults to capture raw again.
         let enableRawCapture = UserDefaults.standard.bool(forKey: "enableRawCapture")
@@ -887,26 +900,36 @@ public final class BLEManager: NSObject, ObservableObject {
     }
 
     /// Designated initializer for testing and preview use: accepts a pre-built Collector.
-    init(state: LiveState, deviceId: String = "my-whoop", collector: Collector?) {
+    init(
+        state: LiveState,
+        deviceId: String = "my-whoop",
+        collector: Collector?,
+        protocolConnectionEnabled: Bool = true,
+        persistedDeviceName: String = "WHOOP 4.0"
+    ) {
         self.state = state
         self.deviceId = deviceId
+        self.protocolConnectionEnabled = protocolConnectionEnabled
+        self.persistedDeviceName = persistedDeviceName
         self.router = FrameRouter(state: state)
         self.collector = collector
         super.init()
         state.lastSyncedAt = UserDefaults.standard.object(forKey: "lastSyncedAt") as? Double
         // Restore identifier + background-capable central (mirrors the production initializer
         // so a restored manager matches by identifier; only exercised by tests/previews).
-        #if os(iOS)
-        central = CBCentralManager(delegate: self, queue: .main,
-                                   options: [CBCentralManagerOptionRestoreIdentifierKey: BLEManager.restoreID])
-        #else
-        // Strand (macOS desktop): no state-restoration identifier (iOS background feature).
-        central = CBCentralManager(delegate: self, queue: .main)
-        #endif
+        if protocolConnectionEnabled {
+            #if os(iOS)
+            central = CBCentralManager(delegate: self, queue: .main,
+                                       options: [CBCentralManagerOptionRestoreIdentifierKey: BLEManager.restoreID])
+            #else
+            // Strand (macOS desktop): no state-restoration identifier (iOS background feature).
+            central = CBCentralManager(delegate: self, queue: .main)
+            #endif
+        }
         // Strap-as-clock: an incoming EVENT packet kicks a rate-limited catch-up sync.
         router.onSyncTrigger = { [weak self] in self?.requestSync(.strap) }
         // #78 hole-4: a paused-for-bond-loop strap gets one bounded salvage attempt per app-foreground.
-        installForegroundSalvageProbe()
+        if protocolConnectionEnabled { installForegroundSalvageProbe() }
     }
 
     // MARK: Public API
@@ -919,6 +942,10 @@ public final class BLEManager: NSObject, ObservableObject {
     /// silently un-pause the give-up and re-run the full refusal hammer, forever, one burst per event
     /// (#78 hole-2; Android's onBluetoothRadioOn always had the correct one-attempt-latched shape).
     public func connect(model: WhoopModel = .persisted) {
+        guard protocolConnectionEnabled else {
+            log("Conexão de protocolo legado desativada nesta edição VWAR.")
+            return
+        }
         // #747/#750: re-arm on the user's explicit retry: clear the give-up streak + pause so this fresh
         // attempt isn't immediately re-paused and the auto-reconnect works again if it bonds.
         if autoReconnectPausedForBondLoop {
@@ -936,6 +963,7 @@ public final class BLEManager: NSObject, ObservableObject {
     /// path schedules nothing afterwards, so the hammer loop cannot restart. A genuine bond still fully
     /// resets via the didWriteValueFor path, so a strap freed since the give-up self-heals.
     func connectFromSystem(model: WhoopModel = .persisted) {
+        guard protocolConnectionEnabled else { return }
         connectCore(model: model)
     }
 
@@ -1018,6 +1046,10 @@ public final class BLEManager: NSObject, ObservableObject {
     }
 
     public func disconnect() {
+        guard protocolConnectionEnabled, central != nil else {
+            intentionalDisconnect = true
+            return
+        }
         intentionalDisconnect = true
         cancelScanFallback()
         // A user-initiated teardown is a clean slate: clear any #80 marginal-radio fallback so the next
@@ -1045,6 +1077,7 @@ public final class BLEManager: NSObject, ObservableObject {
     /// restoration references that point at this strap so VWAR Loop Life lets go for good — until the user deliberately
     /// reconnects (which clears `intentionalDisconnect` again via connect()).
     public func forgetDevice(_ peripheralId: String?) {
+        guard protocolConnectionEnabled, central != nil else { return }
         let target = peripheralId.flatMap { UUID(uuidString: $0) }
         let isCurrent = target == nil || peripheral?.identifier == target
         intentionalDisconnect = true            // defuses the disconnect→3s-reconnect loop's guard
@@ -1094,6 +1127,7 @@ public final class BLEManager: NSObject, ObservableObject {
     /// idles via `prepareForModelSwitch()` so the scan starts clean. `connect()` reuses the live
     /// same-family peripheral on its "Already connected — refreshing" path.
     public func prepareForPresentScan(model: WhoopModel) {
+        guard protocolConnectionEnabled, central != nil else { return }
         if state.connected, selectedModel.deviceFamily == model.deviceFamily {
             log("Add-a-WHOOP scan: keeping the live \(selectedModel.displayName) connection (#74) — presenting nearby straps without dropping it")
             return
@@ -1147,6 +1181,7 @@ public final class BLEManager: NSObject, ObservableObject {
     /// second epitaph, the paused disconnect path schedules nothing). Re-stamps `bondLoopPausedAt` so
     /// back-to-back foregrounds can't chain probes.
     func salvageProbeIfBondLoopPaused(now: Date = Date()) {
+        guard protocolConnectionEnabled else { return }
         let since = bondLoopPausedAt.map { now.timeIntervalSince($0) }
         guard BLEManager.shouldSalvageProbe(pausedForBondLoop: autoReconnectPausedForBondLoop,
                                             connected: state.connected,
@@ -1269,6 +1304,10 @@ public final class BLEManager: NSObject, ObservableObject {
     /// The wizard MUST call `stopWhoopScan()` before any normal connect resumes — this mode owns the
     /// central while active. No-op-to-the-connect-path: it never touches `peripheral`/bond state.
     public func scanForWhoops() {
+        guard protocolConnectionEnabled, central != nil else {
+            discoveredWhoops = []
+            return
+        }
         guard central.state == .poweredOn else {
             log("Add-a-WHOOP scan: Bluetooth not powered on (state=\(central.state.rawValue))")
             return
@@ -1288,6 +1327,10 @@ public final class BLEManager: NSObject, ObservableObject {
     /// End the Add-a-WHOOP present-scan: stop scanning and clear `isPresentingScan` so `didDiscover`
     /// returns to its normal auto-connect behaviour. Safe to call when not presenting (idempotent).
     public func stopWhoopScan() {
+        guard protocolConnectionEnabled, central != nil else {
+            isPresentingScan = false
+            return
+        }
         guard isPresentingScan else { return }
         isPresentingScan = false
         central.stopScan()
@@ -1904,6 +1947,7 @@ public final class BLEManager: NSObject, ObservableObject {
     /// the R10/R11 realtime stream is also on. Keep that stream scoped to the Live tab and stop it
     /// on disappear so it does not permanently compete with historical offload.
     public func startRealtime() {
+        guard protocolConnectionEnabled else { return }
         screenWantsRealtime = true
         state.liveFeedActive = true   // drives the menu-bar Start/Stop label off the real intent
         // The user explicitly (re-)asked for the full stream by opening Live / tapping Start HR — give the
@@ -1923,6 +1967,7 @@ public final class BLEManager: NSObject, ObservableObject {
     /// the reconciler sends it on the on→off edge of the combined want, so a Live screen closing while
     /// continuous capture is on keeps the dense stream flowing.
     public func stopRealtime() {
+        guard protocolConnectionEnabled else { return }
         screenWantsRealtime = false
         state.liveFeedActive = false   // flip the menu-bar toggle back to "Start live feed"
         // Always stop the heavy R10/R11 burst when the Live screen leaves — it's the battery-hungry part
@@ -1937,6 +1982,11 @@ public final class BLEManager: NSObject, ObservableObject {
     /// Android `setKeepStreamForData`. #927: also called with the UNCHANGED preference when "overnight
     /// only" flips, purely to re-run the reconciler with the fresh window gate.
     public func setKeepRealtimeForData(_ keep: Bool) {
+        guard protocolConnectionEnabled else {
+            keepRealtimeForData = false
+            wantsRealtime = false
+            return
+        }
         keepRealtimeForData = keep
         reconcileRealtime()
     }
@@ -1970,6 +2020,11 @@ public final class BLEManager: NSObject, ObservableObject {
     /// framing); otherwise the want is remembered and the post-bond branch arms it. Mirrors the Android
     /// `reconcileRealtime`.
     private func reconcileRealtime() {
+        guard protocolConnectionEnabled else {
+            wantsRealtime = false
+            realtimeArmed = false
+            return
+        }
         let want = screenWantsRealtime || continuousCaptureWantsNow()
         wantsRealtime = want   // keep-alive + post-bond arm-on-connect read this derived value
         guard want != realtimeArmed else { return }                      // no edge — nothing to send
@@ -2583,6 +2638,10 @@ extension BLEManager: @preconcurrency CBCentralManagerDelegate {
         guard central.state == .poweredOn else { return }
         // Bootstrap the async store once on first poweredOn (idempotent if already set).
         Task { @MainActor in await bootstrapStore() }
+        guard protocolConnectionEnabled else {
+            log("Bluetooth ativo; scanner legado desativado na edição VWAR.")
+            return
+        }
         if let p = restoredPeripheral {
             log("poweredOn with restored peripheral — reconnecting \(p.identifier)")
             if p.state != .connected {
@@ -2809,7 +2868,7 @@ extension BLEManager: @preconcurrency CBCentralManagerDelegate {
                 state.append(log: "connect down (uptime ends)", domain: .connection)
                 state.append(log: "reconnect paused=bondLoop (strap refusing bond)", domain: .connection)
             }
-        } else if !intentionalDisconnect {
+        } else if protocolConnectionEnabled && !intentionalDisconnect {
             log("Disconnected\(error.map { " — \($0.localizedDescription)" } ?? ""); rescanning in 3s")
             // Connection test mode: count + describe the involuntary reconnect churn, and mark the link
             // down for the uptime readout. Gated zero-cost (the .connection bool is read before any string
@@ -2874,7 +2933,7 @@ extension BLEManager: @preconcurrency CBCentralManagerDelegate {
         // did, so the loop died here until a manual reconnect. Reschedule with a capped exponential
         // backoff (3, 6, 12, 24, 48, 60s…) so a strap that's genuinely out of range doesn't hammer BLE.
         // #747: don't reschedule while the bond-loop pause is active; the user must free the strap first.
-        guard !intentionalDisconnect, !autoReconnectPausedForBondLoop else { return }
+        guard protocolConnectionEnabled, !intentionalDisconnect, !autoReconnectPausedForBondLoop else { return }
         failedConnectAttempts += 1
         let delay = min(60.0, 3.0 * pow(2.0, Double(failedConnectAttempts - 1)))
         log("Reconnecting in \(Int(delay))s (attempt \(failedConnectAttempts))")
@@ -2892,6 +2951,10 @@ extension BLEManager: @preconcurrency CBCentralManagerDelegate {
     /// notifications are re-routed without user interaction.
     public func centralManager(_ central: CBCentralManager,
                                willRestoreState dict: [String: Any]) {
+        guard protocolConnectionEnabled else {
+            log("Restauração Bluetooth legada ignorada na edição VWAR.")
+            return
+        }
         guard let peripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral],
               let p = peripherals.first else {
             log("Restore: no peripherals in state dict")

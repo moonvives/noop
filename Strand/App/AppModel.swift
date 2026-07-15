@@ -205,7 +205,16 @@ final class AppModel: ObservableObject {
         // aren't open yet here, so the registry's active id can't be read synchronously; `bootstrapStore`
         // (write side) and `wireSourceCoordinator → adoptActiveDevice` (read spine, #814) re-point them to
         // the registry active id once the store opens. Single-device install keeps "my-whoop" throughout.
+        #if os(iOS)
+        self.ble = BLEManager(
+            state: live,
+            deviceId: deviceId,
+            protocolConnectionEnabled: false,
+            persistedDeviceName: "VWAR Loop Life"
+        )
+        #else
         self.ble = BLEManager(state: live, deviceId: deviceId)
+        #endif
         self.repo = Repository(deviceId: deviceId)
         self.coach = AICoachEngine(repo: repo)
         self.intelligence = IntelligenceEngine(repo: repo, profile: profile, deviceId: deviceId)
@@ -403,6 +412,11 @@ final class AppModel: ObservableObject {
     /// `startWhoop`/`stopWhoop` are thin closures over BLEManager's EXISTING public methods (via the
     /// model's `scan()` / `disconnect()`), so the coordinator never references BLEManager directly.
     private func wireSourceCoordinator() async {
+        #if os(iOS)
+        // G Band → Saúde da Apple é a rota principal desta edição. O coletor VWAR separado continua
+        // disponível somente para pesquisa; conectores de outras pulseiras e anéis não são iniciados.
+        return
+        #else
         guard sourceCoordinator == nil, let store = await repo.storeHandle() else { return }
         let registry = DeviceRegistry(store: DeviceRegistryStore(dbQueue: store.registryWriter))
         registry.reload()
@@ -443,6 +457,7 @@ final class AppModel: ObservableObject {
             .sink { [weak self] id in
                 Task { await self?.adoptActiveDevice(id) }
             }
+        #endif
     }
 
     /// Re-point the Repository's ACTIVE-strap READ id at `activeId` and, if it moved, refresh + re-score so a
@@ -999,9 +1014,9 @@ final class AppModel: ObservableObject {
     static func postInactivity(minutes: Int) {
         #if os(iOS)
         let body = minutes > 0
-            ? String(localized: "You've been seated for about \(minutes) min. Time to move.")
-            : String(localized: "Time to move. You've been seated a while.")
-        postWristAlert(identifier: "inactivity-nudge", title: String(localized: "Move reminder"), body: body)
+            ? "Você está sentado há cerca de \(minutes) min. Hora de se movimentar."
+            : "Hora de se movimentar. Você está sentado há algum tempo."
+        postWristAlert(identifier: "inactivity-nudge", title: "Lembrete de movimento", body: body)
         #endif
     }
 
@@ -1009,8 +1024,8 @@ final class AppModel: ObservableObject {
     /// `onSmartAlarmFired` hook. No-op on macOS and when wrist alerts are off.
     static func postSmartAlarm() {
         #if os(iOS)
-        postWristAlert(identifier: "smart-alarm-wake", title: String(localized: "Smart alarm"),
-                       body: String(localized: "Good morning. Your smart alarm just woke you."))
+        postWristAlert(identifier: "smart-alarm-wake", title: "Alarme inteligente",
+                       body: "Bom dia. Seu alarme inteligente acabou de despertar você.")
         #endif
     }
 
@@ -1081,8 +1096,8 @@ final class AppModel: ObservableObject {
                 return
             }
             let content = UNMutableNotificationContent()
-            content.title = String(localized: "Smart alarm")
-            content.body = String(localized: "Backup wake: your smart alarm time is here.")
+            content.title = "Alarme inteligente"
+            content.body = "Despertador de segurança: chegou o horário do seu alarme inteligente."
             content.sound = .default
             let hour = minutes / 60
             let minute = minutes % 60

@@ -8,9 +8,9 @@ struct VWARPortugueseTermsGate: View {
     @State private var checked = false
 
     private let points: [(String, String)] = [
-        ("Projeto independente", "O VWAR Loop Life não é afiliado, patrocinado nem endossado pela VWAR, G Band, Garmin, WHOOP ou Oura. As marcas pertencem aos respectivos titulares."),
+        ("Projeto independente", "O VWAR Loop Life não é afiliado, patrocinado nem endossado pela VWAR, pelo G Band, pela Apple ou pelo Strava. As marcas pertencem aos respectivos titulares."),
         ("Uso com seus dispositivos e seus dados", "Use o aplicativo somente com aparelhos que você possui e com informações às quais tem autorização legítima de acesso."),
-        ("Software experimental", "Bluetooth, sincronização e análises podem falhar, mudar após atualizações de firmware ou apresentar lacunas. Você assume o risco de uso."),
+        ("Software experimental", "A sincronização pela Saúde da Apple e as análises podem falhar, mudar após atualizações do G Band ou apresentar lacunas. Você assume o risco de uso."),
         ("Não é dispositivo médico", "Métricas, tendências, ECG, pressão arterial, glicose e estimativas de composição corporal não servem para diagnóstico, tratamento ou decisão médica."),
         ("Processamento local e sem garantia", "O aplicativo é gratuito, fornecido no estado em que se encontra e mantém os cálculos principais no aparelho. A responsabilidade é limitada ao máximo permitido pela lei aplicável."),
     ]
@@ -173,7 +173,7 @@ struct VWARPortugueseOnboarding: View {
                 promise("SEM ASSINATURA", "Histórico e análises permanecem disponíveis sem cobrança recorrente.")
                 promise("DADOS REAIS", "Ausências continuam vazias; nenhum gráfico recebe valores inventados.")
                 promise("PRIVADO", "Processamento principal no aparelho e permissões solicitadas no momento certo.")
-                promise("INTEROPERÁVEL", "G Band e Garmin entram pelo app Saúde com origem identificada.")
+                promise("INTEROPERÁVEL", "G Band e Strava entram pelo app Saúde com origem identificada.")
             }
             VWARNotice(
                 title: "REQUISITO",
@@ -225,11 +225,11 @@ struct VWARPortugueseOnboarding: View {
                         .font(StrandFont.overlineScaled(9))
                         .tracking(1.2)
                         .foregroundStyle(VWAR26Palette.teal)
-                    Text("O G Band e o Garmin Connect podem gravar sono, frequência cardíaca, VFC, SpO₂, passos e treinos no app Saúde. O VWAR Loop Life lê somente as categorias que você aprovar.")
+                    Text("O G Band pode gravar sinais da pulseira e o Strava pode gravar atividades autorizadas no app Saúde. O VWAR Loop Life lê somente as categorias que você aprovar.")
                         .font(StrandFont.body)
                         .foregroundStyle(VWAR26Palette.secondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("G Band → Saúde da Apple → VWAR Loop Life\nGarmin Connect → Saúde da Apple → VWAR Loop Life")
+                    Text("G Band → Saúde da Apple → VWAR Loop Life\nStrava → Saúde da Apple → VWAR Loop Life")
                         .font(StrandFont.mono(11, weight: .medium))
                         .foregroundStyle(VWAR26Palette.teal)
                         .fixedSize(horizontal: false, vertical: true)
@@ -254,7 +254,7 @@ struct VWARPortugueseOnboarding: View {
                 promise("HOJE", "Calendário, relógio, sinais atuais e inteligência de contexto.")
                 promise("TENDÊNCIAS", "Gráficos interativos de recuperação, carga, sono e sinais noturnos.")
                 promise("SONO", "Duração, eficiência, composição e regularidade de horários.")
-                promise("FONTES", "Saúde da Apple, G Band, Garmin, cobertura local e perfil.")
+                promise("FONTES", "Saúde da Apple, G Band, Strava, cobertura local e perfil.")
             }
             Text("Você mantém o controle: sincronize quando quiser, confira a origem e exporte somente por ação explícita.")
                 .font(StrandFont.body)
@@ -338,7 +338,7 @@ struct VWARPortugueseWhatsNew: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("VERSÃO 11.0.0")
+                    Text("VERSÃO 11.1.0")
                         .font(StrandFont.overlineScaled(9))
                         .tracking(1.4)
                         .foregroundStyle(VWAR26Palette.teal)
@@ -352,7 +352,7 @@ struct VWARPortugueseWhatsNew: View {
                     change("Malha de sinais", "Seis sinais reais em um campo animado, selecionável e sem preencher ausências.")
                     change("Gráficos avançados", "Recuperação, carga, sono, VFC, frequência de repouso, SpO₂ e respiração em séries interativas.")
                     change("Sono aprofundado", "Duração, eficiência, composição e regularidade sem completar lacunas artificialmente.")
-                    change("G Band e Garmin", "Proveniência verificada pelo app Saúde e instruções claras de sincronização.")
+                    change("G Band e Strava", "Proveniência verificada pelo app Saúde e instruções claras de sincronização.")
                     change("Privacidade", "Processamento principal local, transparência de cobertura e nenhuma chave secreta embutida.")
                     VWARNotice(title: "IMPORTANTE", text: "O aplicativo oferece informações de bem-estar, não medições médicas.")
                 }

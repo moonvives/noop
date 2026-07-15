@@ -144,8 +144,8 @@ enum WindDownNudge {
         center.removePendingNotificationRequests(withIdentifiers: [requestId] + perDayRequestIds)
 
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Time to wind down")
-        content.body = String(localized: "A calm hour now helps you hit your wake time well-rested.")
+        content.title = "Hora de desacelerar"
+        content.body = "Uma hora tranquila agora ajuda você a acordar no horário com mais descanso."
         content.sound = .default
 
         // PR#554 — with per-day overrides set, fan out to seven weekday-pinned triggers each at that day's

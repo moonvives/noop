@@ -2,20 +2,7 @@ import XCTest
 @testable import StrandImport
 
 final class HealthSourceClassifierTests: XCTestCase {
-    func testGarminConnectRecognizedFromBundleWhenHealthShowsGenericConnectName() {
-        let source = HealthSourceIdentity(name: "Connect", bundleIdentifier: "com.garmin.connect.mobile")
-        XCTAssertEqual(source.brand, .garminConnect)
-        XCTAssertEqual(source.name, "Connect")
-    }
-
-    func testGarminRecognizedFromExplicitDisplayName() {
-        XCTAssertEqual(
-            HealthSourceClassifier.classify(name: "Garmin Connect", bundleIdentifier: "com.example.health"),
-            .garminConnect
-        )
-    }
-
-    func testUnrelatedConnectAppIsNotMisclassifiedAsGarmin() {
+    func testUnrelatedConnectAppRemainsOther() {
         XCTAssertEqual(
             HealthSourceClassifier.classify(name: "Connect", bundleIdentifier: "com.example.connect"),
             .other
@@ -26,6 +13,17 @@ final class HealthSourceClassifierTests: XCTestCase {
         XCTAssertEqual(HealthSourceClassifier.classify(name: "G Band", bundleIdentifier: ""), .gBand)
         XCTAssertEqual(HealthSourceClassifier.classify(name: "G-Band", bundleIdentifier: ""), .gBand)
         XCTAssertEqual(HealthSourceClassifier.classify(name: "Health", bundleIdentifier: "com.wofit.gband"), .gBand)
+    }
+
+    func testStravaRecognizedFromNameOrBundle() {
+        XCTAssertEqual(
+            HealthSourceClassifier.classify(name: "Strava", bundleIdentifier: "com.example.health"),
+            .strava
+        )
+        XCTAssertEqual(
+            HealthSourceClassifier.classify(name: "Activity", bundleIdentifier: "com.strava.stravaride"),
+            .strava
+        )
     }
 
     func testAppleSourcesRemainDistinctFromThirdPartySources() {
@@ -40,9 +38,9 @@ final class HealthSourceClassifierTests: XCTestCase {
     }
 
     func testIdentityTrimsPresentationStrings() {
-        let source = HealthSourceIdentity(name: "  Garmin Connect\n", bundleIdentifier: " com.garmin.connect.mobile ")
-        XCTAssertEqual(source.name, "Garmin Connect")
-        XCTAssertEqual(source.bundleIdentifier, "com.garmin.connect.mobile")
-        XCTAssertEqual(source.brand, .garminConnect)
+        let source = HealthSourceIdentity(name: "  G Band\n", bundleIdentifier: " com.wofit.gband ")
+        XCTAssertEqual(source.name, "G Band")
+        XCTAssertEqual(source.bundleIdentifier, "com.wofit.gband")
+        XCTAssertEqual(source.brand, .gBand)
     }
 }

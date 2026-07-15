@@ -11,11 +11,11 @@ options:
   developmentLanguage: en
 settings:
   base:
-    MARKETING_VERSION: "11.0.0"
+    MARKETING_VERSION: "11.1.0"
     # iOS build number (CFBundleVersion). GLOBAL so the iOS app AND its widget extension inherit the
     # SAME value — they must match or iOS warns "extension version must match parent app" (#416).
     # macOS sets its own CFBundleVersion on the Strand target and is unaffected by this.
-    CURRENT_PROJECT_VERSION: "174"
+    CURRENT_PROJECT_VERSION: "175"
     SWIFT_VERSION: "5.0"
     # Emit localizable strings so Xcode auto-extracts every LocalizedStringKey into the
     # String Catalog on build (the English (US) base entries).
@@ -182,6 +182,19 @@ targets:
           # Terms/What's-New gates around the TabView). Without this exclude the iOS target fails to
           # resolve RootView().
           - "App/ContentView.swift"
+          # A edição iOS 11.1 usa somente as superfícies VWAR dedicadas em StrandiOS/VITAE.
+          # O onboarding herdado é puramente visual e fica fora do target. Tipos internos ainda
+          # compartilhados por armazenamento/análise e pelos componentes SwiftUI permanecem compilados.
+          - "Onboarding"
+          # Superfícies herdadas que exibiam provedores, importadores e dispositivos não usados pela
+          # edição VWAR. Elas ficam fisicamente fora do IPA; somente a experiência dedicada em
+          # StrandiOS/VITAE pode ser alcançada no iOS 26.
+          - "Liquid/LiquidTodayView.swift"
+          - "Screens/DataSourcesView.swift"
+          - "Screens/CoachView.swift"
+          - "Screens/DevicesView.swift"
+          - "Screens/AddDeviceWizard.swift"
+          - "Data/WatchSessionBridge.swift"
           - "MenuBar"
           - "Data/NotificationSettingsStore.swift"
           - "Screens/NotificationSettingsView.swift"
@@ -231,11 +244,6 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UIBackgroundModes:
-          - bluetooth-central
-          # #524: keep recording an outdoor workout's GPS route while the app is backgrounded (screen off),
-          # matching Android's foreground-service capture. Required by GpsWorkoutRecorder's
-          # allowsBackgroundLocationUpdates; without this mode iOS crashes when background updates start.
-          - location
           # #510: the scheduled debug auto-export submits a BGAppRefreshTaskRequest so iOS can wake the
           # backgrounded app near the user's chosen time to write the overnight strap-log drop. BGAppRefresh
           # needs the "fetch" background mode; the task id below must also be permitted (and registered at
@@ -247,16 +255,8 @@ targets:
         # otherwise iOS refuses to schedule or deliver the background drop.
         BGTaskSchedulerPermittedIdentifiers:
           - com.noopapp.noop.debugexport
-        NSBluetoothAlwaysUsageDescription: "O VWAR Loop Life usa Bluetooth para ler localmente dados de condicionamento físico autorizados de pulseiras compatíveis. Nada sai do aparelho sem sua permissão."
-        NSLocationWhenInUseUsageDescription: "O VWAR Loop Life registra a rota de exercícios ao ar livre para mostrar distância, ritmo e mapa, inclusive com a tela apagada. A rota permanece no aparelho."
         NSHealthShareUsageDescription: "O VWAR Loop Life lê somente os dados que você autorizar no app Saúde para calcular tendências pessoais no aparelho. Nada sai do dispositivo sem sua permissão."
         NSHealthUpdateUsageDescription: "O VWAR Loop Life grava métricas de bem-estar compatíveis no app Saúde somente quando você permitir explicitamente."
-        # #187: the opt-in AI Coach's "Custom (OpenAI-compatible)" provider can point at a LOCAL LLM on
-        # the LAN (Ollama / LM Studio at http://192.168.x.x:11434). ATS blocks cleartext by default;
-        # NSAllowsLocalNetworking exempts loopback/.local/private-LAN hosts ONLY — public HTTPS endpoints
-        # are unaffected, so cloud providers stay TLS. Mirrors the macOS target.
-        NSAppTransportSecurity:
-          NSAllowsLocalNetworking: true
         # #155: expose the app's Documents folder to Files/Shortcuts so the user's Siri Shortcut can
         # read the opt-in noop_sync.txt drop file (Apple-Health-free export for sideloaded installs).
         # Both keys are required for the folder to actually appear in Files.
@@ -290,11 +290,6 @@ targets:
       - package: MarkdownUI
       - package: ZIPFoundation
       - target: NOOPiOSWidgets
-      # Embed the watchOS app so the iPhone app carries it (NOOP.app/Watch/NOOPWatch.app). A watch app
-      # installs by riding inside its iOS companion; without this it would never reach a paired watch.
-      # Build-from-source delivers it for certain; sideload install of the embedded watch app under a free
-      # Apple ID is unproven (an Apple limitation), so the docs steer watch users to a source build for now.
-      - target: NOOPWatch
 
   # WidgetKit + Live Activity extension — the iOS analogue of the macOS menu-bar
   # extra. Reads a tiny snapshot the app publishes into the shared App Group.

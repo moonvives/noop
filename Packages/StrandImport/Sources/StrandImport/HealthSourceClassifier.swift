@@ -6,17 +6,17 @@ import Foundation
 /// `(name, bundleIdentifier)` by the iOS bridge, while tests and future Android provenance adapters
 /// can exercise the exact same clean classification rules without importing a platform SDK.
 public enum HealthSourceBrand: String, CaseIterable, Codable, Hashable, Sendable {
-    case garminConnect = "garmin-connect"
     case gBand = "g-band"
+    case strava
     case apple = "apple"
     case other
 
     public var displayName: String {
         switch self {
-        case .garminConnect: return "Garmin Connect"
         case .gBand: return "G Band"
+        case .strava: return "Strava"
         case .apple: return "Apple"
-        case .other: return "Other"
+        case .other: return "Outro"
         }
     }
 }
@@ -37,23 +37,21 @@ public struct HealthSourceIdentity: Equatable, Hashable, Sendable {
 
 /// Conservative source recognition for health-hub provenance.
 ///
-/// Garmin Connect is commonly shown to users simply as "Connect", so the display name alone is not
-/// enough. We accept it only when either the name explicitly says Garmin or the app bundle contains
-/// `garmin`. This prevents unrelated apps named Connect from being mislabeled. G Band follows the
-/// same rule with its common spacing and punctuation variants.
+/// G Band is recognized through its common spacing and punctuation variants. Strava is kept as a
+/// separate provenance source so the app never presents an installed app as proof of shared data.
 public enum HealthSourceClassifier {
     public static func classify(name: String, bundleIdentifier: String) -> HealthSourceBrand {
         let normalizedName = normalize(name)
         let normalizedBundle = normalize(bundleIdentifier)
 
-        if normalizedName.contains("garmin") || normalizedBundle.contains("garmin") {
-            return .garminConnect
-        }
-
         let compactName = compact(normalizedName)
         let compactBundle = compact(normalizedBundle)
         if compactName.contains("gband") || compactBundle.contains("gband") {
             return .gBand
+        }
+
+        if normalizedName.contains("strava") || normalizedBundle.contains("strava") {
+            return .strava
         }
 
         if normalizedBundle == "com.apple.health"

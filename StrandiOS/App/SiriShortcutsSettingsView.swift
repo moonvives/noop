@@ -4,15 +4,15 @@ import AppIntents
 import StrandDesign
 
 /// Surfaces VWAR Loop Life's already-registered App Intents (see StrandiOS/System/NOOPAppIntents.swift) in the
-/// UI so users discover them. `NOOPShortcuts` auto-registers "Buzz Strap" and "Mark a Moment" with
+/// UI so users discover them. `NOOPShortcuts` registers Health sync and moment marking with
 /// Siri/Spotlight/Shortcuts, but nothing in-app advertised them — this is the iOS analogue of the
 /// Mac's strap-double-tap-runs-a-Shortcut feature. Apple's `SiriTipView`/`ShortcutsLink` (iOS 16+)
 /// do exactly that: tip the user on the spoken phrase and deep-link into the Shortcuts app, scoped to
 /// this app automatically.
 struct SiriShortcutsSettingsView: View {
     var body: some View {
-        ScreenScaffold(title: "Siri & Shortcuts",
-                       subtitle: "Run VWAR Loop Life actions hands-free.") {
+        ScreenScaffold(title: "Siri e Atalhos",
+                       subtitle: "Execute ações do VWAR Loop Life sem usar as mãos.") {
             tips
             shortcutsCard
         }
@@ -25,15 +25,15 @@ struct SiriShortcutsSettingsView: View {
                     Image(systemName: "mic.fill")
                         .foregroundStyle(StrandPalette.accent)
                         .accessibilityHidden(true)
-                    Text("Ready-made actions")
+                    Text("Ações prontas")
                         .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
                 }
-                Text("Buzz your strap or mark a moment from Siri, Spotlight, the Shortcuts app, or a Back-Tap / automation. No setup needed.")
+                Text("Sincronize o app Saúde ou marque um momento pela Siri, Spotlight, Atalhos, Tocar Atrás ou uma automação.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
-                SiriTipView(intent: BuzzStrapIntent(), isVisible: .constant(true))
+                SiriTipView(intent: SyncHealthIntent(), isVisible: .constant(true))
                     .siriTipViewStyle(.dark)
                 SiriTipView(intent: MarkMomentIntent(), isVisible: .constant(true))
                     .siriTipViewStyle(.dark)
@@ -48,11 +48,11 @@ struct SiriShortcutsSettingsView: View {
                     Image(systemName: "square.stack.3d.up.fill")
                         .foregroundStyle(StrandPalette.accent)
                         .accessibilityHidden(true)
-                    Text("Build your own")
+                    Text("Crie sua automação")
                         .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
                 }
-                Text("Wire VWAR Loop Life's actions into a Back-Tap, a focus automation, or a longer Shortcut. For example, double-tap the back of your iPhone to buzz the strap.")
+                Text("Combine as ações do VWAR Loop Life com Tocar Atrás, um modo Foco ou um atalho maior. Por exemplo, toque duas vezes atrás do iPhone para sincronizar o app Saúde.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
