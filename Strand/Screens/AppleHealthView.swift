@@ -209,7 +209,7 @@ struct AppleHealthView: View {
                 // manual .zip export.
                 VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                     liveSyncCard
-                    garminConnectCard
+                    stravaCard
                     // #348 — when the build can't carry the HealthKit entitlement there's no "Enable"
                     // button to tap, so the empty-state copy must point at the file/Shortcuts path
                     // instead of telling the user to tap a control that isn't shown.
@@ -226,7 +226,7 @@ struct AppleHealthView: View {
                 VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                     #if os(iOS)
                     liveSyncCard
-                    garminConnectCard
+                    stravaCard
                     #endif
                     rangeControl
                     tileGrid
@@ -470,66 +470,65 @@ struct AppleHealthView: View {
         }
     }
 
-    /// Garmin's supported iPhone bridge, presented as an explicit integration rather than an implicit
-    /// side effect of the generic Apple Health importer. The status is based on HKSource provenance
-    /// discovered from real samples, not on whether Garmin Connect happens to be installed.
+    /// Strava apresentado como origem explícita, com estado baseado na proveniência HKSource de
+    /// amostras reais e nunca apenas na presença do aplicativo instalado.
     @ViewBuilder
-    private var garminConnectCard: some View {
+    private var stravaCard: some View {
         StrandCard(padding: 20, tint: StrandPalette.metricCyan) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("GARMIN CONNECT")
+                        Text("STRAVA")
                             .font(StrandFont.overline)
                             .foregroundStyle(StrandPalette.metricCyan)
-                        Text("Garmin in your daily view")
+                        Text("Atividades na sua visão diária")
                             .font(StrandFont.headline)
                             .foregroundStyle(StrandPalette.textPrimary)
                     }
                     Spacer()
-                    if let source = health.garminConnectSource {
-                        StatePill(source.metricTypeCount == 1 ? "1 category" : "\(source.metricTypeCount) categories",
+                    if let source = health.stravaSource {
+                        StatePill(source.metricTypeCount == 1 ? "1 categoria" : "\(source.metricTypeCount) categorias",
                                   tone: .positive)
                     } else {
-                        StatePill(health.auth == .authorized ? "Not detected" : "Setup",
+                        StatePill(health.auth == .authorized ? "Não detectado" : "Configurar",
                                   tone: health.auth == .authorized ? .neutral : .warning)
                     }
                 }
 
-                if let source = health.garminConnectSource {
-                    let names = source.sourceNames.isEmpty ? "Garmin Connect" : source.sourceNames.joined(separator: ", ")
-                    Text("Detected from real Apple Health samples written by \(names). Heart rate, sleep, steps, distance, energy, body data and workouts are included when Garmin and your device provide them.")
+                if let source = health.stravaSource {
+                    let names = source.sourceNames.isEmpty ? "Strava" : source.sourceNames.joined(separator: ", ")
+                    Text("Detectado em amostras reais gravadas por \(names) no app Saúde. O VWAR Loop Life usa somente as categorias realmente compartilhadas.")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else if health.auth == .entitlementMissing {
-                    Text("This sideload signature cannot read Apple Health. Garmin still works through standard Bluetooth heart-rate broadcast, or by importing your Garmin data export in Data Sources.")
+                    Text("Esta assinatura não permite ler o app Saúde. Assine novamente preservando o direito HealthKit para verificar atividades do Strava.")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else if health.auth == .authorized {
-                    Text("No Garmin-authored sample was found in the last 30 days. Finish the three steps below, keep Garmin Connect open during a device sync, then verify again.")
+                    Text("Nenhuma amostra do Strava foi encontrada nos últimos 30 dias. Revise a conexão abaixo e sincronize uma atividade novamente.")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
-                    Text("Enable Apple Health above, then connect Garmin Connect. VWAR Loop Life detects Garmin only after Garmin has written at least one authorized sample.")
+                    Text("Autorize o app Saúde acima. O Strava será detectado somente depois de gravar ao menos uma amostra permitida.")
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
                 VStack(alignment: .leading, spacing: 7) {
-                    Text("1  Garmin Connect: More → Settings → Connect Apps → Apple Health.")
-                    Text("2  Select Connect with Apple Health and allow the categories you want.")
-                    Text("3  Sync the watch while Garmin Connect is open, then return here.")
+                    Text("1  No Strava, abra Gerenciar aplicativos e dispositivos → Saúde.")
+                    Text("2  Ative Enviar para Saúde e permita as categorias desejadas.")
+                    Text("3  Sincronize uma atividade e volte para verificar a origem.")
                 }
                 .font(StrandFont.caption)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
 
                 if health.auth == .authorized {
-                    Button(health.syncing ? "Checking Garmin…" : "Check Garmin now") {
+                    Button(health.syncing ? "Verificando Strava…" : "VERIFICAR STRAVA AGORA") {
                         Task {
                             await health.sync()
                             await load()
@@ -542,20 +541,20 @@ struct AppleHealthView: View {
 
                 Divider().overlay(StrandPalette.hairline)
 
-                Text("CONNECT IQ")
+                Text("LIMITE DA INTEGRAÇÃO")
                     .font(StrandFont.overline)
                     .foregroundStyle(StrandPalette.textTertiary)
-                Text("Connect IQ installs watch apps, data fields and watch faces. It is not required for Garmin Connect history sync and does not by itself give this app access to Garmin's cloud history.")
+                Text("O VWAR Loop Life não acessa sua conta nem a nuvem do Strava. Ele identifica somente as atividades que o Strava realmente envia ao app Saúde.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("For live heart rate without HealthKit: enable Broadcast Heart Rate on the Garmin watch, then add it in Devices as a Garmin watch. VWAR Loop Life reads the standard Bluetooth Heart Rate service; availability and menu names vary by model.")
+                Text("A sincronização entre o G Band e o Strava continua configurada nos próprios aplicativos. O app Saúde é a ponte verificável usada nesta edição.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Garmin does not send the workout GPS route to Apple Health, and timed-activity heart-rate detail can be limited. VWAR Loop Life shows only the data that actually arrives and never recreates missing samples.")
+                Text("Rotas e detalhes que não chegam ao app Saúde permanecem ausentes; o VWAR Loop Life nunca recria amostras faltantes.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -734,7 +733,7 @@ struct AppleHealthView: View {
 
     private var sleepSection: some View {
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
-            SectionHeader("Sleep", overline: "Rest",
+            SectionHeader("Sono", overline: "Descanso",
                           trailing: range.caption)
             chartCard(title: "Asleep", key: "asleep_min",
                       gradient: purpleGradient, fallback: 240...600,

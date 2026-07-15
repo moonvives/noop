@@ -44,17 +44,17 @@ final class HealthKitBridge: ObservableObject {
     /// here so an Apple Health auth revoke, quota hit, or invalid sample is visible instead of silent.
     @Published private(set) var lastError: String?
     /// Apps discovered as real HealthKit sample sources during the most recent sync. Used to show an
-    /// honest Garmin Connect / G Band connection state instead of assuming that installing an app
+    /// honest G Band / Strava connection state instead of assuming that installing an app
     /// means it is sharing data.
     @Published private(set) var sourceSummaries: [HealthSourceSummary] = []
     @Published private(set) var sourceInventoryLastChecked: Date?
 
-    var garminConnectSource: HealthSourceSummary? {
-        sourceSummaries.first { $0.brand == .garminConnect }
-    }
-
     var gBandSource: HealthSourceSummary? {
         sourceSummaries.first { $0.brand == .gBand }
+    }
+
+    var stravaSource: HealthSourceSummary? {
+        sourceSummaries.first { $0.brand == .strava }
     }
 
     private let store = HKHealthStore()
@@ -467,7 +467,7 @@ final class HealthKitBridge: ObservableObject {
             lastSync = Date()
             lastError = nil
         } catch {
-            lastError = String(localized: "Apple Health sync failed: \(error.localizedDescription)")
+            lastError = "Falha ao sincronizar o app Saúde: \(error.localizedDescription)"
         }
     }
 
@@ -573,8 +573,8 @@ final class HealthKitBridge: ObservableObject {
     }
 
     /// Refresh just the app/source inventory without importing or writing any health values. The UI
-    /// uses this after setup so a user can verify that Garmin Connect has actually shared at least one
-    /// sample. A missing Garmin row means "not detected", never "Garmin has no data".
+    /// uses this after setup so a user can verify that G Band or Strava has actually shared at least
+    /// one sample. A missing row means "not detected", never "the source has no data".
     func verifyConnectedSources(days: Int = 30) async {
         guard auth == .authorized, HKHealthStore.isHealthDataAvailable() else { return }
         let end = Date()
@@ -621,7 +621,7 @@ final class HealthKitBridge: ObservableObject {
                 metricTypeCount: item.metricTypes.count
             )
         }.sorted { lhs, rhs in
-            let order: [HealthSourceBrand] = [.garminConnect, .gBand, .apple, .other]
+            let order: [HealthSourceBrand] = [.gBand, .strava, .apple, .other]
             return (order.firstIndex(of: lhs.brand) ?? order.count)
                 < (order.firstIndex(of: rhs.brand) ?? order.count)
         }
@@ -756,43 +756,43 @@ final class HealthKitBridge: ObservableObject {
 
     /// Map an `HKWorkoutActivityType` to VWAR Loop Life's human sport label. Strength training routes to the
     /// shared lifting sport so a gym session lands in the Lifting lane; anything we don't name explicitly
-    /// falls back to a generic "Workout" rather than an opaque numeric type.
+    /// usa um nome genérico em pt-BR em vez de um tipo numérico opaco.
     private static func sportName(_ type: HKWorkoutActivityType) -> String {
         switch type {
-        case .running:                    return "Running"
-        case .walking:                    return "Walking"
-        case .hiking:                     return "Hiking"
-        case .cycling:                    return "Cycling"
+        case .running:                    return "Corrida"
+        case .walking:                    return "Caminhada"
+        case .hiking:                     return "Trilha"
+        case .cycling:                    return "Ciclismo"
         case .traditionalStrengthTraining,
-             .functionalStrengthTraining: return LiftingImporter.sport
+             .functionalStrengthTraining: return "Musculação"
         case .highIntensityIntervalTraining: return "HIIT"
-        case .coreTraining:               return "Core training"
+        case .coreTraining:               return "Treino de core"
         case .yoga:                       return "Yoga"
         case .pilates:                    return "Pilates"
-        case .rowing:                     return "Rowing"
-        case .elliptical:                 return "Elliptical"
-        case .stairClimbing, .stairs:     return "Stairs"
-        case .jumpRope:                   return "Jump rope"
-        case .boxing, .kickboxing:        return "Boxing"
-        case .basketball:                 return "Basketball"
-        case .soccer:                     return "Soccer"
-        case .americanFootball:           return "Football"
-        case .baseball:                   return "Baseball"
+        case .rowing:                     return "Remo"
+        case .elliptical:                 return "Elíptico"
+        case .stairClimbing, .stairs:     return "Escadas"
+        case .jumpRope:                   return "Pular corda"
+        case .boxing, .kickboxing:        return "Boxe"
+        case .basketball:                 return "Basquete"
+        case .soccer:                     return "Futebol"
+        case .americanFootball:           return "Futebol americano"
+        case .baseball:                   return "Beisebol"
         case .badminton:                  return "Badminton"
-        case .tennis:                     return "Tennis"
-        case .tableTennis:                return "Table tennis"
-        case .volleyball:                 return "Volleyball"
+        case .tennis:                     return "Tênis"
+        case .tableTennis:                return "Tênis de mesa"
+        case .volleyball:                 return "Vôlei"
         case .squash, .racquetball:       return "Squash"
-        case .martialArts, .taiChi:       return "Martial arts"
-        case .dance, .cardioDance, .socialDance: return "Dancing"
-        case .golf:                       return "Golf"
-        case .climbing:                   return "Climbing"
-        case .downhillSkiing, .crossCountrySkiing: return "Skiing"
-        case .snowboarding:               return "Snowboarding"
-        case .swimming:                   return "Swimming"
-        case .surfingSports:              return "Surfing"
-        case .paddleSports:               return "Paddling"
-        default:                          return "Workout"
+        case .martialArts, .taiChi:       return "Artes marciais"
+        case .dance, .cardioDance, .socialDance: return "Dança"
+        case .golf:                       return "Golfe"
+        case .climbing:                   return "Escalada"
+        case .downhillSkiing, .crossCountrySkiing: return "Esqui"
+        case .snowboarding:               return "Snowboard"
+        case .swimming:                   return "Natação"
+        case .surfingSports:              return "Surfe"
+        case .paddleSports:               return "Remada"
+        default:                          return "Treino"
         }
     }
 

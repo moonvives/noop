@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HealthData>
+<HealthData locale="pt_BR">
+ <ExportDate value="2026-07-14 08:00:00 -0300"/>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="G Band" sourceVersion="1.0" device="VWAR Loop Life" unit="count/min" startDate="2026-07-13 07:00:00 -0300" endDate="2026-07-13 07:00:00 -0300" value="68"/>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="G Band" sourceVersion="1.0" device="VWAR Loop Life" unit="count/min" startDate="2026-07-13 07:30:00 -0200" endDate="2026-07-13 07:30:00 -0200" value="74"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="G Band" sourceVersion="1.0" device="VWAR Loop Life" unit="count" startDate="2026-07-13 07:00:00 -0300" endDate="2026-07-13 08:00:00 -0300" value="1200"/>
+ <Workout workoutActivityType="HKWorkoutActivityTypeRunning" duration="31" durationUnit="min" sourceName="Strava" sourceVersion="500" startDate="2026-07-13 06:00:00 -0300" endDate="2026-07-13 06:31:00 -0300"/>
+ <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Saúde" sourceVersion="26.0" unit="count/min" startDate="2026-07-13 05:00:00 -0300" endDate="2026-07-13 05:00:00 -0300" value="59"/>
+ <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Saúde" sourceVersion="26.0" unit="count/min" startDate="2026-07-13 07:30:00 +00:00" endDate="2026-07-13 07:30:00 +00:00" value="61"/>
+</HealthData>

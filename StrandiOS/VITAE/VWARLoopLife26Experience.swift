@@ -9,11 +9,10 @@ import WhoopStore
 
 struct VWARTrendsView: View {
     @EnvironmentObject private var repo: Repository
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var range: VWARAnalysisRange = .days30
     @State private var selectedDate: Date?
 
-    private var compact: Bool { horizontalSizeClass == .compact }
+    private var compact: Bool { VWARDeviceEdition.current != .iPadProM2 }
     private var points: [VWARTrendPoint] {
         Array(repo.days.suffix(range.rawValue)).compactMap(VWARTrendPoint.init)
     }
@@ -24,7 +23,7 @@ struct VWARTrendsView: View {
                 VWARPageHeader(
                     eyebrow: "ANÁLISE LONGITUDINAL",
                     title: "Tendências",
-                    subtitle: "Referências pessoais, carga e sinais noturnos sem dados simulados."
+                    subtitle: "Referências pessoais formadas somente com sinais disponíveis no app Saúde."
                 )
                 VWARRangePicker(range: $range)
                 summaryGrid
@@ -72,7 +71,7 @@ struct VWARTrendsView: View {
             minimumHeight: 360
         ) {
             if points.isEmpty {
-                VWAREmptyState("Sincronize o G Band ou o Garmin pelo app Saúde para formar a série.")
+                VWAREmptyState("Sincronize o VWAR Loop Life no G Band com o app Saúde. Atividades do Strava aparecem apenas quando também estiverem registradas no Saúde.")
             } else {
                 Chart(points) { point in
                     if let value = point.recovery {
@@ -260,11 +259,10 @@ struct VWARTrendsView: View {
 
 struct VWARSleepIntelligenceView: View {
     @EnvironmentObject private var repo: Repository
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var range: VWARAnalysisRange = .days30
     @State private var sessions: [CachedSleepSession] = []
 
-    private var compact: Bool { horizontalSizeClass == .compact }
+    private var compact: Bool { VWARDeviceEdition.current != .iPadProM2 }
     private var points: [VWARSleepDay] { Array(repo.days.suffix(range.rawValue)).compactMap(VWARSleepDay.init) }
 
     var body: some View {
@@ -273,7 +271,7 @@ struct VWARSleepIntelligenceView: View {
                 VWARPageHeader(
                     eyebrow: "ARQUITETURA E REGULARIDADE",
                     title: "Sono",
-                    subtitle: "Duração, eficiência, estágios e horários em uma única linha analítica."
+                    subtitle: "Duração, eficiência, estágios e horários trazidos do G Band pelo app Saúde."
                 )
                 VWARRangePicker(range: $range)
                 sleepSummary
@@ -326,7 +324,7 @@ struct VWARSleepIntelligenceView: View {
         VWARChartPanel(eyebrow: "QUANTIDADE", title: "Duração por noite", detail: "A linha pontilhada marca oito horas.", minimumHeight: 350) {
             let valid = points.filter { $0.minutes != nil }
             if valid.isEmpty {
-                VWAREmptyState("Nenhuma duração de sono foi sincronizada neste intervalo.")
+                VWAREmptyState("Nenhuma duração de sono do G Band foi encontrada no app Saúde neste intervalo.")
             } else {
                 Chart(valid) { point in
                     AreaMark(x: .value("Dia", point.date), y: .value("Horas", (point.minutes ?? 0) / 60))
@@ -348,7 +346,7 @@ struct VWARSleepIntelligenceView: View {
     private var stagesPanel: some View {
         VWARChartPanel(eyebrow: "COMPOSIÇÃO", title: "Estágios registrados", detail: "Minutos empilhados por noite, sem reconstrução artificial.", minimumHeight: 350) {
             if stageRows.isEmpty {
-                VWAREmptyState("A fonte ainda não forneceu totais de sono leve, profundo ou REM.")
+                VWAREmptyState("O app Saúde ainda não recebeu do G Band totais de sono leve, profundo ou REM.")
             } else {
                 Chart(stageRows) { row in
                     BarMark(x: .value("Dia", row.date), y: .value("Minutos", row.minutes))
@@ -371,7 +369,7 @@ struct VWARSleepIntelligenceView: View {
         VWARChartPanel(eyebrow: "CONTINUIDADE", title: "Eficiência do sono", detail: "Percentual do período na cama efetivamente dormido.", minimumHeight: 350) {
             let valid = points.filter { $0.efficiency != nil }
             if valid.isEmpty {
-                VWAREmptyState("A fonte ainda não informou eficiência do sono.")
+                VWAREmptyState("O app Saúde ainda não contém eficiência do sono para este intervalo.")
             } else {
                 Chart(valid) { point in
                     LineMark(x: .value("Dia", point.date), y: .value("Eficiência", point.efficiency ?? 0))
@@ -484,9 +482,8 @@ struct VWARSourcesView: View {
     @EnvironmentObject private var health: HealthKitBridge
     @EnvironmentObject private var profile: ProfileStore
     @EnvironmentObject private var repo: Repository
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    private var compact: Bool { horizontalSizeClass == .compact }
+    private var compact: Bool { VWARDeviceEdition.current != .iPadProM2 }
 
     var body: some View {
         ScrollView {
@@ -494,7 +491,7 @@ struct VWARSourcesView: View {
                 VWARPageHeader(
                     eyebrow: "CONTROLE E PROVENIÊNCIA",
                     title: "Fontes",
-                    subtitle: "Permissões explícitas, integração local e origem verificável de cada conjunto de dados."
+                    subtitle: "Um único fluxo: VWAR Loop Life no G Band, app Saúde e atividades do Strava."
                 )
                 healthPanel
                 integrationGrid
@@ -503,7 +500,7 @@ struct VWARSourcesView: View {
                 systemPanel
                 VWARNotice(
                     title: "PRIVACIDADE POR PADRÃO",
-                    text: "Os cálculos principais permanecem no aparelho. Nenhuma chave de API, conta Garmin ou credencial G Band é incorporada ao IPA. Dados só saem do dispositivo quando você escolhe exportar ou compartilhar."
+                    text: "Os cálculos principais permanecem no aparelho. Nenhuma chave de API, conta Strava ou credencial G Band é incorporada ao IPA. Dados só saem do dispositivo quando você escolhe exportar ou compartilhar."
                 )
                 Color.clear.frame(height: 92)
             }
@@ -586,10 +583,10 @@ struct VWARSourcesView: View {
                 detail: "No G Band, abra Serviços de dados, ative Saúde da Apple e permita batimentos, passos, sono, oxigênio e temperatura. Depois sincronize aqui."
             )
             sourceCard(
-                title: "GARMIN CONNECT",
-                source: health.garminConnectSource,
-                route: "Garmin Connect → Saúde da Apple → VWAR Loop Life",
-                detail: "No Garmin Connect, autorize a gravação no app Saúde. O VWAR Loop Life reconhece a origem real das amostras; instalar o app, sozinho, não conta como conexão."
+                title: "STRAVA / ATIVIDADES",
+                source: health.stravaSource,
+                route: "Strava → Saúde da Apple → VWAR Loop Life",
+                detail: "No Strava, ative o envio de atividades ao app Saúde. O VWAR Loop Life usa somente atividades realmente gravadas ali; instalar o app, sozinho, não conta como conexão."
             )
         }
     }
@@ -634,10 +631,10 @@ struct VWARSourcesView: View {
                     .tracking(1.2)
                     .foregroundStyle(VWAR26Palette.teal)
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 145), spacing: 10)], spacing: 10) {
-                    VWARMetricTile(label: "DIAS IMPORTADOS", value: "\(repo.freshness.importedDays)", accent: VWAR26Palette.blue)
-                    VWARMetricTile(label: "DIAS CALCULADOS", value: "\(repo.freshness.computedDays)", accent: VWAR26Palette.teal)
                     VWARMetricTile(label: "DIAS DO APP SAÚDE", value: "\(repo.freshness.appleDays)", accent: VWAR26Palette.violet)
-                    VWARMetricTile(label: "SESSÕES DE SONO", value: "\(repo.freshness.importedSleeps + repo.freshness.computedSleeps)", accent: VWAR26Palette.amber)
+                    VWARMetricTile(label: "DIAS NO PAINEL", value: "\(repo.days.count)", accent: VWAR26Palette.blue)
+                    VWARMetricTile(label: "DIAS ANALISADOS", value: "\(repo.freshness.computedDays)", accent: VWAR26Palette.teal)
+                    VWARMetricTile(label: "SONOS ANALISADOS", value: "\(repo.freshness.computedSleeps)", accent: VWAR26Palette.amber)
                 }
                 Text(freshnessRange)
                     .font(StrandFont.footnote)
@@ -699,7 +696,7 @@ struct VWARSourcesView: View {
                     .font(StrandFont.overlineScaled(9))
                     .tracking(1.2)
                     .foregroundStyle(VWAR26Palette.teal)
-                VWARKeyValue(label: "Aplicativo", value: "VWAR Loop Life 11.0.0")
+                VWARKeyValue(label: "Aplicativo", value: "VWAR Loop Life 11.1.0")
                 VWARKeyValue(label: "Sistema mínimo", value: "iOS ou iPadOS 26")
                 VWARKeyValue(label: "Idioma", value: "Português do Brasil")
                 VWARKeyValue(label: "Edição", value: VWARDeviceEdition.current.shortLabel)

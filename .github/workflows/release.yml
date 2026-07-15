@@ -1,4 +1,4 @@
-name: VWAR Loop Life release
+name: VWAR Loop Life iOS release
 
 on:
   workflow_dispatch:
@@ -15,12 +15,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-artifacts-${{ github.ref }}
+  group: release-ios-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   apple:
-    name: Build Apple artifacts
+    name: Build iPhone and iPad IPAs
     runs-on: macos-15
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
@@ -28,66 +28,72 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Resolve version
+      - name: Resolve and validate version
         run: |
           set -euo pipefail
+          project_version="$(sed -n 's/.*MARKETING_VERSION:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}.*/\1/p' project.yml | head -n 1)"
+          test -n "$project_version"
           if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
             version="${GITHUB_REF_NAME#v}"
+            test "$version" = "$project_version" || {
+              echo "A tag v$version diverge do MARKETING_VERSION $project_version" >&2
+              exit 1
+            }
           else
-            version="$(sed -n 's/.*MARKETING_VERSION:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}.*/\1/p' project.yml | head -n 1)"
-            test -n "$version"
+            version="$project_version"
           fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
-          echo "Building Apple artifacts for v$version"
+          echo "TAG=v$version" >> "$GITHUB_ENV"
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Select Xcode 26.3 and install XcodeGen
+        run: |
+          set -euo pipefail
+          test -d "$DEVELOPER_DIR"
+          xcodebuild -version
+          brew install xcodegen
+          xcodegen --version
 
-      - name: Verify Portuguese iOS 26 surface
+      - name: Verify Portuguese Health-only surface
         run: python3 Tools/verify-ios-ptbr.py
 
-      - name: Generate Xcode project
-        run: xcodegen generate
+      - name: Test Health source provenance
+        run: swift test --package-path Packages/StrandImport --filter HealthSourceClassifierTests
 
-      - name: Build macOS app
+      - name: Generate iOS-only project
         run: |
-          set -euo pipefail
-          rm -rf build/release-dd
-          xcodebuild -scheme Strand -configuration Release \
-            -derivedDataPath build/release-dd \
-            -destination 'generic/platform=macOS' \
-            ARCHS="x86_64 arm64" ONLY_ACTIVE_ARCH=NO \
-            CODE_SIGNING_ALLOWED=NO build
-          app="build/release-dd/Build/Products/Release/NOOP.app"
-          test -d "$app"
-          lipo -info "$app/Contents/MacOS/NOOP"
-          lipo -info "$app/Contents/MacOS/NOOP" | grep -E 'x86_64.*arm64|arm64.*x86_64'
-          Tools/anonymize-macos-app.sh "$app"
-          staged="build/VWAR Loop Life.app"
-          rm -rf "$staged"
-          ditto "$app" "$staged"
-          mkdir -p dist
-          ditto -c -k --sequesterRsrc --keepParent "$staged" "dist/VWAR-Loop-Life-v${VERSION}-macos.zip"
-
-      - name: Build dedicated iPhone and iPad IPAs
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("project.yml")
-          text = path.read_text()
-          needle = "\n      - target: NOOPWatch\n"
-          if needle not in text:
-              raise SystemExit("NOOPWatch dependency not found in project.yml")
-          path.write_text(text.replace(needle, "\n", 1))
-          PY
           xcodegen generate
+
+      - name: Build and verify device editions
+        run: |
+          set -euo pipefail
           mkdir -p "$GITHUB_WORKSPACE/dist"
-          while IFS='|' read -r key profile family label app_bundle widget_bundle; do
-            derived="build/ios-${key}-dd"
-            stage="build/ios-${key}-stage"
+
+          build_edition() {
+            key="$1"
+            profile="$2"
+            family="$3"
+            label="$4"
+            app_bundle="$5"
+            widget_bundle="$6"
+            derived="build/ios-$key"
+            stage="build/stage-$key"
             rm -rf "$derived" "$stage"
+
+            settings="$(xcodebuild -project Strand.xcodeproj -target NOOPiOS -configuration Release \
+              -showBuildSettings \
+              TARGETED_DEVICE_FAMILY="$family" \
+              VWAR_DEVICE_EDITION="$profile" \
+              VWAR_APP_BUNDLE_ID="$app_bundle" \
+              VWAR_WIDGET_BUNDLE_ID="$widget_bundle")"
+            printf '%s\n' "$settings" | grep -Eq "^[[:space:]]*TARGETED_DEVICE_FAMILY = $family$"
+            printf '%s\n' "$settings" | grep -Eq "^[[:space:]]*PRODUCT_BUNDLE_IDENTIFIER = $app_bundle$"
+            widget_settings="$(xcodebuild -project Strand.xcodeproj -target NOOPiOSWidgets -configuration Release \
+              -showBuildSettings \
+              TARGETED_DEVICE_FAMILY="$family" \
+              VWAR_WIDGET_BUNDLE_ID="$widget_bundle")"
+            printf '%s\n' "$widget_settings" | grep -Eq "^[[:space:]]*TARGETED_DEVICE_FAMILY = $family$"
+            printf '%s\n' "$widget_settings" | grep -Eq "^[[:space:]]*PRODUCT_BUNDLE_IDENTIFIER = $widget_bundle$"
+
             xcodebuild -scheme NOOPiOS -configuration Release \
               -destination 'generic/platform=iOS' \
               -derivedDataPath "$derived" \
@@ -95,87 +101,48 @@ jobs:
               VWAR_DEVICE_EDITION="$profile" \
               VWAR_APP_BUNDLE_ID="$app_bundle" \
               VWAR_WIDGET_BUNDLE_ID="$widget_bundle" \
-              CODE_SIGNING_ALLOWED=NO build
+              ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+              CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+              build
+
             app="$derived/Build/Products/Release-iphoneos/NOOP.app"
             test -d "$app"
-            lipo -archs "$app/NOOP" | grep -qw arm64
             Tools/anonymize-ios-app.sh "$app"
+            test "$(lipo -archs "$app/NOOP")" = arm64
+            xcrun vtool -show-build "$app/NOOP" | grep -Eq '^[[:space:]]*platform[[:space:]]+IOS([[:space:]]|$)'
+            xcrun vtool -show-build "$app/NOOP" | grep -Eq '^[[:space:]]*minos[[:space:]]+26\.0([[:space:]]|$)'
+            test ! -d "$app/Watch"
+            test "$(find "$app/PlugIns" -maxdepth 1 -type d -name '*.appex' | wc -l | xargs)" = "1"
+            widget="$(find "$app/PlugIns" -maxdepth 1 -type d -name '*.appex' | head -n 1)"
+            widget_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$widget/Info.plist")"
+            test "$(lipo -archs "$widget/$widget_executable")" = arm64
+            xcrun vtool -show-build "$widget/$widget_executable" | grep -Eq '^[[:space:]]*platform[[:space:]]+IOS([[:space:]]|$)'
+            xcrun vtool -show-build "$widget/$widget_executable" | grep -Eq '^[[:space:]]*minos[[:space:]]+26\.0([[:space:]]|$)'
+
             mkdir -p "$stage/Payload"
             ditto "$app" "$stage/Payload/VWARLoopLife.app"
-            rm -rf "$stage/Payload/VWARLoopLife.app/Watch"
             ipa="$GITHUB_WORKSPACE/dist/VWAR-Loop-Life-v${VERSION}-${label}.ipa"
-            /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$stage/Payload" "$ipa"
+            ditto -c -k --sequesterRsrc --keepParent "$stage/Payload" "$ipa"
             python3 Tools/verify-ios-ipa.py "$ipa" "$key"
-            ls -lh "$ipa"
-          done <<'EDITIONS'
-          iphone|iphone-16-pro-max|1|iPhone-16-Pro-Max|com.noopapp.noop.iphone|com.noopapp.noop.iphone.widgets
-          ipad|ipad-pro-m2-12-9|2|iPad-Pro-M2-12.9|com.noopapp.noop.ipad|com.noopapp.noop.ipad.widgets
-          EDITIONS
+          }
 
-      - name: Upload Apple artifacts
+          build_edition iphone iphone-16-pro-max 1 iPhone-16-Pro-Max-iOS26 \
+            com.noopapp.noop.iphone com.noopapp.noop.iphone.widgets
+          build_edition ipad ipad-pro-m2-12-9 2 iPad-Pro-M2-12.9-iPadOS26 \
+            com.noopapp.noop.ipad com.noopapp.noop.ipad.widgets
+          ls -lh "$GITHUB_WORKSPACE/dist/"*.ipa
+
+      - name: Upload IPAs
         uses: actions/upload-artifact@v4
         with:
-          name: vwar-loop-life-apple-artifacts
-          path: |
-            dist/VWAR-Loop-Life-v*-macos.zip
-            dist/VWAR-Loop-Life-v*-iPhone-16-Pro-Max.ipa
-            dist/VWAR-Loop-Life-v*-iPad-Pro-M2-12.9.ipa
-          if-no-files-found: error
-
-  android:
-    name: Build Android artifact
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Resolve version
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
-            version="${GITHUB_REF_NAME#v}"
-          else
-            version="$(sed -n 's/.*MARKETING_VERSION:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}.*/\1/p' project.yml | head -n 1)"
-            test -n "$version"
-          fi
-          echo "VERSION=$version" >> "$GITHUB_ENV"
-          echo "Building Android artifact for v$version"
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build full release APK
-        run: ./gradlew assembleFullRelease
-        working-directory: android
-
-      - name: Collect Android artifact
-        run: |
-          set -euo pipefail
-          mkdir -p dist
-          cp android/app/build/outputs/apk/full/release/app-full-release.apk "dist/VWAR-Loop-Life-v${VERSION}.apk"
-
-      - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vwar-loop-life-android-artifact
-          path: dist/VWAR-Loop-Life-v*.apk
+          name: vwar-loop-life-v11.1.0-ios26-ipas
+          path: dist/*.ipa
           if-no-files-found: error
 
   publish:
     name: Publish GitHub release
     runs-on: ubuntu-latest
-    needs:
-      - apple
-      - android
+    needs: apple
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -183,29 +150,23 @@ jobs:
       - name: Resolve version
         run: |
           set -euo pipefail
-          if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
-            version="${GITHUB_REF_NAME#v}"
-          else
-            version="$(sed -n 's/.*MARKETING_VERSION:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}.*/\1/p' project.yml | head -n 1)"
-            test -n "$version"
-          fi
+          version="$(sed -n 's/.*MARKETING_VERSION:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}.*/\1/p' project.yml | head -n 1)"
+          test -n "$version"
           echo "VERSION=$version" >> "$GITHUB_ENV"
           echo "TAG=v$version" >> "$GITHUB_ENV"
 
-      - name: Download built artifacts
+      - name: Download built IPAs
         uses: actions/download-artifact@v4
         with:
-          pattern: vwar-loop-life-*
+          name: vwar-loop-life-v11.1.0-ios26-ipas
           path: dist
-          merge-multiple: true
 
       - name: Publish or update release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ls -lh dist
-          notes="VWAR Loop Life ${TAG}: duas edições arm64 exclusivas do sistema 26 — iPhone 16 Pro Max e iPad Pro M2 de 12,9 polegadas — com malha de sinais interativa, central lateral no iPad, contexto pessoal auditável e interface integralmente em pt-BR."
+          notes="VWAR Loop Life ${TAG}: nova interface iOS 26 refeita do zero, duas edições arm64 dedicadas a iPhone 16 Pro Max e iPad Pro M2 12,9, fluxo G Band e Strava pelo app Saúde e interface integralmente em pt-BR."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" --title "VWAR Loop Life ${TAG}" --notes "$notes" --latest

@@ -5,17 +5,15 @@ import StrandDesign
 import SwiftUI
 import WhoopStore
 
-/// The iPad-first daily command centre for VWAR Loop Life.
+/// Central de sinais do VWAR Loop Life.
 ///
-/// It uses the same measured Repository rows and audited analytics as the phone UI, but gives a 12.9-inch
-/// display a denser information hierarchy: three honest scores, a scrub-able intraday HR trace, personal
-/// baseline bands, sleep architecture/timing, training balance, and per-vital coverage. There is no demo
-/// data in the runtime path. Missing input renders as an explicit empty state.
+/// Os dois perfis de produto compartilham somente o carregamento e as métricas medidas. A edição para
+/// iPhone privilegia leitura vertical e alcance com uma mão; a edição para iPad usa uma mesa de telemetria
+/// com trilho persistente e painéis simultâneos. Nenhum estado visual cria valores de demonstração.
 struct VITAEPerformanceDashboard: View {
     @EnvironmentObject private var repo: Repository
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @StateObject private var vwar = VWARCaptureManager()
     @State private var range: RangeWindow = .days30
     @State private var selectedDay = Calendar.current.startOfDay(for: Date())
     @State private var intelligenceFocus: VWARDailyFocus = .recovery
@@ -31,341 +29,509 @@ struct VITAEPerformanceDashboard: View {
     @State private var selectedSleepDate: Date?
     @State private var selectedBalanceStrain: Double?
     @State private var selectedVitalDate: Date?
-    @State private var showVWARResearch = false
 
-    private var isCompact: Bool { horizontalSizeClass == .compact }
-    private var pagePadding: CGFloat { isCompact ? 16 : 24 }
+    private var isPadEdition: Bool { VWARDeviceEdition.current == .iPadProM2 }
+    private var isCompact: Bool { !isPadEdition }
+    private var chartHeight: CGFloat { isPadEdition ? 268 : 232 }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                header
-                calendarStrip
-                rangeSelector
-                scoreGrid
-                signalFieldPanel
-                intelligencePanel
-                chartGrid
-                methodology
-                Color.clear.frame(height: 84)
+        ZStack {
+            VWARSpectralBackground(reduceMotion: reduceMotion)
+
+            ScrollView {
+                Group {
+                    if isPadEdition {
+                        iPadCommandCenter
+                    } else {
+                        iPhoneTelemetryStream
+                    }
+                }
+                .frame(maxWidth: isPadEdition ? 1_620 : 620)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 110)
             }
-            .padding(.horizontal, pagePadding)
-            .padding(.top, 22)
-            .frame(maxWidth: 1_440)
-            .frame(maxWidth: .infinity)
         }
-        .background(VITAELuxury.base.ignoresSafeArea())
         .preferredColorScheme(.dark)
         .task(id: "\(repo.refreshSeq)-\(range.rawValue)-\(selectedDayKey)") { await load() }
         .refreshable {
             await repo.refresh()
             await load()
         }
-        .sheet(isPresented: $showVWARResearch) {
-            VWARResearchView(manager: vwar)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.hidden)
-        }
         .sensoryFeedback(.selection, trigger: selectedDay)
+        .sensoryFeedback(.selection, trigger: range)
+        .sensoryFeedback(.selection, trigger: intelligenceFocus)
+        .sensoryFeedback(.impact(weight: .light), trigger: selectedHRPoint?.id)
+        .sensoryFeedback(.impact(weight: .light), trigger: selectedTrendPoint?.id)
     }
 
-    // MARK: - Header
+    // MARK: - Composições por produto
 
-    private var header: some View {
-        Group {
-            if isCompact {
-                VStack(alignment: .leading, spacing: 16) {
-                    identity
-                    HStack(alignment: .center, spacing: 12) {
-                        liveClock
-                        Spacer(minLength: 8)
-                        directCaptureControls
+    private var iPhoneTelemetryStream: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            phoneHeader
+            phoneDayDeck
+            phonePrimaryTelemetry
+            vitalRibbon
+            rangeSelector
+            recoveryLoadPanel
+            heartRatePanel
+            intelligencePanel
+
+            VWARSectionMarker(
+                index: "02",
+                title: "Sono e recuperação",
+                detail: "Sinais registrados no app Saúde"
+            )
+            sleepArchitecturePanel
+            hrvBaselinePanel
+            sleepTimingPanel
+
+            VWARSectionMarker(
+                index: "03",
+                title: "Contexto do dia",
+                detail: "Movimento, equilíbrio e cobertura"
+            )
+            activityPanel
+            balancePanel
+            vitalMatrixPanel
+            methodology
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+    }
+
+    private var iPadCommandCenter: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            iPadHeader
+
+            HStack(alignment: .top, spacing: 20) {
+                iPadTelemetryRail
+                    .frame(width: 276)
+
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack(alignment: .top, spacing: 20) {
+                        iPadReadinessCore
+                            .frame(width: 390)
+                        heartRatePanel
                     }
-                }
-            } else {
-                HStack(alignment: .top, spacing: 24) {
-                    identity
-                    Spacer(minLength: 18)
-                    VStack(alignment: .trailing, spacing: 10) {
-                        liveClock
-                        directCaptureControls
+
+                    HStack(alignment: .top, spacing: 20) {
+                        recoveryLoadPanel
+                        intelligencePanel
                     }
+
+                    VWARSectionMarker(
+                        index: "02",
+                        title: "Matriz fisiológica",
+                        detail: "Histórico real, inspecionável por toque ou ponteiro"
+                    )
+
+                    LazyVGrid(
+                        columns: [
+                            GridItem(.flexible(minimum: 390), spacing: 20, alignment: .top),
+                            GridItem(.flexible(minimum: 390), spacing: 20, alignment: .top),
+                        ],
+                        spacing: 20
+                    ) {
+                        hrvBaselinePanel
+                        sleepTimingPanel
+                        sleepArchitecturePanel
+                        activityPanel
+                        balancePanel
+                        vitalMatrixPanel
+                    }
+
+                    methodology
                 }
+                .frame(maxWidth: .infinity)
             }
         }
-        .accessibilityElement(children: .contain)
+        .padding(.horizontal, 24)
+        .padding(.top, 20)
     }
 
-    private var identity: some View {
-        VStack(alignment: .leading, spacing: 7) {
-                Text("VWAR LOOP LIFE")
-                    .font(StrandFont.overline)
-                    .tracking(2.5)
-                    .foregroundStyle(VITAELuxury.teal)
-                Text("Seu corpo, em contexto")
-                    .font(StrandFont.rounded(isCompact ? 31 : 38, weight: .semibold))
-                    .tracking(-0.8)
+    // MARK: - Cabeçalhos
+
+    private var phoneHeader: some View {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 8) {
+                    VWARLiveGlyph(color: VITAELuxury.spectralCyan)
+                    Text("VWAR / SINAL DO DIA")
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(1.8)
+                        .foregroundStyle(VITAELuxury.spectralCyan)
+                }
+                Text("Seu dia,\nem sinais.")
+                    .font(StrandFont.rounded(39, weight: .semibold))
+                    .tracking(-1.2)
                     .foregroundStyle(StrandPalette.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(Self.longDateFormatter.string(from: selectedDay))
                     .font(StrandFont.subhead)
                     .foregroundStyle(StrandPalette.textSecondary)
-                HStack(spacing: 8) {
-                    Text(VWARDeviceEdition.current.shortLabel)
-                    Rectangle().fill(VITAELuxury.border).frame(width: 18, height: 1)
-                    Text("IOS 26 EXCLUSIVO")
-                }
-                .font(StrandFont.overlineScaled(8))
-                .tracking(1.0)
-                .foregroundStyle(StrandPalette.textTertiary)
             }
+            Spacer(minLength: 8)
+            liveClock(alignment: .trailing)
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .contain)
     }
 
-    private var liveClock: some View {
+    private var iPadHeader: some View {
+        HStack(alignment: .center, spacing: 18) {
+            HStack(spacing: 14) {
+                VWARLiveGlyph(color: VITAELuxury.spectralCyan)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("VWAR LOOP LIFE")
+                        .font(StrandFont.rounded(28, weight: .semibold))
+                        .tracking(-0.5)
+                        .foregroundStyle(StrandPalette.textPrimary)
+                    Text("CENTRAL FISIOLÓGICA / IPAD PRO 12,9")
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(1.55)
+                        .foregroundStyle(VITAELuxury.spectralCyan)
+                }
+            }
+            Spacer(minLength: 24)
+            Text(Self.longDateFormatter.string(from: selectedDay).uppercased())
+                .font(StrandFont.overlineScaled(10))
+                .tracking(1.15)
+                .foregroundStyle(StrandPalette.textSecondary)
+            Divider()
+                .frame(height: 32)
+                .overlay(VITAELuxury.border)
+            liveClock(alignment: .trailing)
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .contain)
+    }
+
+    private func liveClock(alignment: HorizontalAlignment) -> some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
-            VStack(alignment: isCompact ? .leading : .trailing, spacing: 2) {
-                Text("AGORA")
-                    .font(StrandFont.overlineScaled(9))
+            VStack(alignment: alignment, spacing: 3) {
+                Text("HORA LOCAL")
+                    .font(StrandFont.overlineScaled(7))
                     .tracking(1.1)
                     .foregroundStyle(StrandPalette.textTertiary)
                 Text(Self.timeFormatter.string(from: context.date))
-                    .font(StrandFont.number(22))
+                    .font(StrandFont.number(isPadEdition ? 24 : 20, weight: .semibold))
                     .monospacedDigit()
                     .foregroundStyle(StrandPalette.textPrimary)
             }
         }
     }
 
-    private var directCaptureControls: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            Button("VWAR DIRETO") { showVWARResearch = true }
-                .buttonStyle(VITAETextButtonStyle(active: vwar.phase.isActive))
-            HStack(spacing: 7) {
-                Text(vwar.phase.title)
-                    .font(StrandFont.overlineScaled(8))
-                    .tracking(1.0)
-                    .foregroundStyle(StrandPalette.textSecondary)
-                if vwar.eventCount > 0 {
-                    Text("\(vwar.eventCount) PACOTES")
-                        .font(StrandFont.overlineScaled(8))
-                        .tracking(1.0)
-                        .foregroundStyle(StrandPalette.textTertiary)
+    // MARK: - Navegação temporal
+
+    private var phoneDayDeck: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 8) {
+                Button { moveWeek(-1) } label: {
+                    Image(systemName: "chevron.left")
                 }
+                .buttonStyle(VWARIconButtonStyle())
+                .accessibilityLabel("Semana anterior")
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 7) {
+                        ForEach(weekDates, id: \.self) { dayButton(for: $0, compact: true) }
+                    }
+                }
+
+                Button { moveWeek(1) } label: {
+                    Image(systemName: "chevron.right")
+                }
+                .buttonStyle(VWARIconButtonStyle())
+                .disabled(!canMoveToNextWeek)
+                .opacity(canMoveToNextWeek ? 1 : 0.3)
+                .accessibilityLabel("Próxima semana")
             }
+            Button("VOLTAR PARA HOJE") { selectToday() }
+                .font(StrandFont.overlineScaled(8))
+                .tracking(1.0)
+                .foregroundStyle(
+                    Calendar.current.isDateInToday(selectedDay)
+                        ? StrandPalette.textTertiary
+                        : VITAELuxury.spectralCyan
+                )
+                .disabled(Calendar.current.isDateInToday(selectedDay))
         }
+        .padding(12)
+        .background(VWARTitaniumShape(cornerRadius: 22))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(VITAELuxury.border)
+        )
     }
 
-    private var calendarStrip: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 10) {
-                Button(isCompact ? "ANTERIOR" : "SEMANA ANTERIOR") { moveWeek(-1) }
-                    .buttonStyle(VITAECalendarNavigationButtonStyle())
-                Spacer(minLength: 6)
+    private var iPadTelemetryRail: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack {
+                Text("LINHA DO TEMPO")
+                    .font(StrandFont.overlineScaled(9))
+                    .tracking(1.35)
+                    .foregroundStyle(VITAELuxury.spectralCyan)
+                Spacer()
                 Button("HOJE") { selectToday() }
-                    .buttonStyle(VITAECalendarNavigationButtonStyle(active: Calendar.current.isDateInToday(selectedDay)))
-                Spacer(minLength: 6)
-                Button(isCompact ? "PRÓXIMA" : "PRÓXIMA SEMANA") { moveWeek(1) }
-                    .buttonStyle(VITAECalendarNavigationButtonStyle())
-                    .disabled(!canMoveToNextWeek)
-                    .opacity(canMoveToNextWeek ? 1 : 0.34)
+                    .buttonStyle(
+                        VWARTextCapsuleStyle(
+                            active: Calendar.current.isDateInToday(selectedDay)
+                        )
+                    )
             }
-            HStack(spacing: isCompact ? 5 : 8) {
-                ForEach(weekDates, id: \.self) { date in
-                    let selected = Calendar.current.isDate(date, inSameDayAs: selectedDay)
-                    let today = Calendar.current.isDateInToday(date)
+
+            VStack(spacing: 7) {
+                ForEach(weekDates, id: \.self) { dayButton(for: $0, compact: false) }
+            }
+
+            HStack(spacing: 8) {
+                Button { moveWeek(-1) } label: {
+                    Label("Anterior", systemImage: "chevron.left")
+                }
+                .buttonStyle(VWARTextCapsuleStyle())
+
+                Button { moveWeek(1) } label: {
+                    Label("Próxima", systemImage: "chevron.right")
+                }
+                .buttonStyle(VWARTextCapsuleStyle())
+                .disabled(!canMoveToNextWeek)
+                .opacity(canMoveToNextWeek ? 1 : 0.3)
+            }
+
+            Divider().overlay(VITAELuxury.border)
+
+            Text("JANELA ANALÍTICA")
+                .font(StrandFont.overlineScaled(9))
+                .tracking(1.35)
+                .foregroundStyle(StrandPalette.textTertiary)
+
+            VStack(spacing: 7) {
+                ForEach(RangeWindow.allCases) { item in
                     Button {
-                        guard date <= Calendar.current.startOfDay(for: Date()) else { return }
-                        withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
-                            selectedDay = Calendar.current.startOfDay(for: date)
-                        }
+                        updateRange(item)
                     } label: {
-                        VStack(spacing: 7) {
-                            Text(Self.weekdayFormatter.string(from: date).uppercased())
-                                .font(StrandFont.overlineScaled(isCompact ? 8 : 9))
-                                .tracking(0.7)
-                            Text(Self.dayNumberFormatter.string(from: date))
-                                .font(StrandFont.number(isCompact ? 15 : 17))
-                                .monospacedDigit()
-                            if today && !selected {
-                                Text("HOJE")
-                                    .font(StrandFont.overlineScaled(6))
-                                    .tracking(0.7)
-                            }
+                        HStack {
+                            Text(item.label)
+                            Spacer()
+                            if range == item { Image(systemName: "checkmark") }
                         }
-                        .foregroundStyle(selected ? VITAELuxury.base : StrandPalette.textSecondary)
-                        .frame(maxWidth: .infinity, minHeight: isCompact ? 68 : 74)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(selected ? VITAELuxury.teal : VITAELuxury.panel)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(today && !selected ? VITAELuxury.teal.opacity(0.65) : VITAELuxury.border, lineWidth: 1)
-                        )
-                        .opacity(date > Calendar.current.startOfDay(for: Date()) ? 0.28 : 1)
+                        .font(StrandFont.overlineScaled(9))
+                        .tracking(0.8)
+                        .frame(maxWidth: .infinity, minHeight: 38)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(date > Calendar.current.startOfDay(for: Date()))
+                    .buttonStyle(VWARTextCapsuleStyle(active: range == item))
                 }
             }
+
+            Divider().overlay(VITAELuxury.border)
+            sourceStatus
+            Spacer(minLength: 0)
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Calendário semanal interativo")
+        .padding(18)
+        .frame(minHeight: 760, alignment: .top)
+        .background(VWARTitaniumShape(cornerRadius: 26))
+        .overlay(
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(VITAELuxury.border)
+        )
+    }
+
+    @ViewBuilder
+    private func dayButton(for date: Date, compact: Bool) -> some View {
+        let selected = Calendar.current.isDate(date, inSameDayAs: selectedDay)
+        let future = date > Calendar.current.startOfDay(for: Date())
+        Button {
+            guard !future else { return }
+            updateSelectedDay(date)
+        } label: {
+            if compact {
+                VStack(spacing: 4) {
+                    Text(Self.weekdayFormatter.string(from: date).uppercased())
+                        .font(StrandFont.overlineScaled(7))
+                    Text(Self.dayNumberFormatter.string(from: date))
+                        .font(StrandFont.number(17, weight: .semibold))
+                        .monospacedDigit()
+                }
+                .frame(width: 43, height: 54)
+            } else {
+                HStack(spacing: 12) {
+                    Text(Self.weekdayFormatter.string(from: date).uppercased())
+                        .font(StrandFont.overlineScaled(8))
+                        .frame(width: 24, alignment: .leading)
+                    Text(Self.dayNumberFormatter.string(from: date))
+                        .font(StrandFont.number(17, weight: .semibold))
+                        .monospacedDigit()
+                    Spacer()
+                    if Calendar.current.isDateInToday(date) {
+                        Text("HOJE")
+                            .font(StrandFont.overlineScaled(7))
+                            .tracking(0.8)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 44)
+            }
+        }
+        .buttonStyle(
+            VWARDayButtonStyle(
+                selected: selected,
+                accent: recoveryAccent(currentDay?.recovery)
+            )
+        )
+        .disabled(future)
+        .opacity(future ? 0.24 : 1)
+        .accessibilityLabel(Self.longDateFormatter.string(from: date))
+        .accessibilityValue(selected ? "Selecionado" : "")
     }
 
     private var rangeSelector: some View {
-        Group {
-            if isCompact {
-                VStack(alignment: .leading, spacing: 10) {
-                    rangeButtons
-                    Text("TOQUE OU ARRASTE OS GRÁFICOS PARA INSPECIONAR")
-                        .font(StrandFont.overlineScaled(8))
-                        .tracking(0.9)
-                        .foregroundStyle(StrandPalette.textTertiary)
-                }
-            } else {
-                HStack(spacing: 6) {
-                    rangeButtons
-                    Spacer()
-                    Text("ARRASTE OS GRÁFICOS PARA INSPECIONAR")
-                        .font(StrandFont.overlineScaled(9))
-                        .tracking(1.1)
-                        .foregroundStyle(StrandPalette.textTertiary)
-                }
-            }
-        }
-    }
-
-    private var rangeButtons: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 5) {
             ForEach(RangeWindow.allCases) { item in
-                Button(item.label) {
-                    withAnimation(.easeOut(duration: 0.22)) { range = item }
-                }
-                .buttonStyle(VITAERangeButtonStyle(active: range == item))
+                Button(item.label) { updateRange(item) }
+                    .buttonStyle(VWARSegmentStyle(active: range == item))
             }
+        }
+        .padding(5)
+        .background(Color.black.opacity(0.26), in: Capsule())
+        .overlay(Capsule().stroke(VITAELuxury.border))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Janela analítica")
+    }
+
+    private func updateSelectedDay(_ date: Date) {
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.28)) {
+            selectedDay = Calendar.current.startOfDay(for: date)
         }
     }
 
-    // MARK: - Scores
+    private func updateRange(_ item: RangeWindow) {
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.24)) {
+            range = item
+        }
+    }
 
-    private var scoreGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 280 : 285), spacing: 16)], spacing: 16) {
-            PremiumScoreCard(
+    // MARK: - Telemetria principal
+
+    private var phonePrimaryTelemetry: some View {
+        VStack(spacing: 12) {
+            VWARReadinessCore(
                 title: "RECUPERAÇÃO",
                 value: currentDay?.recovery,
-                scale: 100,
                 accent: recoveryAccent(currentDay?.recovery),
                 confidence: coverage(for: .recovery),
-                description: "Referência pessoal de VFC, FC de repouso, sono e temperatura."
+                compact: true,
+                reduceMotion: reduceMotion
             )
-            PremiumScoreCard(
-                title: "CARGA",
-                value: currentDay?.strain,
-                scale: 100,
-                accent: VITAELuxury.violet,
-                confidence: coverage(for: .strain),
-                description: "TRIMP logarítmico calculado apenas sobre frequência cardíaca registrada."
-            )
-            PremiumScoreCard(
-                title: "SONO",
-                value: currentSleepScore,
-                scale: 100,
-                accent: VITAELuxury.blue,
-                confidence: coverage(for: .sleep),
-                description: "Duração, eficiência e arquitetura disponíveis para a noite mais recente."
-            )
+            HStack(spacing: 12) {
+                loadPlate
+                sleepPlate
+            }
         }
     }
 
-    // MARK: - Interactive signal field
-
-    private var signalFieldPanel: some View {
-        VITAEPanel(
-            eyebrow: "MALHA DE SINAIS",
-            title: "Cobertura fisiológica do dia",
-            value: "\(signalNodes.compactMap(\.value).count)/6",
-            detail: "A animação representa presença e magnitude registradas; as linhas não indicam causalidade"
-        ) {
-            VITAESignalField(signals: signalNodes, compact: isCompact)
-        }
-    }
-
-    private var signalNodes: [VITAESignalNode] {
-        [
-            VITAESignalNode(
-                id: "recuperacao",
-                label: "RECUPERAÇÃO",
+    private var iPadReadinessCore: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VWARReadinessCore(
+                title: "RECUPERAÇÃO",
                 value: currentDay?.recovery,
-                valueText: currentDay?.recovery.map { "\(Int($0.rounded()))%" } ?? "Sem dados",
-                normalized: normalized(currentDay?.recovery, minimum: 0, maximum: 100),
-                accent: VITAELuxury.teal
-            ),
-            VITAESignalNode(
-                id: "carga",
-                label: "CARGA",
-                value: currentDay?.strain,
-                valueText: currentDay?.strain.map { String(format: "%.1f", $0) } ?? "Sem dados",
-                normalized: normalized(currentDay?.strain, minimum: 0, maximum: 100),
-                accent: VITAELuxury.violet
-            ),
-            VITAESignalNode(
-                id: "sono",
-                label: "SONO",
-                value: currentSleepScore,
-                valueText: currentSleepScore.map { "\(Int($0.rounded()))%" } ?? "Sem dados",
-                normalized: normalized(currentSleepScore, minimum: 0, maximum: 100),
-                accent: VITAELuxury.blue
-            ),
-            VITAESignalNode(
-                id: "vfc",
-                label: "VFC",
-                value: currentDay?.avgHrv,
-                valueText: currentDay?.avgHrv.map { "\(Int($0.rounded())) ms" } ?? "Sem dados",
-                normalized: normalized(currentDay?.avgHrv, minimum: 10, maximum: 140),
-                accent: VITAELuxury.teal
-            ),
-            VITAESignalNode(
-                id: "repouso",
-                label: "FC DE REPOUSO",
-                value: currentDay?.restingHr.map(Double.init),
-                valueText: currentDay?.restingHr.map { "\($0) bpm" } ?? "Sem dados",
-                normalized: normalized(currentDay?.restingHr.map(Double.init), minimum: 35, maximum: 110),
-                accent: VITAELuxury.rose
-            ),
-            VITAESignalNode(
-                id: "oxigenacao",
-                label: "OXIGENAÇÃO",
-                value: currentDay?.spo2Pct,
-                valueText: currentDay?.spo2Pct.map { String(format: "%.1f%%", $0) } ?? "Sem dados",
-                normalized: normalized(currentDay?.spo2Pct, minimum: 80, maximum: 100),
-                accent: VITAELuxury.amber
-            ),
-        ]
+                accent: recoveryAccent(currentDay?.recovery),
+                confidence: coverage(for: .recovery),
+                compact: false,
+                reduceMotion: reduceMotion
+            )
+            HStack(spacing: 12) {
+                loadPlate
+                sleepPlate
+            }
+        }
     }
 
-    private func normalized(_ value: Double?, minimum: Double, maximum: Double) -> Double? {
-        guard let value, maximum > minimum else { return nil }
-        return min(1, max(0, (value - minimum) / (maximum - minimum)))
+    private var loadPlate: some View {
+        VWARMetricPlate(
+            label: "CARGA",
+            value: currentDay?.strain.map { String(format: "%.1f", $0) } ?? "—",
+            unit: "/ 100",
+            progress: currentDay?.strain.map { $0 / 100 },
+            accent: VITAELuxury.spectralViolet,
+            confidence: coverage(for: .strain)
+        )
     }
 
-    // MARK: - Daily intelligence
+    private var sleepPlate: some View {
+        VWARMetricPlate(
+            label: "SONO",
+            value: currentSleepScore.map { String(Int($0.rounded())) } ?? "—",
+            unit: "/ 100",
+            progress: currentSleepScore.map { $0 / 100 },
+            accent: VITAELuxury.spectralBlue,
+            confidence: coverage(for: .sleep)
+        )
+    }
+
+    private var vitalRibbon: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 9) {
+                VWARSignalChip(
+                    label: "VFC",
+                    value: currentDay?.avgHrv.map { "\(Int($0.rounded())) ms" },
+                    color: VITAELuxury.spectralCyan
+                )
+                VWARSignalChip(
+                    label: "FC REPOUSO",
+                    value: currentDay?.restingHr.map { "\($0) bpm" },
+                    color: VITAELuxury.spectralRose
+                )
+                VWARSignalChip(
+                    label: "OXIGENAÇÃO",
+                    value: currentDay?.spo2Pct.map { String(format: "%.1f%%", $0) },
+                    color: VITAELuxury.spectralAmber
+                )
+                VWARSignalChip(
+                    label: "PASSOS",
+                    value: currentSteps.map(Self.compactNumber),
+                    color: VITAELuxury.spectralViolet
+                )
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Sinais do dia")
+    }
+
+    private var sourceStatus: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("ORIGEM DOS DADOS")
+                .font(StrandFont.overlineScaled(9))
+                .tracking(1.35)
+                .foregroundStyle(StrandPalette.textTertiary)
+            Label("Saúde da Apple", systemImage: "heart.text.square.fill")
+                .font(StrandFont.subhead)
+                .foregroundStyle(StrandPalette.textPrimary)
+            Text("O painel exibe somente sinais já sincronizados e disponíveis no repositório local.")
+                .font(StrandFont.footnote)
+                .foregroundStyle(StrandPalette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Inteligência diária
 
     private var intelligencePanel: some View {
         VITAEPanel(
-            eyebrow: "INTELIGÊNCIA VWAR",
-            title: "O que mudou neste dia",
+            eyebrow: "CONTEXTO PESSOAL",
+            title: "Leitura do dia",
             value: dailyInsight.score.map { String(Int($0.rounded())) },
-            detail: "Comparação determinística com até 28 dias anteriores do seu próprio histórico"
+            detail: "Comparação determinística com até 28 dias do seu próprio histórico"
         ) {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 7) {
+            VStack(alignment: .leading, spacing: 15) {
+                HStack(spacing: 6) {
                     ForEach(VWARDailyFocus.allCases) { focus in
                         Button(focusLabel(focus)) {
-                            withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
+                            withAnimation(reduceMotion ? nil : .snappy(duration: 0.24)) {
                                 intelligenceFocus = focus
                             }
                         }
-                        .buttonStyle(VITAERangeButtonStyle(active: intelligenceFocus == focus))
+                        .buttonStyle(VWARSegmentStyle(active: intelligenceFocus == focus))
                     }
                 }
 
@@ -380,39 +546,21 @@ struct VITAEPerformanceDashboard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                if dailyInsight.comparisons.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("REFERÊNCIA EM FORMAÇÃO")
-                            .font(StrandFont.overlineScaled(9))
-                            .tracking(1.1)
-                            .foregroundStyle(VITAELuxury.amber)
-                        Text("São necessários pelo menos cinco dias anteriores com a mesma medição para comparar sem fabricar contexto.")
-                            .font(StrandFont.subhead)
-                            .foregroundStyle(StrandPalette.textSecondary)
-                    }
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                if let primary = dailyInsight.comparisons.first {
+                    VWARComparisonStrip(
+                        label: signalLabel(primary.metric),
+                        current: signalValue(primary.current, metric: primary.metric),
+                        baseline: signalValue(primary.baselineMedian, metric: primary.metric),
+                        position: positionLabel(primary.position),
+                        color: comparisonColor(primary)
+                    )
                 } else {
-                    VStack(spacing: 0) {
-                        ForEach(Array(dailyInsight.comparisons.prefix(4))) { comparison in
-                            intelligenceComparisonRow(comparison)
-                            if comparison.id != dailyInsight.comparisons.prefix(4).last?.id {
-                                Rectangle().fill(VITAELuxury.border).frame(height: 1)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 14)
-                    .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    VITAEEmptyState(
+                        "São necessários pelo menos cinco dias comparáveis para formar sua referência pessoal."
+                    )
                 }
 
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 94 : 150), spacing: 12)], spacing: 12) {
-                    MetricReadout(label: "REFERÊNCIA", value: intelligenceReferenceLabel)
-                    MetricReadout(label: "PROCESSAMENTO", value: "NO APARELHO")
-                    MetricReadout(label: "MODELO", value: "PESSOAL")
-                }
-
-                Text("Esta leitura descreve diferenças observadas; não prova causa, não diagnostica e não usa ECG, pressão arterial ou glicose estimada para orientar decisões.")
+                Text("Leitura descritiva, não diagnóstica. Ausências permanecem vazias.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -420,51 +568,7 @@ struct VITAEPerformanceDashboard: View {
         }
     }
 
-    private func intelligenceComparisonRow(_ comparison: VWARSignalComparison) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(signalLabel(comparison.metric))
-                    .font(StrandFont.overlineScaled(9))
-                    .tracking(1.0)
-                    .foregroundStyle(StrandPalette.textSecondary)
-                Text("mediana de \(comparison.referenceDays) dias")
-                    .font(StrandFont.footnote)
-                    .foregroundStyle(StrandPalette.textTertiary)
-            }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(signalValue(comparison.current, metric: comparison.metric))
-                    .font(StrandFont.bodyNumber)
-                    .foregroundStyle(StrandPalette.textPrimary)
-                Text("BASE \(signalValue(comparison.baselineMedian, metric: comparison.metric))")
-                    .font(StrandFont.overlineScaled(7))
-                    .tracking(0.8)
-                    .foregroundStyle(StrandPalette.textTertiary)
-            }
-            Text(positionLabel(comparison.position))
-                .font(StrandFont.overlineScaled(8))
-                .tracking(0.9)
-                .foregroundStyle(comparisonColor(comparison))
-                .frame(width: 52, alignment: .trailing)
-        }
-        .padding(.vertical, 12)
-        .accessibilityElement(children: .combine)
-    }
-
-    // MARK: - Charts
-
-    private var chartGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: isCompact ? 300 : 430), spacing: 16, alignment: .top)], spacing: 16) {
-            heartRatePanel
-            recoveryLoadPanel
-            hrvBaselinePanel
-            sleepTimingPanel
-            sleepArchitecturePanel
-            balancePanel
-            vitalMatrixPanel
-            activityPanel
-        }
-    }
+    // MARK: - Gráficos inspecionáveis
 
     private var heartRatePanel: some View {
         VITAEPanel(
@@ -503,7 +607,7 @@ struct VITAEPerformanceDashboard: View {
                 .chartXAxis { VITAEChartAxis.time }
                 .chartYAxis { VITAEChartAxis.numeric(suffix: "") }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
-                .frame(height: 250)
+                .frame(height: chartHeight)
                 .accessibilityLabel("Frequência cardíaca de hoje")
             }
         }
@@ -550,7 +654,7 @@ struct VITAEPerformanceDashboard: View {
                 .chartXAxis { VITAEChartAxis.days }
                 .chartYAxis { VITAEChartAxis.numeric(suffix: "") }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
-                .frame(height: 234)
+                .frame(height: chartHeight)
                 .accessibilityLabel("Tendência de recuperação e carga")
             }
         }
@@ -594,7 +698,7 @@ struct VITAEPerformanceDashboard: View {
                 .chartXAxis { VITAEChartAxis.days }
                 .chartYAxis { VITAEChartAxis.numeric(suffix: " ms") }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
-                .frame(height: 250)
+                .frame(height: chartHeight)
                 .accessibilityLabel("VFC noturna e faixa de referência pessoal")
             }
         }
@@ -640,7 +744,7 @@ struct VITAEPerformanceDashboard: View {
                     }
                 }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
-                .frame(height: 250)
+                .frame(height: chartHeight)
                 .accessibilityLabel("Regularidade dos horários de sono")
             }
         }
@@ -673,7 +777,7 @@ struct VITAEPerformanceDashboard: View {
                     }
                 }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
-                .frame(height: 250)
+                .frame(height: chartHeight)
                 .accessibilityLabel("Linha temporal dos estágios de sono")
             } else if let composition = currentSleepComposition {
                 SleepCompositionBar(composition: composition)
@@ -713,7 +817,7 @@ struct VITAEPerformanceDashboard: View {
                 .chartXAxis { VITAEChartAxis.numeric(suffix: "") }
                 .chartYAxis { VITAEChartAxis.numeric(suffix: "") }
                 .chartPlotStyle { $0.background(VITAELuxury.plot).clipped() }
-                .frame(height: 250)
+                .frame(height: chartHeight)
                 .accessibilityLabel("Dispersão entre carga e recuperação")
             }
         }
@@ -767,20 +871,27 @@ struct VITAEPerformanceDashboard: View {
     }
 
     private var methodology: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("MÉTODO E CONFIANÇA")
-                .font(StrandFont.overline)
-                .tracking(1.6)
-                .foregroundStyle(StrandPalette.textTertiary)
-            Text("VWAR Loop Life calcula VFC por RMSSD após filtragem de intervalos inválidos e ectópicos. A carga usa TRIMP e transformação logarítmica. A recuperação compara suas próprias referências, não uma tabela genérica. Toda pontuação exige dados mínimos; quando faltam sinais, o app mostra ausência em vez de inventar um resultado.")
-                .font(StrandFont.body)
-                .foregroundStyle(StrandPalette.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(VITAELuxury.spectralCyan)
+                .frame(width: 38, height: 38)
+                .background(VITAELuxury.spectralCyan.opacity(0.09), in: Circle())
+            VStack(alignment: .leading, spacing: 8) {
+                Text("MÉTODO E CONFIANÇA")
+                    .font(StrandFont.overline)
+                    .tracking(1.6)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                Text("VFC usa RMSSD após filtragem de intervalos inválidos. Carga usa TRIMP e transformação logarítmica. Recuperação compara apenas suas referências. Toda pontuação exige dados mínimos; quando faltam sinais, o painel mostra ausência.")
+                    .font(StrandFont.body)
+                    .foregroundStyle(StrandPalette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(VITAELuxury.panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(VITAELuxury.border, lineWidth: 1))
+        .background(VWARTitaniumShape(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(VITAELuxury.border, lineWidth: 1))
     }
 
     // MARK: - Data
@@ -1247,416 +1358,411 @@ struct VITAEPerformanceDashboard: View {
     }()
 }
 
-// MARK: - Research sheet
+// MARK: - Superfície visual VWAR
 
-private struct VWARResearchView: View {
-    @ObservedObject var manager: VWARCaptureManager
-    @Environment(\.dismiss) private var dismiss
+private struct VWARSpectralBackground: View {
+    let reduceMotion: Bool
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    status
-                    safety
-                    controls
-                    deviceList
-                    captureSummary
-                    decodedMetrics
-                    evidence
-                    export
-                }
-                .padding(24)
-                .frame(maxWidth: 920)
-                .frame(maxWidth: .infinity)
-            }
-            .background(VITAELuxury.base.ignoresSafeArea())
-            .navigationTitle("VWAR direto")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(VITAELuxury.base, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("FECHAR") { dismiss() }
-                        .font(StrandFont.overlineScaled(10))
-                        .tracking(1.1)
-                        .foregroundStyle(VITAELuxury.teal)
-                }
-            }
-        }
-        .preferredColorScheme(.dark)
-    }
+        TimelineView(.animation(minimumInterval: 1.0 / 12.0, paused: reduceMotion)) { timeline in
+            GeometryReader { geometry in
+                let phase = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
+                let horizontalDrift = CGFloat(sin(phase * 0.08)) * 34
+                let verticalDrift = CGFloat(cos(phase * 0.06)) * 24
 
-    private var status: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(manager.phase.title)
-                    .font(StrandFont.overline)
-                    .tracking(1.5)
-                    .foregroundStyle(manager.phase.isActive ? VITAELuxury.teal : StrandPalette.textSecondary)
-                if let detail = manager.phase.detail {
-                    Text(detail)
-                        .font(StrandFont.body)
-                        .foregroundStyle(StrandPalette.textSecondary)
-                }
-            }
-            Spacer()
-            if manager.eventCount > 0 {
-                Text("\(manager.eventCount) eventos")
-                    .font(StrandFont.bodyNumber)
-                    .foregroundStyle(StrandPalette.textPrimary)
-            }
-        }
-    }
+                ZStack {
+                    VITAELuxury.base
 
-    private var safety: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("CAPTURA INDEPENDENTE")
-                .font(StrandFont.overlineScaled(9))
-                .tracking(1.2)
-                .foregroundStyle(VITAELuxury.amber)
-            Text("O VWAR Loop Life somente lê características anunciadas e assina notificações. Ele não envia comandos proprietários, não altera firmware e não atribui significado médico a bytes desconhecidos.")
-                .font(StrandFont.subhead)
-                .foregroundStyle(StrandPalette.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(16)
-        .background(VITAELuxury.amber.opacity(0.07), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(VITAELuxury.amber.opacity(0.24)))
-    }
+                    RadialGradient(
+                        colors: [
+                            VITAELuxury.spectralCyan.opacity(0.105),
+                            VITAELuxury.spectralBlue.opacity(0.035),
+                            .clear,
+                        ],
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: max(geometry.size.width, geometry.size.height) * 0.78
+                    )
+                    .offset(x: horizontalDrift, y: verticalDrift)
 
-    private var controls: some View {
-        HStack(spacing: 10) {
-            Button(manager.phase == .scanning ? "BUSCANDO" : "BUSCAR DISPOSITIVOS") { manager.startScan() }
-                .buttonStyle(VITAETextButtonStyle(active: manager.phase == .scanning))
-                .disabled(manager.phase == .scanning)
-            Button("PARAR") { manager.stopCapture() }
-                .buttonStyle(VITAETextButtonStyle(active: false))
-                .disabled(!manager.phase.isActive)
-        }
-    }
+                    RadialGradient(
+                        colors: [
+                            VITAELuxury.spectralViolet.opacity(0.075),
+                            .clear,
+                        ],
+                        center: .bottomTrailing,
+                        startRadius: 0,
+                        endRadius: geometry.size.width * 0.7
+                    )
+                    .offset(x: -horizontalDrift * 0.6, y: -verticalDrift)
 
-    @ViewBuilder private var deviceList: some View {
-        if !manager.devices.isEmpty {
-            sectionTitle("DISPOSITIVOS PRÓXIMOS")
-            VStack(spacing: 0) {
-                ForEach(manager.devices) { device in
-                    Button { manager.connect(to: device.id) } label: {
-                        HStack(spacing: 14) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(device.name)
-                                    .font(StrandFont.headline)
-                                    .foregroundStyle(StrandPalette.textPrimary)
-                                Text(device.isLikelyVWAR ? "COMPATIBILIDADE PROVÁVEL" : "DISPOSITIVO BLE NÃO IDENTIFICADO")
-                                    .font(StrandFont.overlineScaled(8))
-                                    .tracking(1.0)
-                                    .foregroundStyle(device.isLikelyVWAR ? VITAELuxury.teal : StrandPalette.textTertiary)
-                            }
-                            Spacer()
-                            Text("\(device.rssi) dBm")
-                                .font(StrandFont.mono(11))
-                                .foregroundStyle(StrandPalette.textSecondary)
-                            Text("CONECTAR")
-                                .font(StrandFont.overlineScaled(9))
-                                .tracking(1.0)
-                                .foregroundStyle(VITAELuxury.teal)
+                    Canvas { context, size in
+                        let spacing: CGFloat = 42
+                        var grid = Path()
+                        var x: CGFloat = 0
+                        while x <= size.width {
+                            grid.move(to: CGPoint(x: x, y: 0))
+                            grid.addLine(to: CGPoint(x: x, y: size.height))
+                            x += spacing
                         }
-                        .padding(.vertical, 15)
-                        .contentShape(Rectangle())
+                        var y: CGFloat = 0
+                        while y <= size.height {
+                            grid.move(to: CGPoint(x: 0, y: y))
+                            grid.addLine(to: CGPoint(x: size.width, y: y))
+                            y += spacing
+                        }
+                        context.stroke(grid, with: .color(.white.opacity(0.018)), lineWidth: 0.5)
                     }
-                    .buttonStyle(.plain)
-                    if device.id != manager.devices.last?.id {
-                        Rectangle().fill(VITAELuxury.border).frame(height: 1)
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            .background(VITAELuxury.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        }
-    }
 
-    @ViewBuilder private var captureSummary: some View {
-        if manager.eventCount > 0 || manager.serviceCount > 0 {
-            sectionTitle("INVENTÁRIO")
-            HStack(spacing: 12) {
-                MetricReadout(label: "SERVIÇOS", value: "\(manager.serviceCount)")
-                MetricReadout(label: "CARACTERÍSTICAS", value: "\(manager.characteristicCount)")
-                MetricReadout(label: "EVENTOS", value: "\(manager.eventCount)")
-            }
-        }
-    }
-
-    @ViewBuilder private var decodedMetrics: some View {
-        if !manager.liveMetrics.isEmpty {
-            sectionTitle("MÉTRICAS PADRÃO BLE")
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 190), spacing: 12)], spacing: 12) {
-                ForEach(manager.liveMetrics) { metric in
-                    MetricReadout(
-                        label: metric.label,
-                        value: metric.kind == .batteryPercent
-                            ? "\(Int(metric.value.rounded()))%"
-                            : "\(Int(metric.value.rounded())) \(metric.unit)"
+                    LinearGradient(
+                        colors: [.clear, Color.black.opacity(0.32)],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
                 }
             }
         }
-    }
-
-    @ViewBuilder private var evidence: some View {
-        if !manager.evidence.isEmpty {
-            sectionTitle("EVIDÊNCIA POR CARACTERÍSTICA")
-            VStack(spacing: 0) {
-                ForEach(manager.evidence.prefix(18)) { item in
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("\(item.key.serviceUUID) / \(item.key.characteristicUUID)")
-                            .font(StrandFont.mono(11, weight: .medium))
-                            .foregroundStyle(StrandPalette.textPrimary)
-                            .textSelection(.enabled)
-                        Text("\(item.key.operation.rawValue.uppercased()) • \(item.observationCount) amostras • \(item.uniquePayloadCount) cargas únicas • bytes variáveis: \(item.changingByteOffsets.map(String.init).joined(separator: ", "))")
-                            .font(StrandFont.footnote)
-                            .foregroundStyle(StrandPalette.textSecondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 12)
-                    if item.id != manager.evidence.prefix(18).last?.id {
-                        Rectangle().fill(VITAELuxury.border).frame(height: 1)
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            .background(VITAELuxury.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        }
-    }
-
-    private var export: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("EXPORTAÇÃO PRIVADA")
-            Text("O arquivo de pesquisa remove o identificador do periférico e notas, mas preserva os bytes necessários para criar decodificadores testáveis.")
-                .font(StrandFont.subhead)
-                .foregroundStyle(StrandPalette.textSecondary)
-            HStack(spacing: 10) {
-                Button("GERAR JSON REDIGIDO") { manager.exportRedactedTranscript() }
-                    .buttonStyle(VITAETextButtonStyle(active: false))
-                    .disabled(manager.eventCount == 0)
-                if let url = manager.exportURL {
-                    ShareLink(item: url) {
-                        Text("COMPARTILHAR ARQUIVO")
-                    }
-                    .buttonStyle(VITAETextButtonStyle(active: true))
-                }
-            }
-            if let error = manager.lastExportError {
-                Text(error).font(StrandFont.footnote).foregroundStyle(VITAELuxury.rose)
-            }
-        }
-    }
-
-    private func sectionTitle(_ value: String) -> some View {
-        Text(value)
-            .font(StrandFont.overlineScaled(9))
-            .tracking(1.2)
-            .foregroundStyle(StrandPalette.textTertiary)
-            .padding(.top, 2)
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
-// MARK: - Visual components
-
-private struct VITAESignalNode: Identifiable {
-    let id: String
-    let label: String
-    let value: Double?
-    let valueText: String
-    let normalized: Double?
-    let accent: Color
-}
-
-private struct VITAESignalField: View {
-    let signals: [VITAESignalNode]
-    let compact: Bool
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var selectedID: String?
-
-    private var selected: VITAESignalNode? {
-        signals.first(where: { $0.id == selectedID }) ?? signals.first
-    }
+private struct VWARTitaniumShape: View {
+    let cornerRadius: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            TimelineView(.animation(minimumInterval: 1.0 / 24.0, paused: reduceMotion)) { timeline in
-                Canvas { context, size in
-                    let positions = positions(in: size)
-                    let phase = timeline.date.timeIntervalSinceReferenceDate
-
-                    for index in signals.indices {
-                        let next = (index + 1) % signals.count
-                        guard signals[index].value != nil, signals[next].value != nil else { continue }
-                        var path = Path()
-                        path.move(to: positions[index])
-                        path.addLine(to: positions[next])
-                        context.stroke(path, with: .color(.white.opacity(0.075)), lineWidth: 1)
-                    }
-
-                    for (index, signal) in signals.enumerated() {
-                        let point = positions[index]
-                        let level = signal.normalized ?? 0
-                        let pulse = reduceMotion ? 0 : sin(phase * 1.4 + Double(index)) * 2.2
-                        let selectedBoost: CGFloat = selectedID == signal.id ? 7 : 0
-                        let radius = CGFloat(13 + level * 15) + selectedBoost + CGFloat(pulse)
-                        let outer = CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2)
-                        let coreRadius = max(5, radius * 0.42)
-                        let core = CGRect(x: point.x - coreRadius, y: point.y - coreRadius, width: coreRadius * 2, height: coreRadius * 2)
-
-                        context.fill(Path(ellipseIn: outer), with: .color(signal.accent.opacity(signal.value == nil ? 0.025 : 0.08 + level * 0.14)))
-                        context.stroke(Path(ellipseIn: outer), with: .color(signal.value == nil ? .white.opacity(0.10) : signal.accent.opacity(0.48)), lineWidth: selectedID == signal.id ? 2.2 : 1.2)
-                        context.fill(Path(ellipseIn: core), with: .color(signal.value == nil ? .white.opacity(0.08) : signal.accent.opacity(0.72)))
-                    }
-                }
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(
+                LinearGradient(
+                    colors: [
+                        VITAELuxury.titaniumTop,
+                        VITAELuxury.panel,
+                        VITAELuxury.titaniumBottom,
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay(alignment: .topLeading) {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.white.opacity(0.13), .clear, .white.opacity(0.035)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.8
+                    )
             }
-            .frame(height: compact ? 205 : 245)
-            .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(VITAELuxury.border))
-            .accessibilityHidden(true)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(signals) { signal in
-                        let active = selected?.id == signal.id
-                        Button {
-                            withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.28)) {
-                                selectedID = signal.id
-                            }
-                        } label: {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(signal.label)
-                                    .font(StrandFont.overlineScaled(8))
-                                    .tracking(0.8)
-                                Text(signal.valueText)
-                                    .font(StrandFont.bodyNumber)
-                            }
-                            .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textSecondary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 10)
-                            .frame(minWidth: compact ? 116 : 138, alignment: .leading)
-                            .background(active ? signal.accent : VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(active ? signal.accent : VITAELuxury.border))
-                        }
-                        .buttonStyle(.plain)
-                        .hoverEffect(.highlight)
-                    }
-                }
-            }
-
-            if let selected {
-                HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text(selected.label)
-                        .font(StrandFont.overlineScaled(9))
-                        .tracking(1.0)
-                        .foregroundStyle(selected.accent)
-                    Text(selected.valueText)
-                        .font(StrandFont.number(20, weight: .semibold))
-                        .foregroundStyle(StrandPalette.textPrimary)
-                    Spacer(minLength: 8)
-                    Text(selected.value == nil ? "AGUARDANDO FONTE" : "MEDIÇÃO PRESENTE")
-                        .font(StrandFont.overlineScaled(8))
-                        .tracking(0.8)
-                        .foregroundStyle(StrandPalette.textTertiary)
-                }
-                .accessibilityElement(children: .combine)
-            }
-
-            Text("A intensidade mostra magnitude dentro de uma faixa visual fixa, não qualidade clínica. Ausências permanecem vazias e nenhuma relação causal é inferida.")
-                .font(StrandFont.footnote)
-                .foregroundStyle(StrandPalette.textTertiary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .onAppear {
-            if selectedID == nil { selectedID = signals.first(where: { $0.value != nil })?.id ?? signals.first?.id }
-        }
-        .sensoryFeedback(.selection, trigger: selectedID)
-    }
-
-    private func positions(in size: CGSize) -> [CGPoint] {
-        let coordinates: [(CGFloat, CGFloat)]
-        if compact {
-            coordinates = [(0.16, 0.30), (0.50, 0.18), (0.84, 0.30), (0.18, 0.76), (0.50, 0.86), (0.82, 0.76)]
-        } else {
-            coordinates = [(0.17, 0.50), (0.33, 0.20), (0.67, 0.20), (0.83, 0.50), (0.67, 0.80), (0.33, 0.80)]
-        }
-        return coordinates.map { CGPoint(x: size.width * $0.0, y: size.height * $0.1) }
     }
 }
 
-private struct PremiumScoreCard: View {
+private struct VWARLiveGlyph: View {
+    let color: Color
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(color.opacity(0.22), lineWidth: 1)
+                .frame(width: 24, height: 24)
+            Circle()
+                .fill(color)
+                .frame(width: 7, height: 7)
+                .shadow(color: color.opacity(0.75), radius: 7)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct VWARSectionMarker: View {
+    let index: String
     let title: String
-    let value: Double?
-    let scale: Double
-    let accent: Color
-    let confidence: CoverageLevel
-    let description: String
+    let detail: String
 
     var body: some View {
-        HStack(spacing: 20) {
-            ScoreArc(value: value, scale: scale, accent: accent)
-                .frame(width: 130, height: 130)
-            VStack(alignment: .leading, spacing: 9) {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(index)
+                .font(StrandFont.number(13, weight: .semibold))
+                .foregroundStyle(VITAELuxury.spectralCyan)
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [VITAELuxury.spectralCyan.opacity(0.7), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 34, height: 1)
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(StrandFont.overline)
-                    .tracking(1.5)
-                    .foregroundStyle(StrandPalette.textSecondary)
-                Text(confidence.label)
+                    .font(StrandFont.rounded(22, weight: .semibold))
+                    .foregroundStyle(StrandPalette.textPrimary)
+                Text(detail.uppercased())
                     .font(StrandFont.overlineScaled(8))
                     .tracking(1.0)
+                    .foregroundStyle(StrandPalette.textTertiary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.top, 8)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct VWARReadinessCore: View {
+    let title: String
+    let value: Double?
+    let accent: Color
+    let confidence: CoverageLevel
+    let compact: Bool
+    let reduceMotion: Bool
+
+    private var progress: Double {
+        min(1, max(0, (value ?? 0) / 100))
+    }
+
+    var body: some View {
+        HStack(spacing: compact ? 20 : 26) {
+            ZStack {
+                Circle()
+                    .stroke(.white.opacity(0.045), lineWidth: compact ? 16 : 18)
+
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(
+                        AngularGradient(
+                            colors: [
+                                accent.opacity(0.22),
+                                accent,
+                                VITAELuxury.spectralBlue,
+                                accent,
+                            ],
+                            center: .center
+                        ),
+                        style: StrokeStyle(
+                            lineWidth: compact ? 16 : 18,
+                            lineCap: .round
+                        )
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: accent.opacity(0.3), radius: 14)
+
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: [.white.opacity(0.2), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.7
+                    )
+                    .padding(compact ? 25 : 29)
+
+                VStack(spacing: -2) {
+                    Text(value.map { String(Int($0.rounded())) } ?? "—")
+                        .font(StrandFont.display(compact ? 52 : 62))
+                        .tracking(StrandFont.displayTracking(compact ? 52 : 62))
+                        .foregroundStyle(StrandPalette.textPrimary)
+                        .contentTransition(.numericText())
+                    Text("DE 100")
+                        .font(StrandFont.overlineScaled(8))
+                        .tracking(1.0)
+                        .foregroundStyle(StrandPalette.textTertiary)
+                }
+            }
+            .frame(width: compact ? 158 : 188, height: compact ? 158 : 188)
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 7) {
+                    Circle()
+                        .fill(accent)
+                        .frame(width: 6, height: 6)
+                        .shadow(color: accent.opacity(0.7), radius: 5)
+                    Text(title)
+                        .font(StrandFont.overlineScaled(10))
+                        .tracking(1.35)
+                        .foregroundStyle(StrandPalette.textSecondary)
+                }
+                Text(value == nil ? "Aguardando sinais" : "Referência pessoal")
+                    .font(StrandFont.rounded(compact ? 18 : 21, weight: .semibold))
+                    .foregroundStyle(StrandPalette.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(confidence.label)
+                    .font(StrandFont.overlineScaled(8))
+                    .tracking(0.9)
                     .foregroundStyle(confidence.color)
-                Text(description)
-                    .font(StrandFont.subhead)
+                Text("VFC, repouso, sono e temperatura quando disponíveis.")
+                    .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, minHeight: 174, alignment: .leading)
-        .background(VITAELuxury.panel, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(VITAELuxury.border, lineWidth: 1))
+        .padding(compact ? 18 : 22)
+        .frame(maxWidth: .infinity, minHeight: compact ? 204 : 236, alignment: .leading)
+        .background(VWARTitaniumShape(cornerRadius: compact ? 26 : 30))
+        .overlay(alignment: .top) {
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [.clear, accent.opacity(0.75), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: compact ? 180 : 220, height: 1)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: compact ? 26 : 30, style: .continuous)
+                .stroke(VITAELuxury.border)
+        }
+        .animation(reduceMotion ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: progress)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title), \(value.map { String(Int($0.rounded())) } ?? "sem dados"), \(confidence.label)")
+        .accessibilityLabel(title)
+        .accessibilityValue(value.map { "\(Int($0.rounded())) de 100, \(confidence.label)" } ?? "Sem dados")
     }
 }
 
-private struct ScoreArc: View {
-    let value: Double?
-    let scale: Double
+private struct VWARMetricPlate: View {
+    let label: String
+    let value: String
+    let unit: String
+    let progress: Double?
     let accent: Color
+    let confidence: CoverageLevel
 
-    private var progress: Double { min(1, max(0, (value ?? 0) / scale)) }
+    private var clampedProgress: Double {
+        min(1, max(0, progress ?? 0))
+    }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .trim(from: 0.08, to: 0.92)
-                .stroke(.white.opacity(0.07), style: .init(lineWidth: 11, lineCap: .round))
-                .rotationEffect(.degrees(90))
-            Circle()
-                .trim(from: 0.08, to: 0.08 + 0.84 * progress)
-                .stroke(
-                    AngularGradient(colors: [accent.opacity(0.45), accent], center: .center),
-                    style: .init(lineWidth: 11, lineCap: .round)
-                )
-                .rotationEffect(.degrees(90))
-                .shadow(color: accent.opacity(0.23), radius: 10)
-            VStack(spacing: -1) {
-                Text(value.map { String(Int($0.rounded())) } ?? "—")
-                    .font(StrandFont.display(44))
-                    .tracking(StrandFont.displayTracking(44))
-                    .foregroundStyle(StrandPalette.textPrimary)
-                Text("DE \(Int(scale))")
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 7) {
+                Circle().fill(accent).frame(width: 5, height: 5)
+                Text(label)
                     .font(StrandFont.overlineScaled(8))
-                    .tracking(1.0)
+                    .tracking(1.1)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                Spacer()
+            }
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text(value)
+                    .font(StrandFont.number(28, weight: .semibold))
+                    .foregroundStyle(StrandPalette.textPrimary)
+                    .contentTransition(.numericText())
+                Text(unit)
+                    .font(StrandFont.overlineScaled(7))
+                    .foregroundStyle(StrandPalette.textTertiary)
+            }
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.055))
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [accent.opacity(0.35), accent],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geometry.size.width * clampedProgress)
+                        .shadow(color: accent.opacity(0.25), radius: 5)
+                }
+            }
+            .frame(height: 4)
+
+            Text(confidence.label)
+                .font(StrandFont.overlineScaled(7))
+                .tracking(0.75)
+                .foregroundStyle(confidence.color)
+        }
+        .padding(15)
+        .frame(maxWidth: .infinity, minHeight: 128, alignment: .leading)
+        .background(VWARTitaniumShape(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(VITAELuxury.border)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(label)
+        .accessibilityValue(value == "—" ? "Sem dados" : "\(value) \(unit)")
+    }
+}
+
+private struct VWARSignalChip: View {
+    let label: String
+    let value: String?
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Capsule()
+                .fill(color)
+                .frame(width: 3, height: 28)
+                .shadow(color: color.opacity(0.4), radius: 4)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(label)
+                    .font(StrandFont.overlineScaled(7))
+                    .tracking(0.85)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                Text(value ?? "Sem dados")
+                    .font(StrandFont.bodyNumber)
+                    .foregroundStyle(value == nil ? StrandPalette.textTertiary : StrandPalette.textPrimary)
+            }
+        }
+        .padding(.horizontal, 13)
+        .padding(.vertical, 10)
+        .background(VWARTitaniumShape(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(VITAELuxury.border)
+        )
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct VWARComparisonStrip: View {
+    let label: String
+    let current: String
+    let baseline: String
+    let position: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Capsule()
+                .fill(color)
+                .frame(width: 3, height: 44)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                    .font(StrandFont.overlineScaled(8))
+                    .tracking(0.9)
+                    .foregroundStyle(StrandPalette.textTertiary)
+                Text(current)
+                    .font(StrandFont.number(19, weight: .semibold))
+                    .foregroundStyle(StrandPalette.textPrimary)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(position)
+                    .font(StrandFont.overlineScaled(8))
+                    .tracking(0.9)
+                    .foregroundStyle(color)
+                Text("BASE \(baseline)")
+                    .font(StrandFont.overlineScaled(7))
+                    .tracking(0.65)
                     .foregroundStyle(StrandPalette.textTertiary)
             }
         }
-        .animation(.easeOut(duration: 0.6), value: progress)
+        .padding(13)
+        .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                .stroke(VITAELuxury.border)
+        )
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -1667,7 +1773,13 @@ private struct VITAEPanel<Content: View>: View {
     let detail: String
     let content: Content
 
-    init(eyebrow: String, title: String, value: String?, detail: String, @ViewBuilder content: () -> Content) {
+    init(
+        eyebrow: String,
+        title: String,
+        value: String?,
+        detail: String,
+        @ViewBuilder content: () -> Content
+    ) {
         self.eyebrow = eyebrow
         self.title = title
         self.value = value
@@ -1679,10 +1791,15 @@ private struct VITAEPanel<Content: View>: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(eyebrow)
-                        .font(StrandFont.overlineScaled(9))
-                        .tracking(1.25)
-                        .foregroundStyle(StrandPalette.textTertiary)
+                    HStack(spacing: 7) {
+                        Rectangle()
+                            .fill(VITAELuxury.spectralCyan)
+                            .frame(width: 16, height: 1)
+                        Text(eyebrow)
+                            .font(StrandFont.overlineScaled(8))
+                            .tracking(1.25)
+                            .foregroundStyle(StrandPalette.textTertiary)
+                    }
                     Text(title)
                         .font(StrandFont.title2)
                         .foregroundStyle(StrandPalette.textPrimary)
@@ -1697,22 +1814,44 @@ private struct VITAEPanel<Content: View>: View {
                         .font(StrandFont.number(20, weight: .semibold))
                         .foregroundStyle(StrandPalette.textPrimary)
                         .multilineTextAlignment(.trailing)
+                        .contentTransition(.numericText())
                 }
             }
             content
         }
         .padding(20)
-        .frame(maxWidth: .infinity, minHeight: 356, alignment: .topLeading)
-        .background(VITAELuxury.panel, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(VITAELuxury.border, lineWidth: 1))
+        .frame(maxWidth: .infinity, minHeight: 350, alignment: .topLeading)
+        .background(VWARTitaniumShape(cornerRadius: 24))
+        .overlay(alignment: .topTrailing) {
+            RadialGradient(
+                colors: [VITAELuxury.spectralBlue.opacity(0.08), .clear],
+                center: .topTrailing,
+                startRadius: 0,
+                endRadius: 150
+            )
+            .frame(width: 210, height: 150)
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .allowsHitTesting(false)
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(VITAELuxury.border, lineWidth: 1)
+        )
     }
 }
 
 private struct VITAEEmptyState: View {
     let message: String
-    init(_ message: String) { self.message = message }
+
+    init(_ message: String) {
+        self.message = message
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 9) {
+            Image(systemName: "waveform.slash")
+                .font(.system(size: 19, weight: .medium))
+                .foregroundStyle(VITAELuxury.spectralCyan.opacity(0.7))
             Text("SEM DADOS SUFICIENTES")
                 .font(StrandFont.overlineScaled(9))
                 .tracking(1.2)
@@ -1720,19 +1859,31 @@ private struct VITAEEmptyState: View {
             Text(message)
                 .font(StrandFont.body)
                 .foregroundStyle(StrandPalette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, minHeight: 230, alignment: .center)
+        .frame(maxWidth: .infinity, minHeight: 170, alignment: .center)
         .padding(18)
-        .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(
+            Color.black.opacity(0.18),
+            in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(VITAELuxury.border)
+        )
     }
 }
 
 private struct VITAELegend: View {
     let label: String
     let color: Color
+
     var body: some View {
         HStack(spacing: 7) {
-            Rectangle().fill(color).frame(width: 20, height: 2)
+            Capsule()
+                .fill(color)
+                .frame(width: 20, height: 3)
+                .shadow(color: color.opacity(0.3), radius: 4)
             Text(label)
                 .font(StrandFont.overlineScaled(8))
                 .tracking(1.0)
@@ -1744,6 +1895,7 @@ private struct VITAELegend: View {
 private struct MetricReadout: View {
     let label: String
     let value: String
+
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             Text(label)
@@ -1758,13 +1910,20 @@ private struct MetricReadout: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(VITAELuxury.plot, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(VITAELuxury.border, lineWidth: 1))
+        .background(
+            Color.black.opacity(0.2),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(VITAELuxury.border, lineWidth: 1)
+        )
     }
 }
 
 private struct SleepCompositionBar: View {
     let composition: SleepComposition
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             GeometryReader { geometry in
@@ -1777,7 +1936,11 @@ private struct SleepCompositionBar: View {
                 }
             }
             .frame(height: 54)
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 10)], spacing: 10) {
+
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 110), spacing: 10)],
+                spacing: 10
+            ) {
                 ForEach(composition.parts) { part in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(part.stage.label.uppercased())
@@ -1791,7 +1954,8 @@ private struct SleepCompositionBar: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            Text("A fonte informou totais por estágio, sem linha temporal. O VWAR Loop Life não inventa a ordem dos ciclos.")
+
+            Text("A fonte informou totais por estágio, sem linha temporal. O app não inventa a ordem dos ciclos.")
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textTertiary)
         }
@@ -1815,14 +1979,21 @@ private struct VitalMatrix: View {
                         .frame(height: 30)
                 }
             }
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(columns) { column in
-                        Button { selectedDate = column.date } label: {
+                        Button {
+                            selectedDate = column.date
+                        } label: {
                             VStack(spacing: 8) {
                                 Text(VITAEPerformanceDashboard.shortDateFormatter.string(from: column.date))
                                     .font(StrandFont.overlineScaled(7))
-                                    .foregroundStyle(selectedDate == column.date ? .white : StrandPalette.textTertiary)
+                                    .foregroundStyle(
+                                        selectedDate == column.date
+                                            ? .white
+                                            : StrandPalette.textTertiary
+                                    )
                                     .frame(height: 14)
                                 ForEach(column.cells) { cell in
                                     RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -1830,66 +2001,110 @@ private struct VitalMatrix: View {
                                         .frame(width: 31, height: 30)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                                .stroke(selectedDate == column.date ? .white.opacity(0.45) : .clear, lineWidth: 1)
+                                                .stroke(
+                                                    selectedDate == column.date
+                                                        ? .white.opacity(0.45)
+                                                        : .clear,
+                                                    lineWidth: 1
+                                                )
                                         )
                                         .accessibilityLabel("\(cell.metric.label), \(cell.displayValue)")
                                 }
                             }
                         }
                         .buttonStyle(.plain)
+                        .hoverEffect(.highlight)
                     }
                 }
             }
         }
+        .sensoryFeedback(.selection, trigger: selectedDate)
     }
 }
 
-private struct VITAETextButtonStyle: ButtonStyle {
-    let active: Bool
+private struct VWARIconButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(StrandFont.overlineScaled(10))
-            .tracking(1.1)
-            .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textPrimary)
-            .padding(.horizontal, 15)
-            .padding(.vertical, 11)
-            .background(active ? VITAELuxury.teal : VITAELuxury.panel, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(active ? VITAELuxury.teal : VITAELuxury.border))
-            .opacity(configuration.isPressed ? 0.65 : 1)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(StrandPalette.textSecondary)
+            .frame(width: 36, height: 54)
+            .background(Color.black.opacity(0.24), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(VITAELuxury.border)
+            )
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .opacity(configuration.isPressed ? 0.72 : 1)
     }
 }
 
-private struct VITAECalendarNavigationButtonStyle: ButtonStyle {
+private struct VWARTextCapsuleStyle: ButtonStyle {
     var active = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(StrandFont.overlineScaled(8))
-            .tracking(0.9)
+            .tracking(0.75)
             .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textSecondary)
             .padding(.horizontal, 11)
             .padding(.vertical, 8)
-            .background(active ? VITAELuxury.teal : VITAELuxury.panel, in: Capsule())
-            .overlay(Capsule().stroke(active ? VITAELuxury.teal : VITAELuxury.border, lineWidth: 1))
-            .opacity(configuration.isPressed ? 0.62 : 1)
+            .background(
+                active ? VITAELuxury.spectralCyan : Color.black.opacity(0.24),
+                in: Capsule()
+            )
+            .overlay(
+                Capsule()
+                    .stroke(active ? VITAELuxury.spectralCyan : VITAELuxury.border)
+            )
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .opacity(configuration.isPressed ? 0.72 : 1)
     }
 }
 
-private struct VITAERangeButtonStyle: ButtonStyle {
-    let active: Bool
+private struct VWARDayButtonStyle: ButtonStyle {
+    let selected: Bool
+    let accent: Color
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(StrandFont.overlineScaled(9))
-            .tracking(1.0)
-            .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textSecondary)
-            .padding(.horizontal, 13)
-            .padding(.vertical, 9)
-            .background(active ? VITAELuxury.teal : VITAELuxury.panel, in: Capsule())
-            .overlay(Capsule().stroke(active ? VITAELuxury.teal : VITAELuxury.border))
-            .opacity(configuration.isPressed ? 0.7 : 1)
+            .foregroundStyle(selected ? VITAELuxury.base : StrandPalette.textSecondary)
+            .background(
+                selected ? accent : Color.black.opacity(0.22),
+                in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .stroke(selected ? accent : VITAELuxury.border)
+            )
+            .shadow(color: selected ? accent.opacity(0.18) : .clear, radius: 8)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.74 : 1)
     }
 }
 
+private struct VWARSegmentStyle: ButtonStyle {
+    let active: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(StrandFont.overlineScaled(8))
+            .tracking(0.75)
+            .foregroundStyle(active ? VITAELuxury.base : StrandPalette.textSecondary)
+            .padding(.horizontal, 11)
+            .padding(.vertical, 9)
+            .frame(maxWidth: .infinity)
+            .background(
+                active ? VITAELuxury.spectralCyan : Color.clear,
+                in: Capsule()
+            )
+            .overlay(
+                Capsule()
+                    .stroke(active ? VITAELuxury.spectralCyan.opacity(0.9) : .clear)
+            )
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.72 : 1)
+    }
+}
 // MARK: - Models and styling
 
 private protocol DatedPoint { var date: Date { get } }
@@ -2069,15 +2284,25 @@ private struct VitalColumn: Identifiable, DatedPoint {
 }
 
 private enum VITAELuxury {
-    static let base = Color(red: 0.035, green: 0.043, blue: 0.052)
-    static let panel = Color(red: 0.065, green: 0.078, blue: 0.094)
-    static let plot = Color(red: 0.042, green: 0.052, blue: 0.064)
-    static let border = Color.white.opacity(0.075)
-    static let teal = Color(red: 0.45, green: 0.89, blue: 0.81)
-    static let blue = Color(red: 0.38, green: 0.60, blue: 1.0)
-    static let violet = Color(red: 0.61, green: 0.48, blue: 1.0)
-    static let rose = Color(red: 1.0, green: 0.37, blue: 0.49)
-    static let amber = Color(red: 0.98, green: 0.73, blue: 0.34)
+    static let base = Color(red: 0.014, green: 0.017, blue: 0.022)
+    static let panel = Color(red: 0.044, green: 0.050, blue: 0.060)
+    static let plot = Color(red: 0.024, green: 0.029, blue: 0.037)
+    static let titaniumTop = Color(red: 0.075, green: 0.082, blue: 0.094)
+    static let titaniumBottom = Color(red: 0.028, green: 0.033, blue: 0.041)
+    static let border = Color.white.opacity(0.085)
+
+    static let spectralCyan = Color(red: 0.38, green: 0.96, blue: 0.91)
+    static let spectralBlue = Color(red: 0.34, green: 0.58, blue: 1.0)
+    static let spectralViolet = Color(red: 0.68, green: 0.43, blue: 1.0)
+    static let spectralRose = Color(red: 1.0, green: 0.31, blue: 0.52)
+    static let spectralAmber = Color(red: 1.0, green: 0.72, blue: 0.29)
+
+    // Aliases mantêm a semântica dos gráficos e dos estágios de sono.
+    static let teal = spectralCyan
+    static let blue = spectralBlue
+    static let violet = spectralViolet
+    static let rose = spectralRose
+    static let amber = spectralAmber
 }
 
 private enum VITAEChartAxis {

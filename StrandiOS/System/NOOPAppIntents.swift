@@ -6,7 +6,7 @@ import AppIntents
 /// into the running `AppModel` directly (BLE only lives in the foreground app), so they enqueue here
 /// and the app drains the queue when it next becomes active.
 enum PendingIntents {
-    enum Action: String { case markMoment, buzz }
+    enum Action: String { case markMoment, syncHealth }
 
     private static let key = "noop.pendingIntents"
     private static var defaults: UserDefaults? { UserDefaults(suiteName: WidgetSnapshot.suiteName) }
@@ -41,23 +41,24 @@ enum PendingIntents {
 
 /// Record a timestamped "moment" — the iOS analogue of the strap double-tap "mark a moment" action.
 struct MarkMomentIntent: AppIntent {
-    static var title: LocalizedStringResource = "Mark a Moment"
-    static var description = IntentDescription("Record a timestamped moment in VWAR Loop Life.")
+    static var title: LocalizedStringResource = "Marcar um momento"
+    static var description = IntentDescription("Registra um momento com data e hora no VWAR Loop Life.")
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         PendingIntents.append(.markMoment, at: Date())
-        return .result(dialog: "Moment marked.")
+        return .result(dialog: "Momento registrado.")
     }
 }
 
-/// Send a confirming haptic buzz to the strap. Opens the app so the live BLE link can deliver it.
-struct BuzzStrapIntent: AppIntent {
-    static var title: LocalizedStringResource = "Buzz Strap"
-    static var description = IntentDescription("Send a haptic buzz to your WHOOP strap.")
+/// Opens the app and requests a fresh Apple Health import. The foreground lifecycle owns the actual
+/// HealthKit synchronization so the intent never asks for health permissions without context.
+struct SyncHealthIntent: AppIntent {
+    static var title: LocalizedStringResource = "Sincronizar Saúde"
+    static var description = IntentDescription("Abre o VWAR Loop Life e sincroniza os dados autorizados do app Saúde.")
     static var openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        PendingIntents.append(.buzz)
+        PendingIntents.append(.syncHealth)
         return .result()
     }
 }
@@ -66,13 +67,13 @@ struct BuzzStrapIntent: AppIntent {
 struct NOOPShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: MarkMomentIntent(),
-                    phrases: ["Mark a moment in \(.applicationName)"],
-                    shortTitle: "Mark a Moment",
+                    phrases: ["Marcar um momento no \(.applicationName)"],
+                    shortTitle: "Marcar momento",
                     systemImageName: "mappin.and.ellipse")
-        AppShortcut(intent: BuzzStrapIntent(),
-                    phrases: ["Buzz my \(.applicationName) strap"],
-                    shortTitle: "Buzz Strap",
-                    systemImageName: "waveform.path")
+        AppShortcut(intent: SyncHealthIntent(),
+                    phrases: ["Sincronizar Saúde no \(.applicationName)"],
+                    shortTitle: "Sincronizar Saúde",
+                    systemImageName: "heart.text.square")
     }
 }
 #endif

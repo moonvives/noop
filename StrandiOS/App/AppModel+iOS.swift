@@ -2,18 +2,18 @@
 import Foundation
 
 extension AppModel {
-    /// Execute any actions queued by App Intents while the app was suspended (mark moment, buzz).
+    /// Execute any actions queued by App Intents while the app was suspended.
     /// Call when the app becomes active.
-    func drainPendingIntents() {
+    @discardableResult
+    func drainPendingIntents() -> Bool {
+        var shouldSyncHealth = false
         for item in PendingIntents.drain() {
             switch item.action {
             case .markMoment: markMoment(at: item.date ?? Date())
-            // #921: the "Buzz Strap" Siri shortcut logged its write but a WHOOP 4.0 never vibrated.
-            // The one-shot routine sends the confirmed pattern + RUN_ALARM sequence, acked, so a
-            // busy just-foregrounded BLE link can't silently drop it.
-            case .buzz:       buzzStrapOnce()
+            case .syncHealth: shouldSyncHealth = true
             }
         }
+        return shouldSyncHealth
     }
 }
 #endif

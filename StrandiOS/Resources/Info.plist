@@ -49,27 +49,16 @@
 	<string>public.app-category.healthcare-fitness</string>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>O VWAR Loop Life usa Bluetooth para ler localmente dados de condicionamento físico autorizados de pulseiras compatíveis. Nada sai do aparelho sem sua permissão.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>O VWAR Loop Life lê somente os dados que você autorizar no app Saúde para calcular tendências pessoais no aparelho. Nada sai do dispositivo sem sua permissão.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>O VWAR Loop Life grava métricas de bem-estar compatíveis no app Saúde somente quando você permitir explicitamente.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>O VWAR Loop Life registra a rota de exercícios ao ar livre para mostrar distância, ritmo e mapa, inclusive com a tela apagada. A rota permanece no aparelho.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>bluetooth-central</string>
-		<string>location</string>
 		<string>fetch</string>
 	</array>
 	<key>UIFileSharingEnabled</key>

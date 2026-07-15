@@ -30,9 +30,12 @@ enum IllnessNotifier {
         center.getNotificationSettings { settings in
             guard settings.authorizationStatus == .authorized else { return }
             let content = UNMutableNotificationContent()
-            content.title = String(localized: "Early warning: take it easy")
-            content.subtitle = String(localized: "On-device estimate (approximate), not a diagnosis.")
-            content.body = message
+            content.title = "Alerta antecipado: vá com calma"
+            content.subtitle = "Estimativa aproximada no aparelho; não é diagnóstico."
+            // O motor produz uma explicação detalhada para a interface. A notificação usa uma frase
+            // curta e integralmente em pt-BR para não vazar rótulos técnicos do modelo compartilhado.
+            _ = message
+            content.body = "Seus sinais recentes mudaram em conjunto. Reduza o ritmo e consulte os detalhes no VWAR Loop Life."
             content.sound = .default
             center.add(UNNotificationRequest(identifier: "illness-watch",
                                              content: content, trigger: nil))
